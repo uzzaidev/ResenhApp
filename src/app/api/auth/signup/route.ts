@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: error.errors[0].message },
@@ -87,26 +87,67 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Log detalhado do erro para debug
-    logger.error({ 
-      error: {
-        name: error?.constructor?.name || 'Unknown',
-        message: error?.message || 'No message',
-        stack: error?.stack,
-        // Capturar detalhes específicos de erros SQL/PostgreSQL
-        ...(error as any)?.code && { code: (error as any).code },
-        ...(error as any)?.detail && { detail: (error as any).detail },
-        ...(error as any)?.hint && { hint: (error as any).hint },
-        ...(error as any)?.routine && { routine: (error as any).routine },
-        // Capturar erro completo como fallback
-        fullError: error
-      },
-      email: email?.toLowerCase(),
-      name: name
+    // Capturar TUDO sobre o erro
+    const errorDetails = {
+      // Básico
+      type: typeof error,
+      name: error?.constructor?.name || 'Unknown',
+      message: error?.message || 'No message',
+      stack: error?.stack,
+
+      // PostgreSQL/Neon errors
+      code: error?.code,
+      detail: error?.detail,
+      hint: error?.hint,
+      routine: error?.routine,
+      schema: error?.schema,
+      table: error?.table,
+      column: error?.column,
+      constraint: error?.constraint,
+
+      // Todas as propriedades do erro
+      allKeys: Object.keys(error || {}),
+
+      // String representation completa
+      toString: String(error),
+
+      // JSON attempt
+      jsonAttempt: (() => {
+        try {
+          return JSON.stringify(error, Object.getOwnPropertyNames(error));
+        } catch {
+          return 'Failed to stringify';
+        }
+      })(),
+    };
+
+    logger.error({
+      error: errorDetails,
+      context: {
+        email: body?.email,
+        name: body?.name,
+        hasPassword: !!body?.password,
+      }
     }, "Erro ao criar usuário");
-    
+
+    // Console log forçado para garantir que vemos no Vercel
+    console.error('=== SIGNUP ERROR DETAILS ===');
+    console.error('Error type:', typeof error);
+    console.error('Error name:', error?.constructor?.name);
+    console.error('Error message:', error?.message);
+    console.error('Error code:', error?.code);
+    console.error('Error detail:', error?.detail);
+    console.error('Error keys:', Object.keys(error || {}));
+    console.error('Error string:', String(error));
+    console.error('============================');
+
+    // Retornar erro específico
+    const errorMessage = error?.message
+      ? `Erro: ${error.message}`
+      : "Erro ao criar conta. Verifique os logs.";
+
     return NextResponse.json(
-      { error: "Erro ao criar conta. Tente novamente." },
+      { error: errorMessage, debug: errorDetails.code || errorDetails.name },
       { status: 500 }
     );
   }
