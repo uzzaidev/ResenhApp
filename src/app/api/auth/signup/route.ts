@@ -12,6 +12,8 @@ const signupSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  let requestBody: any = null; // Declarar no escopo da função para usar no catch
+
   try {
     // Rate limiting - 5 signup attempts per minute per IP
     const rateLimit = await checkRateLimit(request, RateLimitPresets.AUTH);
@@ -33,6 +35,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+    requestBody = body; // Salvar para usar no catch se necessário
 
     // Validar dados
     const validatedData = signupSchema.parse(body);
@@ -124,9 +127,9 @@ export async function POST(request: NextRequest) {
     logger.error({
       error: errorDetails,
       context: {
-        email: body?.email,
-        name: body?.name,
-        hasPassword: !!body?.password,
+        email: requestBody?.email,
+        name: requestBody?.name,
+        hasPassword: !!requestBody?.password,
       }
     }, "Erro ao criar usuário");
 
