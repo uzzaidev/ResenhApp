@@ -16,22 +16,24 @@ const adminRsvpSchema = z.object({
 // Helper function to promote first person from waitlist
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function promoteFromWaitlist(eventId: string, event: any) {
-  const [firstInWaitlist] = await sql`
+  const firstInWaitlistQuery = await sql`
     SELECT * FROM event_attendance
     WHERE event_id = ${eventId} AND status = 'waitlist'
     ORDER BY created_at ASC
     LIMIT 1
   `;
+  const [firstInWaitlist] = firstInWaitlistQuery as any[];
 
   if (!firstInWaitlist) return;
 
-  const [counts] = await sql`
+  const countsQuery = await sql`
     SELECT
       COUNT(*) FILTER (WHERE status = 'yes' AND role = 'gk') as gk_count,
       COUNT(*) FILTER (WHERE status = 'yes' AND role = 'line') as line_count
     FROM event_attendance
     WHERE event_id = ${eventId}
   `;
+  const [counts] = countsQuery as any[];
 
   const totalPlayers = parseInt(counts.gk_count) + parseInt(counts.line_count);
   const gkCount = parseInt(counts.gk_count);
@@ -74,19 +76,21 @@ export async function POST(
     const { userId, status, preferredPosition, secondaryPosition } = validation.data;
 
     // Get event details
-    const [event] = await sql`
+    const eventQuery = await sql`
       SELECT * FROM events WHERE id = ${eventId}
     `;
+    const [event] = eventQuery as any[];
 
     if (!event) {
       return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
     }
 
     // Check if admin is member of the group with admin role
-    const [adminMembership] = await sql`
+    const adminMembershipQuery = await sql`
       SELECT * FROM group_members
       WHERE group_id = ${event.group_id} AND user_id = ${admin.id}
     `;
+    const [adminMembership] = adminMembershipQuery as any[];
 
     if (!adminMembership || adminMembership.role !== "admin") {
       return NextResponse.json(
@@ -96,10 +100,11 @@ export async function POST(
     }
 
     // Check if user to be confirmed is member of the group
-    const [userMembership] = await sql`
+    const userMembershipQuery = await sql`
       SELECT * FROM group_members
       WHERE group_id = ${event.group_id} AND user_id = ${userId}
     `;
+    const [userMembership] = userMembershipQuery as any[];
 
     if (!userMembership) {
       return NextResponse.json(
@@ -144,13 +149,14 @@ export async function POST(
     const role = preferredPosition === "gk" ? "gk" : "line";
 
     // Count current confirmations (excluding the user being confirmed to avoid double-counting)
-    const [counts] = await sql`
+    const countsQuery = await sql`
       SELECT
         COUNT(*) FILTER (WHERE status = 'yes' AND role = 'gk') as gk_count,
         COUNT(*) FILTER (WHERE status = 'yes' AND role = 'line') as line_count
       FROM event_attendance
       WHERE event_id = ${eventId} AND user_id != ${userId}
     `;
+    const [counts] = countsQuery as any[];
 
     let finalStatus = "yes";
 
@@ -165,7 +171,7 @@ export async function POST(
     }
 
     // Upsert attendance
-    const [attendance] = await sql`
+    const attendanceQuery = await sql`
       INSERT INTO event_attendance (event_id, user_id, role, status, preferred_position, secondary_position)
       VALUES (${eventId}, ${userId}, ${role}, ${finalStatus}, ${preferredPosition}, ${secondaryPosition || null})
       ON CONFLICT (event_id, user_id)
@@ -177,6 +183,7 @@ export async function POST(
         updated_at = NOW()
       RETURNING *
     `;
+    const [attendance] = attendanceQuery as any[];
 
     logger.info(
       { eventId, userId, adminId: admin.id, status: finalStatus },

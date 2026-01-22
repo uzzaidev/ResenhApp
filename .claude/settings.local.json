@@ -17,7 +17,10 @@
       "Bash(find:*)",
       "Bash(if [ -f \"package.json\" ])",
       "Bash(then sed -i 's/\"\"name\"\": \"\"peladeiros\"\"/\"\"name\"\": \"\"resenhapp\"\"/g; s/\"\"Peladeiros\"\"/\"\"ResenhApp\"\"/g' package.json)",
-      "Bash(else echo \"package.json não encontrado\")"
+      "Bash(else echo \"package.json não encontrado\")",
+      "Bash(tee:*)",
+      "Bash(grep:*)",
+      "Bash(timeout 60 pnpm build:*)"
     ],
     "deny": [],
     "ask": []

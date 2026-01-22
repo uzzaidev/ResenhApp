@@ -18,10 +18,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Find invite by code
-    const [invite] = await sql`
+    const inviteQuery = await sql`
       SELECT * FROM invites
       WHERE code = ${code}
     `;
+    const [invite] = inviteQuery as any[];
 
     if (!invite) {
       return NextResponse.json(
@@ -47,10 +48,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user is already a member
-    const [existingMember] = await sql`
+    const existingMemberQuery = await sql`
       SELECT * FROM group_members
       WHERE group_id = ${invite.group_id} AND user_id = ${user.id}
     `;
+    const [existingMember] = existingMemberQuery as any[];
 
     if (existingMember) {
       return NextResponse.json(
@@ -73,10 +75,11 @@ export async function POST(request: NextRequest) {
     `;
 
     // Create user wallet if doesn't exist
-    const [existingWallet] = await sql`
+    const existingWalletQuery = await sql`
       SELECT * FROM wallets
       WHERE owner_type = 'user' AND owner_id = ${user.id}
     `;
+    const [existingWallet] = existingWalletQuery as any[];
 
     if (!existingWallet) {
       await sql`
@@ -86,9 +89,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Get group details
-    const [group] = await sql`
+    const groupQuery = await sql`
       SELECT * FROM groups WHERE id = ${invite.group_id}
     `;
+    const [group] = groupQuery as any[];
 
     logger.info(
       { groupId: invite.group_id, userId: user.id, inviteId: invite.id },

@@ -18,7 +18,7 @@ function AuthErrorContent() {
         return {
           title: "Erro de Configuração",
           description: "A autenticação não está configurada corretamente.",
-          details: "Verifique se as variáveis de ambiente AUTH_SECRET e DATABASE_URL estão configuradas.",
+          details: "Verifique se as variáveis de ambiente AUTH_SECRET e SUPABASE_DB_URL (ou DATABASE_URL) estão configuradas.",
         };
       case "AccessDenied":
         return {

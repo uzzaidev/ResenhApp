@@ -21,17 +21,18 @@ export async function GET(
     const user = await requireAuth();
 
     // Check if user is member of the group
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership) {
       return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
     }
 
     // Get event settings
-    const [settings] = await sql`
+    const settingsQuery = await sql`
       SELECT
         min_players as "minPlayers",
         max_players as "maxPlayers",
@@ -39,6 +40,7 @@ export async function GET(
       FROM event_settings
       WHERE group_id = ${groupId}
     `;
+    const [settings] = settingsQuery as any[];
 
     if (settings) {
       return NextResponse.json({
@@ -88,10 +90,11 @@ export async function POST(
     }
 
     // Check if user is admin of the group
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(

@@ -22,10 +22,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if user is member of the group
-    const [membership] = await sql`
+    const membershipResult = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
+    const [membership] = membershipResult as Array<{ role: string }>;
 
     if (!membership) {
       return NextResponse.json(
@@ -98,10 +99,11 @@ export async function POST(request: NextRequest) {
     const { groupId, startsAt, venueId, maxPlayers, maxGoalkeepers, waitlistEnabled } = validation.data;
 
     // Check if user is admin of the group
-    const [membership] = await sql`
+    const membershipResult = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
+    const [membership] = membershipResult as Array<{ role: string }>;
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -110,7 +112,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const [event] = await sql`
+    const eventResult = await sql`
       INSERT INTO events (
         group_id,
         starts_at,
@@ -131,6 +133,7 @@ export async function POST(request: NextRequest) {
       )
       RETURNING *
     `;
+    const [event] = eventResult as any[];
 
     logger.info({ eventId: event.id, groupId, userId: user.id }, "Event created");
 

@@ -31,19 +31,21 @@ export async function POST(
     const validatedData = swapPlayersSchema.parse(body);
 
     // Get event
-    const [event] = await sql`
+    const eventQuery = await sql`
       SELECT * FROM events WHERE id = ${eventId}
     `;
+    const [event] = eventQuery as any[];
 
     if (!event) {
       return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
     }
 
     // Check if user is admin of the group
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${event.group_id} AND user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -60,7 +62,7 @@ export async function POST(
         AND t.id IN (${validatedData.player1.currentTeamId}, ${validatedData.player2.currentTeamId})
     `;
 
-    if (teamsCheck.length !== 2) {
+    if (!Array.isArray(teamsCheck) || teamsCheck.length !== 2) {
       return NextResponse.json(
         { error: "Um ou ambos os times não pertencem a este evento" },
         { status: 400 }
@@ -68,18 +70,20 @@ export async function POST(
     }
 
     // Get player 1 info
-    const [player1Info] = await sql`
+    const player1InfoQuery = await sql`
       SELECT position FROM team_members
       WHERE team_id = ${validatedData.player1.currentTeamId}
         AND user_id = ${validatedData.player1.userId}
     `;
+    const [player1Info] = player1InfoQuery as any[];
 
     // Get player 2 info
-    const [player2Info] = await sql`
+    const player2InfoQuery = await sql`
       SELECT position FROM team_members
       WHERE team_id = ${validatedData.player2.currentTeamId}
         AND user_id = ${validatedData.player2.userId}
     `;
+    const [player2Info] = player2InfoQuery as any[];
 
     if (!player1Info || !player2Info) {
       return NextResponse.json(

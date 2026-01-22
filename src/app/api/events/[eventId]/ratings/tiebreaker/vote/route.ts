@@ -30,11 +30,12 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const { tiebreakerId, votedUserId } = validation.data;
 
     // Verificar se usuário participou do evento
-    const [attendance] = await sql`
+    const attendanceQuery = await sql`
       SELECT status
       FROM event_attendance
       WHERE event_id = ${eventId} AND user_id = ${user.id}
     `;
+    const [attendance] = attendanceQuery as any[];
 
     if (!attendance || attendance.status !== "yes") {
       return NextResponse.json(
@@ -44,10 +45,11 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }
 
     // Buscar tiebreaker e validar
-    const [tiebreaker] = await sql`
+    const tiebreakerQuery = await sql`
       SELECT * FROM mvp_tiebreakers
       WHERE id = ${tiebreakerId} AND event_id = ${eventId}
     `;
+    const [tiebreaker] = tiebreakerQuery as any[];
 
     if (!tiebreaker) {
       return NextResponse.json(
@@ -99,17 +101,19 @@ export async function POST(request: NextRequest, context: RouteContext) {
     `;
 
     // Contar total de participantes e votos
-    const [participantCount] = await sql`
+    const participantCountQuery = await sql`
       SELECT COUNT(DISTINCT user_id) as count
       FROM event_attendance
       WHERE event_id = ${eventId} AND status = 'yes'
     `;
+    const [participantCount] = participantCountQuery as any[];
 
-    const [voteCount] = await sql`
+    const voteCountQuery = await sql`
       SELECT COUNT(DISTINCT voter_user_id) as count
       FROM mvp_tiebreaker_votes
       WHERE tiebreaker_id = ${tiebreakerId}
     `;
+    const [voteCount] = voteCountQuery as any[];
 
     const totalParticipants = parseInt(participantCount.count as string);
     const totalVotes = parseInt(voteCount.count as string);
@@ -125,13 +129,14 @@ export async function POST(request: NextRequest, context: RouteContext) {
         GROUP BY voted_user_id
         ORDER BY vote_count DESC
       `;
+      const voteCountsArray = voteCounts as Array<{ voted_user_id: number; vote_count: string | number }>;
 
-      const maxVotes = parseInt(voteCounts[0].vote_count as string);
-      const stillTied = voteCounts.filter(
+      const maxVotes = parseInt(voteCountsArray[0].vote_count as string);
+      const stillTied = voteCountsArray.filter(
         (vc) => parseInt(vc.vote_count as string) === maxVotes
       );
 
-      if (stillTied.length === 1) {
+      if (Array.isArray(stillTied) && stillTied.length === 1) {
         // Desempate resolvido!
         await sql`
           UPDATE mvp_tiebreakers

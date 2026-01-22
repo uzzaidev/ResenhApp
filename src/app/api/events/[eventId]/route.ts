@@ -14,7 +14,7 @@ export async function GET(
     const { eventId } = await params;
     const user = await requireAuth();
 
-    const [event] = await sql`
+    const eventResult = await sql`
       SELECT
         e.*,
         g.name as group_name,
@@ -25,16 +25,18 @@ export async function GET(
       LEFT JOIN venues v ON e.venue_id = v.id
       WHERE e.id = ${eventId}
     `;
+    const [event] = eventResult as any[];
 
     if (!event) {
       return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
     }
 
     // Check if user is member of the group
-    const [membership] = await sql`
+    const membershipResult = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${event.group_id} AND user_id = ${user.id}
     `;
+    const [membership] = membershipResult as Array<{ role: string }>;
 
     if (!membership) {
       return NextResponse.json(
@@ -95,7 +97,7 @@ export async function GET(
         ...event,
         userRole: membership.role,
         attendance,
-        teams: teams.length > 0 ? teams : null,
+        teams: Array.isArray(teams) && teams.length > 0 ? teams : null,
       },
     });
   } catch (error) {
@@ -119,19 +121,21 @@ export async function PATCH(
     const { eventId } = await params;
     const user = await requireAuth();
 
-    const [event] = await sql`
+    const eventCheckResult = await sql`
       SELECT * FROM events WHERE id = ${eventId}
     `;
+    const [event] = eventCheckResult as any[];
 
     if (!event) {
       return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
     }
 
     // Check if user is admin
-    const [membership] = await sql`
+    const membershipCheckResult = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${event.group_id} AND user_id = ${user.id}
     `;
+    const [membership] = membershipCheckResult as Array<{ role: string }>;
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -143,7 +147,7 @@ export async function PATCH(
     const body = await request.json();
     const { startsAt, venueId, maxPlayers, maxGoalkeepers, waitlistEnabled, status } = body;
 
-    const [updated] = await sql`
+    const updatedResult = await sql`
       UPDATE events
       SET
         starts_at = COALESCE(${startsAt}, starts_at),
@@ -156,6 +160,7 @@ export async function PATCH(
       WHERE id = ${eventId}
       RETURNING *
     `;
+    const [updated] = updatedResult as any[];
 
     logger.info({ eventId, userId: user.id }, "Event updated");
 
@@ -181,19 +186,21 @@ export async function DELETE(
     const { eventId } = await params;
     const user = await requireAuth();
 
-    const [event] = await sql`
+    const eventDeleteCheckResult = await sql`
       SELECT * FROM events WHERE id = ${eventId}
     `;
+    const [event] = eventDeleteCheckResult as any[];
 
     if (!event) {
       return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
     }
 
     // Check if user is admin
-    const [membership] = await sql`
+    const membershipDeleteCheckResult = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${event.group_id} AND user_id = ${user.id}
     `;
+    const [membership] = membershipDeleteCheckResult as Array<{ role: string }>;
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(

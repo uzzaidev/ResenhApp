@@ -15,10 +15,11 @@ export async function POST(
     const user = await requireAuth();
 
     // Check if current user is admin
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -38,9 +39,10 @@ export async function POST(
     }
 
     // Check if user exists
-    const [targetUser] = await sql`
+    const targetUserQuery = await sql`
       SELECT id, name, email FROM users WHERE id = ${userId}
     `;
+    const [targetUser] = targetUserQuery as any[];
 
     if (!targetUser) {
       return NextResponse.json(
@@ -50,10 +52,11 @@ export async function POST(
     }
 
     // Check if user is already a member
-    const [existingMember] = await sql`
+    const existingMemberQuery = await sql`
       SELECT * FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${userId}
     `;
+    const [existingMember] = existingMemberQuery as any[];
 
     if (existingMember) {
       return NextResponse.json(
@@ -63,11 +66,12 @@ export async function POST(
     }
 
     // Add user to group with default role 'member' and base_rating 5 (scale 0-10)
-    const [newMember] = await sql`
+    const newMemberQuery = await sql`
       INSERT INTO group_members (group_id, user_id, role, base_rating)
       VALUES (${groupId}, ${userId}, 'member', 5)
       RETURNING *
     `;
+    const [newMember] = newMemberQuery as any[];
 
     logger.info(
       { groupId, userId, addedBy: user.id },

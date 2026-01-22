@@ -58,11 +58,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             WHERE email = ${email.toLowerCase()}
           `;
 
-          if (result.length === 0) {
+          if (!Array.isArray(result) || result.length === 0) {
             return null;
           }
 
-          const user = result[0];
+          const user = result[0] as any;
 
           // Verificar senha
           if (!user.password_hash) {

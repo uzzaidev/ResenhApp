@@ -34,19 +34,21 @@ export async function POST(
     const validatedData = manualTeamsSchema.parse(body);
 
     // Get event
-    const [event] = await sql`
+    const eventQuery = await sql`
       SELECT * FROM events WHERE id = ${eventId}
     `;
+    const [event] = eventQuery as any[];
 
     if (!event) {
       return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
     }
 
     // Check if user is admin of the group
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${event.group_id} AND user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -65,12 +67,13 @@ export async function POST(
 
     for (let i = 0; i < validatedData.teams.length; i++) {
       const teamData = validatedData.teams[i];
-      
-      const [team] = await sql`
+
+      const teamQuery = await sql`
         INSERT INTO teams (event_id, name, seed)
         VALUES (${eventId}, ${teamData.name}, ${i})
         RETURNING *
       `;
+      const [team] = teamQuery as any[];
 
       // Add team members
       for (const member of teamData.members) {
@@ -117,19 +120,21 @@ export async function GET(
     const user = await requireAuth();
 
     // Get event to check group membership
-    const [event] = await sql`
+    const eventQuery = await sql`
       SELECT * FROM events WHERE id = ${eventId}
     `;
+    const [event] = eventQuery as any[];
 
     if (!event) {
       return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
     }
 
     // Check if user is a member of the group
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${event.group_id} AND user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership) {
       return NextResponse.json(

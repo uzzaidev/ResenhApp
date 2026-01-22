@@ -1,0 +1,27 @@
+
+> peladeiros-app@0.1.0 build C:\Projetos Uzz.Ai\peladeiros-main
+> next build
+
+▲ Next.js 16.1.1 (Turbopack)
+- Environments: .env
+- Experiments (use with caution):
+  · optimizePackageImports
+  · serverActions
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 11.5s
+  Running TypeScript ...
+Failed to compile.
+
+./src/app/api/events/[eventId]/route.ts:148:11
+Type error: Type 'any[][] | Record<string, any>[] | FullQueryResults<boolean>' must have a '[Symbol.iterator]()' method that returns an iterator.
+
+[0m [90m 146 |[39m     [36mconst[39m { startsAt[33m,[39m venueId[33m,[39m maxPlayers[33m,[39m maxGoalkeepers[33m,[39m waitlistEnabled[33m,[39m status } [33m=[39m body[33m;[39m
+ [90m 147 |[39m
+[31m[1m>[22m[39m[90m 148 |[39m     [36mconst[39m [updated] [33m=[39m [36mawait[39m sql[32m`[39m
+ [90m     |[39m           [31m[1m^[22m[39m
+ [90m 149 |[39m [32m      UPDATE events[39m
+ [90m 150 |[39m [32m      SET[39m
+ [90m 151 |[39m [32m        starts_at = COALESCE(${startsAt}, starts_at),[39m[0m
+Next.js build worker exited with code: 1 and signal: null
+ ELIFECYCLE  Command failed with exit code 1.

@@ -56,11 +56,12 @@ export async function POST(request: NextRequest) {
     const { name, description, privacy } = validation.data;
 
     // Create group
-    const [group] = await sql`
+    const groupQuery = await sql`
       INSERT INTO groups (name, description, privacy, created_by)
       VALUES (${name}, ${description || null}, ${privacy}, ${user.id})
       RETURNING *
     `;
+    const [group] = groupQuery as any[];
 
     // Add creator as admin
     await sql`

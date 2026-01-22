@@ -13,12 +13,13 @@ export async function GET(request: NextRequest, context: RouteContext) {
     const { eventId } = await context.params;
 
     // Verificar se usuário é membro do grupo
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT gm.role
       FROM events e
       INNER JOIN group_members gm ON e.group_id = gm.group_id
       WHERE e.id = ${eventId} AND gm.user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership) {
       return NextResponse.json(
@@ -28,12 +29,13 @@ export async function GET(request: NextRequest, context: RouteContext) {
     }
 
     // Buscar tiebreaker ativo para este evento
-    const [tiebreaker] = await sql`
+    const tiebreakerQuery = await sql`
       SELECT * FROM mvp_tiebreakers
       WHERE event_id = ${eventId}
       ORDER BY round DESC
       LIMIT 1
     `;
+    const [tiebreaker] = tiebreakerQuery as any[];
 
     if (!tiebreaker) {
       return NextResponse.json({
@@ -48,6 +50,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       FROM users
       WHERE id = ANY(${tiedUserIds})
     `;
+    const playersArray = players as Array<{ id: number; name: string; image: string }>;
 
     // Buscar votos atuais do desempate
     const voteCounts = await sql`
@@ -58,24 +61,27 @@ export async function GET(request: NextRequest, context: RouteContext) {
       WHERE tiebreaker_id = ${tiebreaker.id}
       GROUP BY voted_user_id
     `;
+    const voteCountsArray = voteCounts as Array<{ voted_user_id: number; vote_count: string | number }>;
 
     // Verificar se usuário atual já votou neste desempate
-    const [userVote] = await sql`
+    const userVoteQuery = await sql`
       SELECT voted_user_id
       FROM mvp_tiebreaker_votes
       WHERE tiebreaker_id = ${tiebreaker.id} AND voter_user_id = ${user.id}
     `;
+    const [userVote] = userVoteQuery as any[];
 
     // Buscar total de participantes que devem votar
-    const [participantCount] = await sql`
+    const participantCountQuery = await sql`
       SELECT COUNT(DISTINCT user_id) as count
       FROM event_attendance
       WHERE event_id = ${eventId} AND status = 'yes'
     `;
+    const [participantCount] = participantCountQuery as any[];
 
     // Mapear jogadores com votos
-    const playersWithVotes = players.map((player) => {
-      const voteCount = voteCounts.find(
+    const playersWithVotes = playersArray.map((player) => {
+      const voteCount = voteCountsArray.find(
         (vc) => vc.voted_user_id === player.id
       );
       return {

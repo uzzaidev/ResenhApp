@@ -16,10 +16,11 @@ export async function GET(
     const user = await requireAuth();
 
     // Check if user is member of the group
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership) {
       return NextResponse.json(
@@ -210,10 +211,11 @@ export async function POST(
     const user = await requireAuth();
 
     // Check if current user is admin
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -236,10 +238,11 @@ export async function POST(
     const { userId, type, amountCents, dueDate, eventId } = validation.data;
 
     // Check if target user is a member of the group
-    const [targetMember] = await sql`
+    const targetMemberQuery = await sql`
       SELECT user_id FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${userId}
     `;
+    const [targetMember] = targetMemberQuery as any[];
 
     if (!targetMember) {
       return NextResponse.json(
@@ -249,11 +252,12 @@ export async function POST(
     }
 
     // Create charge
-    const [charge] = await sql`
+    const chargeQuery = await sql`
       INSERT INTO charges (group_id, user_id, type, amount_cents, due_date, status, event_id)
       VALUES (${groupId}, ${userId}, ${type}, ${amountCents}, ${dueDate || null}, 'pending', ${eventId || null})
       RETURNING *
     `;
+    const [charge] = chargeQuery as any[];
 
     logger.info(
       { groupId, chargeId: charge.id, userId, createdBy: user.id },
@@ -261,9 +265,10 @@ export async function POST(
     );
 
     // Get user info
-    const [userInfo] = await sql`
+    const userInfoQuery = await sql`
       SELECT id, name, image FROM users WHERE id = ${userId}
     `;
+    const [userInfo] = userInfoQuery as any[];
 
     return NextResponse.json({
       message: "Cobrança criada com sucesso",

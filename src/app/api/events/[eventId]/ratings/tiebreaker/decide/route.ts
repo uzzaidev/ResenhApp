@@ -30,12 +30,13 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const { tiebreakerId, winnerUserId } = validation.data;
 
     // Verificar se usuário é admin do grupo
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT gm.role
       FROM events e
       INNER JOIN group_members gm ON e.group_id = gm.group_id
       WHERE e.id = ${eventId} AND gm.user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -45,10 +46,11 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }
 
     // Buscar tiebreaker e validar
-    const [tiebreaker] = await sql`
+    const tiebreakerQuery = await sql`
       SELECT * FROM mvp_tiebreakers
       WHERE id = ${tiebreakerId} AND event_id = ${eventId}
     `;
+    const [tiebreaker] = tiebreakerQuery as any[];
 
     if (!tiebreaker) {
       return NextResponse.json(

@@ -22,7 +22,7 @@ export async function GET(
       WHERE user_id = ${user.id} AND group_id = ${groupId}
     `;
 
-    if (membership.length === 0) {
+    if (!Array.isArray(membership) || membership.length === 0) {
       return NextResponse.json(
         { error: "Você não é membro deste grupo" },
         { status: 403 }
@@ -108,7 +108,19 @@ export async function GET(
       LEFT JOIN player_ratings pr ON pr.rated_user_id = ${user.id} AND pr.event_id = ue.id
     `;
 
-    if (!stats || stats.length === 0 || stats[0].games_played === '0') {
+    const statsArray = stats as Array<{
+      games_played: string;
+      goals: string;
+      assists: string;
+      saves: string;
+      yellow_cards: string;
+      red_cards: string;
+      wins: string;
+      losses: string;
+      mvp_count: string;
+    }>;
+
+    if (!Array.isArray(statsArray) || statsArray.length === 0 || statsArray[0].games_played === '0') {
       return NextResponse.json({
         gamesPlayed: 0,
         goals: 0,
@@ -125,7 +137,7 @@ export async function GET(
       });
     }
 
-    const userStats = stats[0];
+    const userStats = statsArray[0];
 
     // Buscar tags recebidas
     const tagsResult = await sql`

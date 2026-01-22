@@ -99,11 +99,11 @@ export default async function GroupPage({ params }: RouteParams) {
     WHERE g.id = ${groupId} AND gm.user_id = ${user.id}
   `;
 
-  if (groupResult.length === 0) {
+  if (!Array.isArray(groupResult) || groupResult.length === 0) {
     redirect("/dashboard");
   }
 
-  const group = groupResult[0];
+  const group = groupResult[0] as any;
 
   // Buscar próximos eventos do grupo
   const upcomingEvents = await sql`

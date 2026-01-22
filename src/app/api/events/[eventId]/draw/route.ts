@@ -183,19 +183,21 @@ export async function POST(
     const { numTeams = 2 } = body;
 
     // Get event
-    const [event] = await sql`
+    const eventQuery = await sql`
       SELECT * FROM events WHERE id = ${eventId}
     `;
+    const [event] = eventQuery as any[];
 
     if (!event) {
       return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
     }
 
     // Check if user is admin of the group
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${event.group_id} AND user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -234,7 +236,7 @@ export async function POST(
     `;
 
     // Get draw configuration for the group
-    const [drawConfig] = await sql`
+    const drawConfigQuery = await sql`
       SELECT
         players_per_team as "playersPerTeam",
         reserves_per_team as "reservesPerTeam",
@@ -245,6 +247,7 @@ export async function POST(
       FROM draw_configs
       WHERE group_id = ${event.group_id}
     `;
+    const [drawConfig] = drawConfigQuery as any[];
 
     console.log('Draw config found:', drawConfig ? 'YES' : 'NO');
     if (drawConfig) {
@@ -304,11 +307,12 @@ export async function POST(
       }
 
       try {
-        const [team] = await sql`
+        const teamQuery = await sql`
           INSERT INTO teams (event_id, name, seed)
           VALUES (${eventId}, ${teamNames[i]}, ${i})
           RETURNING *
         `;
+        const [team] = teamQuery as any[];
         console.log(`Created team ${team.id} in database`);
 
         // Add team members with validation

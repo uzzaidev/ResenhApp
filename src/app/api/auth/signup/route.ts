@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       SELECT id FROM users WHERE email = ${email.toLowerCase()}
     `;
 
-    if (existingUser.length > 0) {
+    if (Array.isArray(existingUser) && existingUser.length > 0) {
       return NextResponse.json(
         { error: "Email já cadastrado" },
         { status: 400 }
@@ -64,15 +64,17 @@ export async function POST(request: NextRequest) {
       RETURNING id, name, email
     `;
 
-    logger.info({ userId: newUser[0].id }, "Novo usuário criado");
+    const user = Array.isArray(newUser) ? newUser[0] : (newUser as any)[0];
+    
+    logger.info({ userId: user.id }, "Novo usuário criado");
 
     return NextResponse.json(
       {
         success: true,
         user: {
-          id: newUser[0].id,
-          name: newUser[0].name,
-          email: newUser[0].email,
+          id: user.id,
+          name: user.name,
+          email: user.email,
         },
       },
       { status: 201 }

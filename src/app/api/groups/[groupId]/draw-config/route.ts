@@ -26,17 +26,18 @@ export async function GET(
     const user = await requireAuth();
 
     // Check if user is member of the group
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership) {
       return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
     }
 
     // Get draw config
-    const [config] = await sql`
+    const configQuery = await sql`
       SELECT
         players_per_team as "playersPerTeam",
         reserves_per_team as "reservesPerTeam",
@@ -47,6 +48,7 @@ export async function GET(
       FROM draw_configs
       WHERE group_id = ${groupId}
     `;
+    const [config] = configQuery as any[];
 
     if (config) {
       return NextResponse.json({
@@ -106,10 +108,11 @@ export async function POST(
     }
 
     // Check if user is admin of the group
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(

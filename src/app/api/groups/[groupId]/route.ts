@@ -15,10 +15,11 @@ export async function GET(
     const user = await requireAuth();
 
     // Check if user is member
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership) {
       return NextResponse.json(
@@ -27,9 +28,10 @@ export async function GET(
       );
     }
 
-    const [group] = await sql`
+    const groupQuery = await sql`
       SELECT * FROM groups WHERE id = ${groupId}
     `;
+    const [group] = groupQuery as any[];
 
     if (!group) {
       return NextResponse.json({ error: "Grupo não encontrado" }, { status: 404 });
@@ -95,10 +97,11 @@ export async function PATCH(
     const user = await requireAuth();
 
     // Check if user is admin
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -110,7 +113,7 @@ export async function PATCH(
     const body = await request.json();
     const { name, description, privacy } = body;
 
-    const [updated] = await sql`
+    const updatedQuery = await sql`
       UPDATE groups
       SET
         name = COALESCE(${name}, name),
@@ -120,6 +123,7 @@ export async function PATCH(
       WHERE id = ${groupId}
       RETURNING *
     `;
+    const [updated] = updatedQuery as any[];
 
     logger.info({ groupId, userId: user.id }, "Group updated");
 

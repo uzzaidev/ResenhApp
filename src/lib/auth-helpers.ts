@@ -20,12 +20,13 @@ export async function getCurrentUser() {
       WHERE id = ${session.user.id}
     `;
 
-    if (dbUser.length > 0) {
+    if (Array.isArray(dbUser) && dbUser.length > 0) {
+      const user = dbUser[0] as any;
       return {
-        id: dbUser[0].id,
-        email: dbUser[0].email,
-        name: dbUser[0].name,
-        image: dbUser[0].image,
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        image: user.image,
       };
     }
 

@@ -8,19 +8,20 @@ export async function GET() {
   try {
     const user = await requireAuth();
 
-    const [result] = await sql`
+    const queryResult = await sql`
       SELECT COUNT(*)::int as count
       FROM charges
       WHERE user_id = ${user.id}
       AND status = 'pending'
     `;
+    const [result] = queryResult as Array<{ count: number }>;
 
     logger.info(
-      { userId: user.id, count: result.count },
+      { userId: user.id, count: result?.count },
       "Fetched pending charges count"
     );
 
-    return NextResponse.json({ count: result.count || 0 });
+    return NextResponse.json({ count: result?.count || 0 });
   } catch (error) {
     if (error instanceof Error && error.message === "Não autenticado") {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });

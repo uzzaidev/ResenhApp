@@ -16,10 +16,11 @@ export async function GET(
     const user = await requireAuth();
 
     // Check if user is admin
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -66,10 +67,11 @@ export async function POST(
     const user = await requireAuth();
 
     // Check if user is admin
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -83,7 +85,7 @@ export async function POST(
 
     const inviteCode = generateInviteCode();
 
-    const [invite] = await sql`
+    const inviteQuery = await sql`
       INSERT INTO invites (group_id, code, created_by, expires_at, max_uses)
       VALUES (
         ${groupId},
@@ -94,6 +96,7 @@ export async function POST(
       )
       RETURNING *
     `;
+    const [invite] = inviteQuery as any[];
 
     logger.info({ groupId, inviteId: invite.id, userId: user.id }, "Invite created");
 

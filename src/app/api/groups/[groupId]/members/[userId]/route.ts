@@ -27,10 +27,11 @@ export async function PATCH(
     const user = await requireAuth();
 
     // Check if current user is admin
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -40,10 +41,11 @@ export async function PATCH(
     }
 
     // Check if target user is a member
-    const [targetMember] = await sql`
+    const targetMemberQuery = await sql`
       SELECT * FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${userId}
     `;
+    const [targetMember] = targetMemberQuery as any[];
 
     if (!targetMember) {
       return NextResponse.json(
@@ -64,11 +66,12 @@ export async function PATCH(
 
     // If trying to demote an admin to member, check if they're the last admin
     if (targetMember.role === 'admin' && role === 'member') {
-      const [adminCount] = await sql`
+      const adminCountQuery = await sql`
         SELECT COUNT(*) as count
         FROM group_members
         WHERE group_id = ${groupId} AND role = 'admin'
       `;
+      const [adminCount] = adminCountQuery as any[];
 
       if (parseInt(adminCount.count) <= 1) {
         return NextResponse.json(
@@ -79,12 +82,13 @@ export async function PATCH(
     }
 
     // Update member role
-    const [updated] = await sql`
+    const updatedQuery = await sql`
       UPDATE group_members
       SET role = ${role}
       WHERE group_id = ${groupId} AND user_id = ${userId}
       RETURNING *
     `;
+    const [updated] = updatedQuery as any[];
 
     logger.info(
       { groupId, userId, newRole: role, updatedBy: user.id },
@@ -128,10 +132,11 @@ export async function DELETE(
     const user = await requireAuth();
 
     // Check if current user is admin
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -149,10 +154,11 @@ export async function DELETE(
     }
 
     // Check if target user is a member
-    const [targetMember] = await sql`
+    const targetMemberQuery = await sql`
       SELECT * FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${userId}
     `;
+    const [targetMember] = targetMemberQuery as any[];
 
     if (!targetMember) {
       return NextResponse.json(

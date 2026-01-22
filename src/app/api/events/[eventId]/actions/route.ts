@@ -15,19 +15,21 @@ export async function GET(
     const { eventId } = await params;
     const user = await requireAuth();
 
-    const [event] = await sql`
+    const eventResult = await sql`
       SELECT group_id FROM events WHERE id = ${eventId}
     `;
+    const [event] = eventResult as Array<{ group_id: number }>;
 
     if (!event) {
       return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
     }
 
     // Check if user is member
-    const [membership] = await sql`
+    const membershipResult = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${event.group_id} AND user_id = ${user.id}
     `;
+    const [membership] = membershipResult as Array<{ role: string }>;
 
     if (!membership) {
       return NextResponse.json(
@@ -91,19 +93,21 @@ export async function POST(
 
     const { actorUserId, actionType, subjectUserId, teamId, minute, metadata } = validation.data;
 
-    const [event] = await sql`
+    const eventCheckResult = await sql`
       SELECT * FROM events WHERE id = ${eventId}
     `;
+    const [event] = eventCheckResult as any[];
 
     if (!event) {
       return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
     }
 
     // Check if user is admin
-    const [membership] = await sql`
+    const membershipCheckResult = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${event.group_id} AND user_id = ${user.id}
     `;
+    const [membership] = membershipCheckResult as Array<{ role: string }>;
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -112,7 +116,7 @@ export async function POST(
       );
     }
 
-    const [action] = await sql`
+    const actionResult = await sql`
       INSERT INTO event_actions (
         event_id,
         actor_user_id,
@@ -133,6 +137,7 @@ export async function POST(
       )
       RETURNING *
     `;
+    const [action] = actionResult as any[];
 
     logger.info(
       { eventId, actionType, actorUserId },
@@ -171,19 +176,21 @@ export async function DELETE(
       );
     }
 
-    const [event] = await sql`
+    const eventDeleteResult = await sql`
       SELECT * FROM events WHERE id = ${eventId}
     `;
+    const [event] = eventDeleteResult as any[];
 
     if (!event) {
       return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
     }
 
     // Check if user is admin
-    const [membership] = await sql`
+    const membershipDeleteResult = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${event.group_id} AND user_id = ${user.id}
     `;
+    const [membership] = membershipDeleteResult as Array<{ role: string }>;
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -199,7 +206,7 @@ export async function DELETE(
       RETURNING *
     `;
 
-    if (result.length === 0) {
+    if (!Array.isArray(result) || result.length === 0) {
       return NextResponse.json(
         { error: "Ação não encontrada" },
         { status: 404 }

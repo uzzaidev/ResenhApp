@@ -15,19 +15,21 @@ export async function GET(
     const { eventId } = await params;
     const user = await requireAuth();
 
-    const [event] = await sql`
+    const eventQuery = await sql`
       SELECT group_id FROM events WHERE id = ${eventId}
     `;
+    const [event] = eventQuery as any[];
 
     if (!event) {
       return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
     }
 
     // Check if user is member
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${event.group_id} AND user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership) {
       return NextResponse.json(
@@ -37,14 +39,15 @@ export async function GET(
     }
 
     // Get user's vote for this event (single vote)
-    const [vote] = await sql`
+    const voteQuery = await sql`
       SELECT rated_user_id as player_id
       FROM player_ratings
-      WHERE event_id = ${eventId} 
+      WHERE event_id = ${eventId}
         AND rater_user_id = ${user.id}
         AND 'mvp' = ANY(tags)
       LIMIT 1
     `;
+    const [vote] = voteQuery as any[];
 
     return NextResponse.json({ vote: vote || null });
   } catch (error) {
@@ -80,19 +83,21 @@ export async function POST(
 
     const { ratedUserId } = validation.data;
 
-    const [event] = await sql`
+    const eventQuery = await sql`
       SELECT group_id FROM events WHERE id = ${eventId}
     `;
+    const [event] = eventQuery as any[];
 
     if (!event) {
       return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
     }
 
     // Check if user is member and attended
-    const [attendance] = await sql`
+    const attendanceQuery = await sql`
       SELECT * FROM event_attendance
       WHERE event_id = ${eventId} AND user_id = ${user.id} AND status = 'yes'
     `;
+    const [attendance] = attendanceQuery as any[];
 
     if (!attendance) {
       return NextResponse.json(
@@ -110,10 +115,11 @@ export async function POST(
     }
 
     // Check if the rated player participated
-    const [ratedAttendance] = await sql`
+    const ratedAttendanceQuery = await sql`
       SELECT * FROM event_attendance
       WHERE event_id = ${eventId} AND user_id = ${ratedUserId} AND status = 'yes'
     `;
+    const [ratedAttendance] = ratedAttendanceQuery as any[];
 
     if (!ratedAttendance) {
       return NextResponse.json(
@@ -129,7 +135,7 @@ export async function POST(
     `;
 
     // Insert new vote with 'mvp' tag and NULL score
-    const [vote] = await sql`
+    const voteQuery = await sql`
       INSERT INTO player_ratings (
         event_id,
         rater_user_id,
@@ -146,6 +152,7 @@ export async function POST(
       )
       RETURNING *
     `;
+    const [vote] = voteQuery as any[];
 
     logger.info(
       { eventId, raterUserId: user.id, ratedUserId },

@@ -28,19 +28,21 @@ export async function POST(
     const { status, role, preferredPosition, secondaryPosition } = validation.data;
 
     // Get event details
-    const [event] = await sql`
+    const eventQuery = await sql`
       SELECT * FROM events WHERE id = ${eventId}
     `;
+    const [event] = eventQuery as any[];
 
     if (!event) {
       return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
     }
 
     // Check if user is member of the group
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT * FROM group_members
       WHERE group_id = ${event.group_id} AND user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as any[];
 
     if (!membership) {
       return NextResponse.json(
@@ -50,13 +52,14 @@ export async function POST(
     }
 
     // Count current confirmations (excluding the current user to avoid double-counting)
-    const [counts] = await sql`
+    const countsQuery = await sql`
       SELECT
         COUNT(*) FILTER (WHERE status = 'yes' AND role = 'gk') as gk_count,
         COUNT(*) FILTER (WHERE status = 'yes' AND role = 'line') as line_count
       FROM event_attendance
       WHERE event_id = ${eventId} AND user_id != ${user.id}
     `;
+    const [counts] = countsQuery as any[];
 
     let finalStatus = status;
 
@@ -73,17 +76,18 @@ export async function POST(
     }
 
     // Get current attendance status to track self-removal
-    const [currentAttendance] = await sql`
+    const currentAttendanceQuery = await sql`
       SELECT status FROM event_attendance
       WHERE event_id = ${eventId} AND user_id = ${user.id}
     `;
+    const [currentAttendance] = currentAttendanceQuery as any[];
 
     // Determine if this is a self-removal (yes → no) or re-confirmation (no → yes)
     const isSelfRemoval = currentAttendance?.status === 'yes' && status === 'no';
     const isReconfirmation = currentAttendance?.status === 'no' && status === 'yes';
 
     // Upsert attendance
-    const [attendance] = await sql`
+    const attendanceQuery = await sql`
       INSERT INTO event_attendance (event_id, user_id, role, status, preferred_position, secondary_position, removed_by_self_at)
       VALUES (
         ${eventId},
@@ -108,25 +112,28 @@ export async function POST(
         updated_at = NOW()
       RETURNING *
     `;
+    const [attendance] = attendanceQuery as any[];
 
     // If user changed to "no" or "waitlist" to "yes", check waitlist
     if (status === "no" || (finalStatus === "yes" && event.waitlist_enabled)) {
       // Move first person from waitlist to confirmed
-      const [firstInWaitlist] = await sql`
+      const firstInWaitlistQuery = await sql`
         SELECT * FROM event_attendance
         WHERE event_id = ${eventId} AND status = 'waitlist'
         ORDER BY created_at ASC
         LIMIT 1
       `;
+      const [firstInWaitlist] = firstInWaitlistQuery as any[];
 
       if (firstInWaitlist) {
-        const [updatedCounts] = await sql`
+        const updatedCountsQuery = await sql`
           SELECT
             COUNT(*) FILTER (WHERE status = 'yes' AND role = 'gk') as gk_count,
             COUNT(*) FILTER (WHERE status = 'yes' AND role = 'line') as line_count
           FROM event_attendance
           WHERE event_id = ${eventId}
         `;
+        const [updatedCounts] = updatedCountsQuery as any[];
 
         const totalPlayers = parseInt(updatedCounts.gk_count) + parseInt(updatedCounts.line_count);
         const gkCount = parseInt(updatedCounts.gk_count);

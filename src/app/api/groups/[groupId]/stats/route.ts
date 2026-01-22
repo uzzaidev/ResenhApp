@@ -22,7 +22,7 @@ export async function GET(
       WHERE user_id = ${user.id} AND group_id = ${groupId}
     `;
 
-    if (membership.length === 0) {
+    if (!Array.isArray(membership) || membership.length === 0) {
       return NextResponse.json(
         { error: "Você não é membro deste grupo" },
         { status: 403 }
@@ -35,7 +35,7 @@ export async function GET(
       WHERE group_id = ${groupId} AND status = 'finished'
     `;
 
-    if (finishedEvents.length === 0) {
+    if (!Array.isArray(finishedEvents) || finishedEvents.length === 0) {
       return NextResponse.json({
         topScorers: [],
         topAssisters: [],
@@ -45,7 +45,7 @@ export async function GET(
       });
     }
 
-    const eventIds = (finishedEvents as unknown as Array<{ id: string }>).map(e => e.id);
+    const eventIds = (finishedEvents as Array<{ id: string }>).map(e => e.id);
 
     // Artilheiros (top 10)
     const topScorers = await sql`

@@ -16,10 +16,11 @@ export async function PATCH(
     const user = await requireAuth();
 
     // Check if current user is admin
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -29,10 +30,11 @@ export async function PATCH(
     }
 
     // Check if charge exists and belongs to the group
-    const [existingCharge] = await sql`
+    const existingChargeQuery = await sql`
       SELECT * FROM charges
       WHERE id = ${chargeId} AND group_id = ${groupId}
     `;
+    const [existingCharge] = existingChargeQuery as any[];
 
     if (!existingCharge) {
       return NextResponse.json(
@@ -55,12 +57,13 @@ export async function PATCH(
     const { status } = validation.data;
 
     // Update charge status
-    const [updatedCharge] = await sql`
+    const updatedChargeQuery = await sql`
       UPDATE charges
       SET status = ${status}, updated_at = NOW()
       WHERE id = ${chargeId}
       RETURNING *
     `;
+    const [updatedCharge] = updatedChargeQuery as any[];
 
     logger.info(
       { groupId, chargeId, status, updatedBy: user.id },
@@ -68,9 +71,10 @@ export async function PATCH(
     );
 
     // Get user info
-    const [userInfo] = await sql`
+    const userInfoQuery = await sql`
       SELECT id, name, image FROM users WHERE id = ${updatedCharge.user_id}
     `;
+    const [userInfo] = userInfoQuery as any[];
 
     return NextResponse.json({
       message: "Status atualizado com sucesso",
@@ -100,10 +104,11 @@ export async function DELETE(
     const user = await requireAuth();
 
     // Check if current user is admin
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -113,10 +118,11 @@ export async function DELETE(
     }
 
     // Check if charge exists and belongs to the group
-    const [existingCharge] = await sql`
+    const existingChargeQuery = await sql`
       SELECT * FROM charges
       WHERE id = ${chargeId} AND group_id = ${groupId}
     `;
+    const [existingCharge] = existingChargeQuery as any[];
 
     if (!existingCharge) {
       return NextResponse.json(

@@ -13,12 +13,13 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const { eventId } = await context.params;
 
     // Verificar se usuário é admin do grupo do evento
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT gm.role
       FROM events e
       INNER JOIN group_members gm ON e.group_id = gm.group_id
       WHERE e.id = ${eventId} AND gm.user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       ORDER BY vote_count DESC
     `;
 
-    if (voteCounts.length === 0) {
+    if (!Array.isArray(voteCounts) || voteCounts.length === 0) {
       return NextResponse.json(
         { error: "Nenhum voto registrado ainda" },
         { status: 400 }
@@ -48,13 +49,14 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }
 
     // Identificar jogadores com o máximo de votos
-    const maxVotes = parseInt(voteCounts[0].vote_count as string);
-    const tiedPlayers = voteCounts.filter(
+    const voteCountsArray = voteCounts as Array<{ voted_user_id: number; user_name: string; vote_count: string | number }>;
+    const maxVotes = parseInt(voteCountsArray[0].vote_count as string);
+    const tiedPlayers = voteCountsArray.filter(
       (v) => parseInt(v.vote_count as string) === maxVotes
     );
 
     // Se apenas 1 jogador tem o máximo, não há empate
-    if (tiedPlayers.length === 1) {
+    if (Array.isArray(tiedPlayers) && tiedPlayers.length === 1) {
       return NextResponse.json({
         success: true,
         hasTie: false,
@@ -67,15 +69,16 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }
 
     // Há empate! Criar registro de tiebreaker
-    const tiedUserIds = tiedPlayers.map((p) => p.voted_user_id);
+    const tiedUserIds = Array.isArray(tiedPlayers) ? tiedPlayers.map((p) => p.voted_user_id) : [];
 
     // Verificar se já existe tiebreaker para este evento
-    const [existingTiebreaker] = await sql`
+    const existingTiebreakerQuery = await sql`
       SELECT id, status FROM mvp_tiebreakers
       WHERE event_id = ${eventId}
       ORDER BY round DESC
       LIMIT 1
     `;
+    const [existingTiebreaker] = existingTiebreakerQuery as any[];
 
     if (existingTiebreaker && existingTiebreaker.status !== "completed" && existingTiebreaker.status !== "admin_decided") {
       return NextResponse.json(
@@ -87,7 +90,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     // Criar novo tiebreaker
     const round = existingTiebreaker ? (existingTiebreaker.round as number) + 1 : 1;
 
-    const [tiebreaker] = await sql`
+    const tiebreakerQuery = await sql`
       INSERT INTO mvp_tiebreakers (
         event_id,
         round,
@@ -101,6 +104,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       )
       RETURNING *
     `;
+    const [tiebreaker] = tiebreakerQuery as any[];
 
     logger.info(
       { eventId, tiedUserIds, round, userId: user.id },

@@ -15,10 +15,11 @@ export async function GET(
     const user = await requireAuth();
 
     // Check if user is member
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership) {
       return NextResponse.json(
@@ -39,15 +40,16 @@ export async function GET(
       WHERE e.group_id = ${groupId}
       GROUP BY e.id, e.status
     `;
+    const debugEventsArray = debugEvents as any[];
 
     logger.info({
       groupId,
-      events: debugEvents.map((e: any) => ({
+      events: Array.isArray(debugEventsArray) ? debugEventsArray.map((e: any) => ({
         event_id: e.event_id,
         status: e.status,
         total_actions: e.total_actions,
         total_goals: e.total_goals
-      }))
+      })) : []
     }, "Events and actions in group");
 
     // DEBUG: Ver todas as ações de gol com detalhes
@@ -67,17 +69,18 @@ export async function GET(
       ORDER BY e.starts_at DESC
       LIMIT 20
     `;
+    const debugGoalsArray = debugGoals as any[];
 
     logger.info({
       groupId,
-      totalGoals: debugGoals.length,
-      goals: debugGoals.map((g: any) => ({
+      totalGoals: Array.isArray(debugGoalsArray) ? debugGoalsArray.length : 0,
+      goals: Array.isArray(debugGoalsArray) ? debugGoalsArray.map((g: any) => ({
         action_id: g.id,
         event_id: g.event_id,
         event_status: g.event_status,
         player_name: g.player_name,
         subject_user_id: g.subject_user_id
-      }))
+      })) : []
     }, "All goals in group");
 
     // Get player statistics and rankings
@@ -178,12 +181,13 @@ export async function GET(
       WHERE games_played > 0  -- Só mostrar quem jogou
       ORDER BY performance_score DESC, mvp_count DESC, goals DESC
     `;
+    const rankingsArray = rankings as any[];
 
     // DEBUG: Log detalhado dos rankings
     logger.info({
       groupId,
-      totalPlayers: rankings.length,
-      sample: rankings.slice(0, 3).map((r: any) => ({
+      totalPlayers: Array.isArray(rankingsArray) ? rankingsArray.length : 0,
+      sample: Array.isArray(rankingsArray) ? rankingsArray.slice(0, 3).map((r: any) => ({
         name: r.player_name,
         games_played: r.games_played,
         goals: r.goals,
@@ -191,10 +195,10 @@ export async function GET(
         wins: r.wins,
         avg_rating: r.avg_rating,
         performance_score: r.performance_score
-      }))
+      })) : []
     }, "Rankings calculated");
 
-    return NextResponse.json({ rankings });
+    return NextResponse.json({ rankings: rankingsArray });
   } catch (error) {
     if (error instanceof Error && error.message === "Não autenticado") {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });

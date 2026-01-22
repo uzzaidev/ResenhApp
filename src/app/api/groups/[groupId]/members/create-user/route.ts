@@ -16,10 +16,11 @@ export async function POST(
     const user = await requireAuth();
 
     // Check if current user is admin
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -48,9 +49,10 @@ export async function POST(
     }
 
     // Check if user already exists
-    const [existingUser] = await sql`
+    const existingUserQuery = await sql`
       SELECT id FROM users WHERE email = ${email}
     `;
+    const [existingUser] = existingUserQuery as any[];
 
     if (existingUser) {
       return NextResponse.json(
@@ -66,11 +68,12 @@ export async function POST(
     const passwordHash = await bcrypt.hash(password, 10);
 
     // Create user
-    const [newUser] = await sql`
+    const newUserQuery = await sql`
       INSERT INTO users (email, name, password_hash)
       VALUES (${email}, ${name}, ${passwordHash})
       RETURNING id, email, name
     `;
+    const [newUser] = newUserQuery as any[];
 
     // Create wallet for user
     await sql`
@@ -79,11 +82,12 @@ export async function POST(
     `;
 
     // Add user to group with default role 'member' and base_rating 5 (scale 0-10)
-    const [newMember] = await sql`
+    const newMemberQuery = await sql`
       INSERT INTO group_members (group_id, user_id, role, base_rating)
       VALUES (${groupId}, ${newUser.id}, 'member', 5)
       RETURNING *
     `;
+    const [newMember] = newMemberQuery as any[];
 
     logger.info(
       { groupId, userId: newUser.id, createdBy: user.id, email },

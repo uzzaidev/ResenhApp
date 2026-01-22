@@ -15,10 +15,11 @@ export async function DELETE(
     const user = await requireAuth();
 
     // Check if user is admin
-    const [membership] = await sql`
+    const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
+    const [membership] = membershipQuery as Array<{ role: string }>;
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -28,10 +29,11 @@ export async function DELETE(
     }
 
     // Check if invite exists and belongs to group
-    const [invite] = await sql`
+    const inviteQuery = await sql`
       SELECT * FROM invites
       WHERE id = ${inviteId} AND group_id = ${groupId}
     `;
+    const [invite] = inviteQuery as any[];
 
     if (!invite) {
       return NextResponse.json(

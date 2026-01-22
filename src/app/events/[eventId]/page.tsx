@@ -87,11 +87,11 @@ export default async function EventRsvpPage({ params }: RouteParams) {
     WHERE e.id = ${eventId}
   `;
 
-  if (eventResult.length === 0) {
+  if (!Array.isArray(eventResult) || eventResult.length === 0) {
     redirect("/dashboard");
   }
 
-  const event = eventResult[0];
+  const event = eventResult[0] as any;
 
   // Verificar se o usuário é membro do grupo
   const membershipResult = await sql`
@@ -99,11 +99,11 @@ export default async function EventRsvpPage({ params }: RouteParams) {
     WHERE group_id = ${event.group_id} AND user_id = ${user.id}
   `;
 
-  if (membershipResult.length === 0) {
+  if (!Array.isArray(membershipResult) || membershipResult.length === 0) {
     redirect("/dashboard");
   }
 
-  const membership = membershipResult[0];
+  const membership = membershipResult[0] as any;
   const isAdmin = membership.role === "admin";
 
   // Buscar times e jogadores
@@ -130,7 +130,7 @@ export default async function EventRsvpPage({ params }: RouteParams) {
     ORDER BY t.seed ASC
   ` as unknown as Team[];
   
-  const hasTeams = teams.length > 0;
+  const hasTeams = Array.isArray(teams) && teams.length > 0;
 
   // Buscar status atual do usuário neste evento
   const userAttendanceResult = await sql`
@@ -138,7 +138,7 @@ export default async function EventRsvpPage({ params }: RouteParams) {
     WHERE event_id = ${eventId} AND user_id = ${user.id}
   `;
 
-  const userAttendance: UserAttendance = userAttendanceResult.length > 0
+  const userAttendance: UserAttendance = Array.isArray(userAttendanceResult) && userAttendanceResult.length > 0
     ? userAttendanceResult[0] as { status: string; preferred_position: string | null; secondary_position: string | null; }
     : null;
 
