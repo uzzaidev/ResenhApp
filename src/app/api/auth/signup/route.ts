@@ -87,7 +87,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    logger.error({ error }, "Erro ao criar usuário");
+    // Log detalhado do erro para debug
+    logger.error({ 
+      error: {
+        name: error?.constructor?.name || 'Unknown',
+        message: error?.message || 'No message',
+        stack: error?.stack,
+        // Capturar detalhes específicos de erros SQL/PostgreSQL
+        ...(error as any)?.code && { code: (error as any).code },
+        ...(error as any)?.detail && { detail: (error as any).detail },
+        ...(error as any)?.hint && { hint: (error as any).hint },
+        ...(error as any)?.routine && { routine: (error as any).routine },
+        // Capturar erro completo como fallback
+        fullError: error
+      },
+      email: email?.toLowerCase(),
+      name: name
+    }, "Erro ao criar usuário");
+    
     return NextResponse.json(
       { error: "Erro ao criar conta. Tente novamente." },
       { status: 500 }
