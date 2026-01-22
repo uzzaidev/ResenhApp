@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teste Auth - ResenhApp</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #1a1f26 0%, #0f1419 100%);
+      color: #fff;
+    }
+    .container {
+      background: rgba(42, 49, 66, 0.8);
+      padding: 30px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    h1 {
+      color: #4FFFB0;
+      margin-bottom: 10px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #95A5B8;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      box-sizing: border-box;
+      background: rgba(26, 31, 38, 0.5);
+      color: #fff;
+      font-size: 14px;
+    }
+    input:focus {
+      outline: none;
+      border-color: #4FFFB0;
+    }
+    button {
+      background-color: #4FFFB0;
+      color: #1a1f26;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    button:hover {
+      background-color: #3fe0a0;
+      transform: translateY(-2px);
+    }
+    .message {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+    }
+    .success {
+      background-color: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .error {
+      background-color: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .info {
+      background-color: rgba(59, 130, 246, 0.2);
+      color: #3b82f6;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    a {
+      color: #4FFFB0;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .user-details {
+      background: rgba(26, 31, 38, 0.5);
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+    .user-details p {
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔐 Teste de Autenticação - ResenhApp</h1>
+
+    <div id="auth-container">
+      <!-- Sign Up Form -->
+      <div id="signup-form">
+        <h2>Cadastro</h2>
+        <div class="form-group">
+          <label>Email:</label>
+          <input type="email" id="signup-email" placeholder="seu@email.com" required>
+        </div>
+        <div class="form-group">
+          <label>Senha:</label>
+          <input type="password" id="signup-password" placeholder="Mínimo 6 caracteres" required>
+        </div>
+        <div class="form-group">
+          <label>Nome Completo:</label>
+          <input type="text" id="signup-name" placeholder="Seu Nome" required>
+        </div>
+        <button onclick="handleSignUp()">Cadastrar</button>
+        <p style="text-align: center; margin-top: 15px;">
+          Já tem conta? <a href="#" onclick="showSignIn()">Fazer Login</a>
+        </p>
+      </div>
+
+      <!-- Sign In Form -->
+      <div id="signin-form" style="display: none;">
+        <h2>Login</h2>
+        <div class="form-group">
+          <label>Email:</label>
+          <input type="email" id="signin-email" placeholder="seu@email.com" required>
+        </div>
+        <div class="form-group">
+          <label>Senha:</label>
+          <input type="password" id="signin-password" placeholder="Sua senha" required>
+        </div>
+        <button onclick="handleSignIn()">Entrar</button>
+        <p style="text-align: center; margin-top: 15px;">
+          <a href="#" onclick="handleResetPassword()">Esqueci minha senha</a>
+        </p>
+        <p style="text-align: center; margin-top: 15px;">
+          Não tem conta? <a href="#" onclick="showSignUp()">Cadastrar</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- User Info (quando logado) -->
+    <div id="user-info" style="display: none;">
+      <h2>✅ Logado com sucesso!</h2>
+      <div id="user-details" class="user-details"></div>
+      <button onclick="handleSignOut()" style="background-color: #e74c3c; margin-top: 20px;">Sair</button>
+    </div>
+
+    <!-- Messages -->
+    <div id="message"></div>
+  </div>
+
+  <script>
+    // ⚠️ SUBSTITUIR COM SUAS CREDENCIAIS
+    const SUPABASE_URL = 'https://ujrvfkkkssfdhwizjucq.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable__qrQJ5NFYQU9Lc1QNPOJ1Q_z9mEOcEa';
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Verificar se já está logado
+    checkAuth();
+
+    async function checkAuth() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        showUserInfo(user);
+      }
+    }
+
+    async function handleSignUp() {
+      const email = document.getElementById('signup-email').value;
+      const password = document.getElementById('signup-password').value;
+      const name = document.getElementById('signup-name').value;
+
+      if (!email || !password || !name) {
+        showMessage('Por favor, preencha todos os campos', 'error');
+        return;
+      }
+
+      if (password.length < 6) {
+        showMessage('A senha deve ter no mínimo 6 caracteres', 'error');
+        return;
+      }
+
+      showMessage('Cadastrando...', 'info');
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+            platform_role: 'player'
+          }
+        }
+      });
+
+      if (error) {
+        showMessage('Erro: ' + error.message, 'error');
+      } else {
+        if (data.user && !data.user.email_confirmed_at) {
+          showMessage('✅ Cadastro realizado! Verifique seu email para confirmar a conta.', 'success');
+        } else {
+          showMessage('✅ Cadastro realizado com sucesso!', 'success');
+          showUserInfo(data.user);
+        }
+      }
+    }
+
+    async function handleSignIn() {
+      const email = document.getElementById('signin-email').value;
+      const password = document.getElementById('signin-password').value;
+
+      if (!email || !password) {
+        showMessage('Por favor, preencha email e senha', 'error');
+        return;
+      }
+
+      showMessage('Fazendo login...', 'info');
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        showMessage('Erro: ' + error.message, 'error');
+      } else {
+        showMessage('✅ Login realizado com sucesso!', 'success');
+        showUserInfo(data.user);
+      }
+    }
+
+    async function handleResetPassword() {
+      const email = document.getElementById('signin-email').value || prompt('Digite seu email:');
+      
+      if (!email) {
+        showMessage('Email é obrigatório', 'error');
+        return;
+      }
+
+      showMessage('Enviando email de redefinição...', 'info');
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'http://localhost:3000/auth/reset-password'
+      });
+
+      if (error) {
+        showMessage('Erro: ' + error.message, 'error');
+      } else {
+        showMessage('✅ Email de redefinição enviado! Verifique sua caixa de entrada.', 'success');
+      }
+    }
+
+    async function handleSignOut() {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        showMessage('Erro: ' + error.message, 'error');
+      } else {
+        showMessage('✅ Logout realizado!', 'success');
+        document.getElementById('auth-container').style.display = 'block';
+        document.getElementById('user-info').style.display = 'none';
+        document.getElementById('signup-form').style.display = 'block';
+        document.getElementById('signin-form').style.display = 'none';
+      }
+    }
+
+    function showUserInfo(user) {
+      document.getElementById('auth-container').style.display = 'none';
+      document.getElementById('user-info').style.display = 'block';
+      
+      const details = `
+        <p><strong>ID:</strong> ${user.id}</p>
+        <p><strong>Email:</strong> ${user.email}</p>
+        <p><strong>Email Confirmado:</strong> ${user.email_confirmed_at ? '✅ Sim' : '❌ Não (verifique seu email)'}</p>
+        <p><strong>Criado em:</strong> ${new Date(user.created_at).toLocaleString('pt-BR')}</p>
+        ${user.user_metadata?.full_name ? `<p><strong>Nome:</strong> ${user.user_metadata.full_name}</p>` : ''}
+        ${user.user_metadata?.platform_role ? `<p><strong>Role:</strong> ${user.user_metadata.platform_role}</p>` : ''}
+      `;
+      
+      document.getElementById('user-details').innerHTML = details;
+    }
+
+    function showSignIn() {
+      document.getElementById('signup-form').style.display = 'none';
+      document.getElementById('signin-form').style.display = 'block';
+    }
+
+    function showSignUp() {
+      document.getElementById('signin-form').style.display = 'none';
+      document.getElementById('signup-form').style.display = 'block';
+    }
+
+    function showMessage(text, type) {
+      const messageDiv = document.getElementById('message');
+      messageDiv.className = `message ${type}`;
+      messageDiv.textContent = text;
+      messageDiv.style.display = 'block';
+      
+      setTimeout(() => {
+        messageDiv.style.display = 'none';
+      }, 5000);
+    }
+
+    // Listener para mudanças de auth
+    supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed:', event, session);
+      if (event === 'SIGNED_IN' && session) {
+        showUserInfo(session.user);
+      } else if (event === 'SIGNED_OUT') {
+        document.getElementById('auth-container').style.display = 'block';
+        document.getElementById('user-info').style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
+

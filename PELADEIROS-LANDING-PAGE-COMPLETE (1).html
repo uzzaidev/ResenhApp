@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peladeiros | Organize sua pelada em 1 clique</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="App gratuito que automatiza confirmações, sorteio de times e Split Pix para grupos de futebol. Sem mais cancelamentos de última hora ou confusão com pagamentos.">
+    <meta name="keywords" content="app pelada, organizar futebol, split pix automático, sorteio de times, gestão de pelada">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600&family=Exo+2:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                        inter: ['Inter', 'sans-serif'],
+                        exo2: ['Exo 2', 'sans-serif'],
+                    },
+                    colors: {
+                        uzzai: {
+                            mint: '#1ABC9C',
+                            black: '#1C1C1C',
+                            silver: '#B0B0B0',
+                            blue: '#2E86AB',
+                            gold: '#FFD700',
+                        },
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Animações personalizadas */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        .animate-slide-in {
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .pulse-soft {
+            animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        /* Gradient top for cards */
+        .gradient-top::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #1ABC9C, #2E86AB);
+            border-radius: 8px 8px 0 0;
+        }
+
+        /* Hover lift effect */
+        .hover-lift {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(26, 188, 156, 0.2);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1C1C1C;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1ABC9C;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #15a085;
+        }
+    </style>
+</head>
+
+<body class="bg-uzzai-black text-white font-inter selection:bg-uzzai-mint selection:text-uzzai-black">
+
+    <!-- ========================================
+         HERO SECTION
+         ======================================== -->
+    <section class="relative overflow-hidden py-20 lg:py-32">
+        <!-- Background Gradients -->
+        <div class="absolute inset-0 bg-gradient-to-br from-uzzai-black via-[#0f242a] to-uzzai-black"></div>
+        <div class="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-uzzai-mint/10 blur-[120px]"></div>
+        <div class="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-uzzai-blue/10 blur-[120px]"></div>
+
+        <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
+            <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
+                <!-- Left: Content -->
+                <div class="space-y-8 animate-fade-in">
+                    <!-- Badge -->
+                    <div class="inline-flex items-center gap-2 rounded-full border border-uzzai-mint/30 bg-uzzai-mint/10 px-4 py-1.5 text-sm font-bold uppercase tracking-widest text-uzzai-mint">
+                        <span class="relative flex h-2 w-2">
+                            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-uzzai-mint opacity-75"></span>
+                            <span class="relative inline-flex h-2 w-2 rounded-full bg-uzzai-mint"></span>
+                        </span>
+                        100% GRATUITO • SPLIT PIX AUTOMÁTICO
+                    </div>
+
+                    <!-- Logo UzzAI -->
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-1 text-4xl">
+                            <span class="font-poppins font-normal text-uzzai-mint">Uzz</span>
+                            <span class="font-exo2 font-semibold text-uzzai-blue">Ai</span>
+                        </div>
+                        <span class="text-2xl text-uzzai-silver">• Peladeiros</span>
+                    </div>
+
+                    <!-- Título -->
+                    <h1 class="font-poppins text-5xl font-bold leading-tight lg:text-6xl">
+                        Organize sua pelada em
+                        <span class="text-uzzai-mint"> 1 clique</span>
+                    </h1>
+
+                    <!-- Descrição -->
+                    <p class="text-xl text-uzzai-silver leading-relaxed">
+                        App <strong class="text-white">100% gratuito</strong> que automatiza confirmações, sorteio de times e Split Pix.
+                        <br/>
+                        <span class="text-uzzai-mint font-semibold">Sem mais cancelamentos de última hora ou confusão com pagamentos.</span>
+                    </p>
+
+                    <!-- CTAs -->
+                    <div class="flex flex-col gap-4 sm:flex-row">
+                        <a href="#waitlist" class="inline-flex items-center justify-center gap-2 rounded-full bg-uzzai-mint px-8 py-4 text-lg font-bold text-uzzai-black transition-all hover:bg-[#15a085] hover:scale-105">
+                            <i data-lucide="user-plus" class="h-5 w-5"></i>
+                            Entrar na Fila de Espera
+                        </a>
+                        <a href="#como-funciona" class="inline-flex items-center justify-center gap-2 rounded-full border border-uzzai-mint/50 px-8 py-4 text-lg font-semibold text-uzzai-mint transition-all hover:bg-uzzai-mint/10">
+                            <i data-lucide="play-circle" class="h-5 w-5"></i>
+                            Ver Como Funciona
+                        </a>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="flex items-center gap-8 pt-4 text-sm text-uzzai-silver">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="check-circle-2" class="h-5 w-5 text-uzzai-mint"></i>
+                            <span><strong class="text-white">50+</strong> grupos ativos</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="trending-up" class="h-5 w-5 text-uzzai-gold"></i>
+                            <span><strong class="text-white">69%</strong> retenção D30</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="users" class="h-5 w-5 text-uzzai-blue"></i>
+                            <span><strong class="text-white">300+</strong> jogadores</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Mockup -->
+                <div class="relative mx-auto w-full max-w-lg lg:mx-0 lg:max-w-none">
+                    <div class="relative rounded-[2rem] border border-white/10 bg-white/5 p-3 backdrop-blur-md shadow-2xl shadow-uzzai-mint/20 hover-lift">
+                        <div class="relative aspect-[9/16] overflow-y-auto rounded-[1.5rem] bg-gradient-to-br from-uzzai-black to-[#0f242a]" style="max-height: 600px;">
+                            <!-- Mockup simulado do app -->
+                            <div class="p-6 space-y-4">
+                                <!-- Header simulado -->
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <div class="h-10 w-10 rounded-full bg-uzzai-mint/20 flex items-center justify-center">
+                                            <i data-lucide="users" class="h-5 w-5 text-uzzai-mint"></i>
+                                        </div>
+                                        <div>
+                                            <div class="h-3 w-24 bg-white/20 rounded"></div>
+                                            <div class="h-2 w-16 bg-white/10 rounded mt-1"></div>
+                                        </div>
+                                    </div>
+                                    <div class="relative">
+                                        <i data-lucide="bell" class="h-5 w-5 text-uzzai-silver"></i>
+                                        <span class="absolute -top-1 -right-1 h-4 w-4 bg-uzzai-gold rounded-full text-[8px] flex items-center justify-center text-uzzai-black font-bold">3</span>
+                                    </div>
+                                </div>
+
+                                <!-- Próxima pelada card -->
+                                <div class="relative gradient-top bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <span class="text-xs font-bold text-uzzai-mint uppercase">Próxima Pelada</span>
+                                        <span class="text-xs text-uzzai-silver">Quinta, 18h</span>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-sm">Confirmados</span>
+                                            <span class="text-lg font-bold text-uzzai-mint">18/20</span>
+                                        </div>
+                                        <div class="w-full bg-white/10 rounded-full h-2">
+                                            <div class="bg-gradient-to-r from-uzzai-mint to-uzzai-blue h-2 rounded-full" style="width: 90%"></div>
+                                        </div>
+                                        <div class="text-xs text-uzzai-silver">Arena Sport • R$ 5,00/pessoa</div>
+                                    </div>
+                                </div>
+
+                                <!-- Quick actions -->
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="bg-uzzai-mint/10 border border-uzzai-mint/30 rounded-lg p-3 text-center hover:bg-uzzai-mint/20 transition-colors cursor-pointer">
+                                        <i data-lucide="check-circle" class="h-6 w-6 text-uzzai-mint mx-auto mb-1"></i>
+                                        <div class="text-xs font-semibold">Confirmar</div>
+                                    </div>
+                                    <div class="bg-uzzai-gold/10 border border-uzzai-gold/30 rounded-lg p-3 text-center hover:bg-uzzai-gold/20 transition-colors cursor-pointer">
+                                        <i data-lucide="dollar-sign" class="h-6 w-6 text-uzzai-gold mx-auto mb-1"></i>
+                                        <div class="text-xs font-semibold">Split Pix</div>
+                                    </div>
+                                </div>
+
+                                <!-- Ranking rápido -->
+                                <div class="relative gradient-top bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <span class="text-xs font-bold text-uzzai-gold uppercase flex items-center gap-1">
+                                            <i data-lucide="trophy" class="h-3 w-3"></i>
+                                            Top 3 Artilheiros
+                                        </span>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <div class="flex items-center justify-between text-xs">
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-uzzai-gold font-bold">1º</span>
+                                                <span>Lucas Silva</span>
+                                            </div>
+                                            <span class="font-bold text-uzzai-mint">12 gols</span>
+                                        </div>
+                                        <div class="flex items-center justify-between text-xs">
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-gray-400 font-bold">2º</span>
+                                                <span>Pedro Costa</span>
+                                            </div>
+                                            <span class="font-bold text-uzzai-mint">8 gols</span>
+                                        </div>
+                                        <div class="flex items-center justify-between text-xs">
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-orange-700 font-bold">3º</span>
+                                                <span>Marcos Alves</span>
+                                            </div>
+                                            <span class="font-bold text-uzzai-mint">7 gols</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Stats pessoais -->
+                                <div class="grid grid-cols-4 gap-2">
+                                    <div class="text-center p-2 bg-white/5 rounded-lg border border-white/10">
+                                        <div class="text-lg font-bold text-uzzai-mint">12</div>
+                                        <div class="text-[10px] text-uzzai-silver">Jogos</div>
+                                    </div>
+                                    <div class="text-center p-2 bg-white/5 rounded-lg border border-white/10">
+                                        <div class="text-lg font-bold text-uzzai-gold">8</div>
+                                        <div class="text-[10px] text-uzzai-silver">Gols</div>
+                                    </div>
+                                    <div class="text-center p-2 bg-white/5 rounded-lg border border-white/10">
+                                        <div class="text-lg font-bold text-uzzai-blue">5</div>
+                                        <div class="text-[10px] text-uzzai-silver">Assists</div>
+                                    </div>
+                                    <div class="text-center p-2 bg-white/5 rounded-lg border border-white/10">
+                                        <div class="text-lg font-bold text-green-400">75%</div>
+                                        <div class="text-[10px] text-uzzai-silver">Win</div>
+                                    </div>
+                                </div>
+
+                                <!-- Mini gráfico de atividade -->
+                                <div class="relative gradient-top bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <span class="text-xs font-bold text-uzzai-blue uppercase flex items-center gap-1">
+                                            <i data-lucide="activity" class="h-3 w-3"></i>
+                                            Atividade Semanal
+                                        </span>
+                                        <span class="text-xs text-green-400 font-bold flex items-center gap-1">
+                                            <i data-lucide="trending-up" class="h-3 w-3"></i>
+                                            +15%
+                                        </span>
+                                    </div>
+                                    <div class="flex items-end justify-between h-16 gap-1">
+                                        <div class="flex-1 bg-uzzai-mint/30 rounded-t" style="height: 40%"></div>
+                                        <div class="flex-1 bg-uzzai-mint/30 rounded-t" style="height: 60%"></div>
+                                        <div class="flex-1 bg-uzzai-mint/30 rounded-t" style="height: 50%"></div>
+                                        <div class="flex-1 bg-uzzai-mint/30 rounded-t" style="height: 80%"></div>
+                                        <div class="flex-1 bg-uzzai-mint rounded-t" style="height: 100%"></div>
+                                        <div class="flex-1 bg-uzzai-mint/30 rounded-t" style="height: 70%"></div>
+                                        <div class="flex-1 bg-uzzai-mint/30 rounded-t" style="height: 55%"></div>
+                                    </div>
+                                    <div class="flex justify-between mt-2 text-[8px] text-uzzai-silver">
+                                        <span>S</span>
+                                        <span>T</span>
+                                        <span>Q</span>
+                                        <span>Q</span>
+                                        <span class="text-uzzai-mint font-bold">S</span>
+                                        <span>S</span>
+                                        <span>D</span>
+                                    </div>
+                                </div>
+
+                                <!-- Badges de conquistas -->
+                                <div class="relative gradient-top bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <span class="text-xs font-bold text-purple-400 uppercase flex items-center gap-1">
+                                            <i data-lucide="award" class="h-3 w-3"></i>
+                                            Conquistas
+                                        </span>
+                                    </div>
+                                    <div class="grid grid-cols-4 gap-2">
+                                        <div class="flex flex-col items-center p-2 bg-uzzai-gold/10 border border-uzzai-gold/30 rounded">
+                                            <i data-lucide="flame" class="h-5 w-5 text-uzzai-gold mb-1"></i>
+                                            <span class="text-[8px] text-uzzai-silver text-center">Streak 5x</span>
+                                        </div>
+                                        <div class="flex flex-col items-center p-2 bg-uzzai-mint/10 border border-uzzai-mint/30 rounded">
+                                            <i data-lucide="target" class="h-5 w-5 text-uzzai-mint mb-1"></i>
+                                            <span class="text-[8px] text-uzzai-silver text-center">Hat-trick</span>
+                                        </div>
+                                        <div class="flex flex-col items-center p-2 bg-uzzai-blue/10 border border-uzzai-blue/30 rounded">
+                                            <i data-lucide="shield" class="h-5 w-5 text-uzzai-blue mb-1"></i>
+                                            <span class="text-[8px] text-uzzai-silver text-center">Muralha</span>
+                                        </div>
+                                        <div class="flex flex-col items-center p-2 bg-white/5 border border-white/10 rounded opacity-40">
+                                            <i data-lucide="lock" class="h-5 w-5 text-uzzai-silver mb-1"></i>
+                                            <span class="text-[8px] text-uzzai-silver text-center">Bloqueado</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Floating badges -->
+                    <div class="absolute -bottom-4 -right-4 bg-uzzai-gold rounded-full px-6 py-3 shadow-xl border-4 border-uzzai-black animate-pulse">
+                        <div class="text-sm font-bold text-uzzai-black">100% Grátis</div>
+                    </div>
+
+                    <div class="absolute -top-4 -left-4 bg-uzzai-mint rounded-full px-4 py-2 shadow-xl border-4 border-uzzai-black">
+                        <div class="text-xs font-bold text-uzzai-black flex items-center gap-1">
+                            <i data-lucide="zap" class="h-3 w-3"></i>
+                            Beta Privada
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+         PROBLEMA SECTION
+         ======================================== -->
+    <section class="py-20 bg-[#0f1a1a]">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center gap-2 rounded-full bg-red-500/10 border border-red-500/30 px-4 py-1.5 text-sm font-bold text-red-400 uppercase mb-4">
+                    <i data-lucide="alert-circle" class="h-4 w-4"></i>
+                    Problemas que você conhece bem
+                </div>
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">
+                    Cansado de <span class="text-red-400">jogar sozinho?</span>
+                </h2>
+                <p class="text-xl text-uzzai-silver max-w-3xl mx-auto">
+                    Se você organiza peladas, já passou por isso:
+                </p>
+            </div>
+
+            <div class="grid gap-8 md:grid-cols-3">
+                <!-- Problema 1 -->
+                <div class="group relative overflow-hidden rounded-2xl border border-red-500/20 bg-red-500/5 p-8 hover:border-red-500/50 transition-all hover-lift">
+                    <div class="absolute top-0 right-0 h-32 w-32 bg-red-500/10 rounded-full blur-3xl"></div>
+                    <div class="relative">
+                        <div class="flex h-16 w-16 items-center justify-center rounded-xl bg-red-500/20 mb-6">
+                            <i data-lucide="dollar-sign" class="h-8 w-8 text-red-400"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4 text-red-400">
+                            "Eu pago sozinho e perco R$ 200/mês"
+                        </h3>
+                        <p class="text-uzzai-silver leading-relaxed">
+                            Você fica de <strong class="text-white">cobrador</strong>, manda Pix 100 vezes, e ainda tem gente que esquece de pagar.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Problema 2 -->
+                <div class="group relative overflow-hidden rounded-2xl border border-red-500/20 bg-red-500/5 p-8 hover:border-red-500/50 transition-all hover-lift">
+                    <div class="absolute top-0 right-0 h-32 w-32 bg-red-500/10 rounded-full blur-3xl"></div>
+                    <div class="relative">
+                        <div class="flex h-16 w-16 items-center justify-center rounded-xl bg-red-500/20 mb-6">
+                            <i data-lucide="clock" class="h-8 w-8 text-red-400"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4 text-red-400">
+                            "Jogo cancelado 30min antes"
+                        </h3>
+                        <p class="text-uzzai-silver leading-relaxed">
+                            Você já pagou a quadra, mas aparecem só <strong class="text-white">8 jogadores</strong>. Frustração total.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Problema 3 -->
+                <div class="group relative overflow-hidden rounded-2xl border border-red-500/20 bg-red-500/5 p-8 hover:border-red-500/50 transition-all hover-lift">
+                    <div class="absolute top-0 right-0 h-32 w-32 bg-red-500/10 rounded-full blur-3xl"></div>
+                    <div class="relative">
+                        <div class="flex h-16 w-16 items-center justify-center rounded-xl bg-red-500/20 mb-6">
+                            <i data-lucide="users" class="h-8 w-8 text-red-400"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4 text-red-400">
+                            "Sempre sobra no time fraco"
+                        </h3>
+                        <p class="text-uzzai-silver leading-relaxed">
+                            Sorteio na moeda, "panelinha" dos fortes no mesmo time. <strong class="text-white">Jogo desbalanceado</strong> é jogo chato.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+         SOLUÇÃO SECTION
+         ======================================== -->
+    <section class="py-20">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center gap-2 rounded-full bg-uzzai-mint/10 border border-uzzai-mint/30 px-4 py-1.5 text-sm font-bold text-uzzai-mint uppercase mb-4">
+                    <i data-lucide="check-circle" class="h-4 w-4"></i>
+                    A solução que você esperava
+                </div>
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">
+                    <span class="text-uzzai-mint">Peladeiros</span> resolve tudo isso
+                </h2>
+                <p class="text-xl text-uzzai-silver max-w-3xl mx-auto">
+                    App 100% gratuito que automatiza confirmações, pagamentos e sorteio de times
+                </p>
+            </div>
+
+            <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
+                <!-- Left: Features list -->
+                <div class="space-y-6">
+                    <!-- Feature 1 -->
+                    <div class="flex items-start gap-4 p-6 rounded-xl bg-uzzai-mint/5 border border-uzzai-mint/20 hover:border-uzzai-mint/50 transition-all">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-uzzai-mint/20 flex-shrink-0">
+                            <i data-lucide="check-circle-2" class="h-6 w-6 text-uzzai-mint"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2">Confirmação em 1 Clique</h3>
+                            <p class="text-uzzai-silver">
+                                Jogador recebe notificação, confirma presença em <strong class="text-white">1 segundo</strong>.
+                                Sem ficar perguntando no grupo quem vem.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Feature 2 -->
+                    <div class="flex items-start gap-4 p-6 rounded-xl bg-uzzai-gold/5 border border-uzzai-gold/20 hover:border-uzzai-gold/50 transition-all">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-uzzai-gold/20 flex-shrink-0">
+                            <i data-lucide="dollar-sign" class="h-6 w-6 text-uzzai-gold"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2">Split Pix Automático</h3>
+                            <p class="text-uzzai-silver">
+                                App gera <strong class="text-white">QR Code individual</strong> para cada jogador.
+                                Pagamento rastreado automaticamente. Você nunca mais fica de cobrador.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Feature 3 -->
+                    <div class="flex items-start gap-4 p-6 rounded-xl bg-uzzai-blue/5 border border-uzzai-blue/20 hover:border-uzzai-blue/50 transition-all">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-uzzai-blue/20 flex-shrink-0">
+                            <i data-lucide="shuffle" class="h-6 w-6 text-uzzai-blue"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2">Sorteio Balanceado por IA</h3>
+                            <p class="text-uzzai-silver">
+                                Algoritmo inteligente considera <strong class="text-white">histórico de gols, assistências e nível</strong>.
+                                Times equilibrados = jogo emocionante.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Demo interativo -->
+                <div class="relative">
+                    <div class="relative rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-md shadow-2xl">
+                        <div class="mb-4 flex items-center justify-between">
+                            <h4 class="text-lg font-bold">Demo: Dashboard do Grupo</h4>
+                            <span class="text-xs bg-uzzai-mint/20 text-uzzai-mint px-3 py-1 rounded-full font-bold">BETA PRIVADA</span>
+                        </div>
+
+                        <!-- Tabs simulados -->
+                        <div class="flex gap-2 mb-4 border-b border-white/10 pb-2">
+                            <button class="px-4 py-2 text-sm font-semibold bg-uzzai-mint/20 text-uzzai-mint rounded-lg">
+                                Dashboard
+                            </button>
+                            <button class="px-4 py-2 text-sm text-uzzai-silver hover:text-white">
+                                Eventos
+                            </button>
+                            <button class="px-4 py-2 text-sm text-uzzai-silver hover:text-white">
+                                Rankings
+                            </button>
+                        </div>
+
+                        <!-- Cards de métricas -->
+                        <div class="grid grid-cols-3 gap-3 mb-4">
+                            <div class="bg-uzzai-mint/10 border border-uzzai-mint/30 rounded-lg p-3 text-center">
+                                <div class="text-2xl font-bold text-uzzai-mint">18/20</div>
+                                <div class="text-xs text-uzzai-silver">Confirmados</div>
+                            </div>
+                            <div class="bg-uzzai-gold/10 border border-uzzai-gold/30 rounded-lg p-3 text-center">
+                                <div class="text-2xl font-bold text-uzzai-gold">R$ 100</div>
+                                <div class="text-xs text-uzzai-silver">Arrecadado</div>
+                            </div>
+                            <div class="bg-uzzai-blue/10 border border-uzzai-blue/30 rounded-lg p-3 text-center">
+                                <div class="text-2xl font-bold text-uzzai-blue">5h</div>
+                                <div class="text-xs text-uzzai-silver">Restam</div>
+                            </div>
+                        </div>
+
+                        <!-- Lista de jogadores simulada -->
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                                <div class="flex items-center gap-3">
+                                    <div class="h-8 w-8 rounded-full bg-uzzai-mint/30 flex items-center justify-center text-xs font-bold">PC</div>
+                                    <span class="text-sm">Pedro Costa</span>
+                                </div>
+                                <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded font-semibold">CONFIRMADO</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                                <div class="flex items-center gap-3">
+                                    <div class="h-8 w-8 rounded-full bg-uzzai-blue/30 flex items-center justify-center text-xs font-bold">LS</div>
+                                    <span class="text-sm">Lucas Silva</span>
+                                </div>
+                                <span class="text-xs bg-uzzai-gold/20 text-uzzai-gold px-2 py-1 rounded font-semibold">PAGO ✓</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-white/5 rounded-lg opacity-50">
+                                <div class="flex items-center gap-3">
+                                    <div class="h-8 w-8 rounded-full bg-uzzai-silver/30 flex items-center justify-center text-xs font-bold">MA</div>
+                                    <span class="text-sm">Marcos Alves</span>
+                                </div>
+                                <span class="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded font-semibold">PENDENTE</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Floating notification -->
+                    <div class="absolute -top-4 -right-4 bg-uzzai-mint rounded-lg px-4 py-2 shadow-xl animate-pulse">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="bell" class="h-4 w-4 text-uzzai-black"></i>
+                            <span class="text-sm font-bold text-uzzai-black">+3 confirmados!</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+         FEATURES AVANÇADAS
+         ======================================== -->
+    <section id="features" class="py-20 bg-[#0f1a1a]">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">
+                    Features <span class="text-uzzai-mint">Profissionais</span>
+                </h2>
+                <p class="text-xl text-uzzai-silver max-w-3xl mx-auto">
+                    Recursos avançados que transformam a gestão da sua pelada
+                </p>
+            </div>
+
+            <!-- Grid 3 colunas: 6 features -->
+            <div class="grid gap-8 lg:grid-cols-3 mb-12">
+                <!-- Feature 1: Analytics Dashboard -->
+                <div class="relative gradient-top bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-uzzai-mint/50 transition-all hover-lift">
+                    <div class="flex items-start gap-3 mb-4">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-uzzai-mint/20 flex-shrink-0">
+                            <i data-lucide="bar-chart-3" class="h-6 w-6 text-uzzai-mint"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-1">Analytics Dashboard</h3>
+                            <p class="text-sm text-uzzai-silver">
+                                Gráficos de atividade com tendências
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Mini gráfico -->
+                    <div class="bg-uzzai-black/50 rounded-lg p-3">
+                        <div class="flex items-end justify-between h-20 gap-1">
+                            <div class="flex-1 bg-uzzai-mint/30 rounded-t" style="height: 60%"></div>
+                            <div class="flex-1 bg-uzzai-mint/30 rounded-t" style="height: 80%"></div>
+                            <div class="flex-1 bg-uzzai-mint rounded-t" style="height: 100%"></div>
+                            <div class="flex-1 bg-uzzai-mint/30 rounded-t" style="height: 70%"></div>
+                            <div class="flex-1 bg-uzzai-mint/30 rounded-t" style="height: 50%"></div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 flex items-center gap-2 text-xs">
+                        <i data-lucide="trending-up" class="h-3 w-3 text-green-400"></i>
+                        <span class="text-green-400 font-bold">+23%</span>
+                        <span class="text-uzzai-silver">vs. mês anterior</span>
+                    </div>
+                </div>
+
+                <!-- Feature 2: Campo Visual Interativo -->
+                <div class="relative gradient-top bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-uzzai-blue/50 transition-all hover-lift">
+                    <div class="flex items-start gap-3 mb-4">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-uzzai-blue/20 flex-shrink-0">
+                            <i data-lucide="maximize" class="h-6 w-6 text-uzzai-blue"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-1">Campo Visual</h3>
+                            <p class="text-sm text-uzzai-silver">
+                                Drag & drop de jogadores
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Mini campo SVG -->
+                    <div class="bg-green-800/20 rounded-lg p-3 border border-green-600/30">
+                        <svg viewBox="0 0 100 60" class="w-full h-20">
+                            <rect x="0" y="0" width="100" height="60" fill="#1a4d2e" stroke="#fff" stroke-width="0.5"/>
+                            <line x1="50" y1="0" x2="50" y2="60" stroke="#fff" stroke-width="0.5"/>
+                            <circle cx="50" cy="30" r="8" fill="none" stroke="#fff" stroke-width="0.5"/>
+                            <!-- Jogadores -->
+                            <circle cx="15" cy="30" r="3" fill="#2E86AB"/>
+                            <circle cx="30" cy="15" r="3" fill="#2E86AB"/>
+                            <circle cx="85" cy="30" r="3" fill="#1ABC9C"/>
+                            <circle cx="70" cy="15" r="3" fill="#1ABC9C"/>
+                        </svg>
+                    </div>
+
+                    <div class="mt-3 flex items-center gap-3 text-xs">
+                        <div class="flex items-center gap-1">
+                            <div class="h-2 w-2 bg-uzzai-blue rounded-full"></div>
+                            <span class="text-uzzai-silver">Time A</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <div class="h-2 w-2 bg-uzzai-mint rounded-full"></div>
+                            <span class="text-uzzai-silver">Time B</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 3: Notificações Push -->
+                <div class="relative gradient-top bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-uzzai-gold/50 transition-all hover-lift">
+                    <div class="flex items-start gap-3 mb-4">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-uzzai-gold/20 flex-shrink-0">
+                            <i data-lucide="bell" class="h-6 w-6 text-uzzai-gold"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-1">Notificações Push</h3>
+                            <p class="text-sm text-uzzai-silver">
+                                Lembretes automáticos
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Lista mini de notificações -->
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2 p-2 bg-uzzai-mint/10 border border-uzzai-mint/30 rounded text-xs">
+                            <i data-lucide="calendar" class="h-4 w-4 text-uzzai-mint flex-shrink-0"></i>
+                            <span class="flex-1 font-semibold">Pelada amanhã 18h</span>
+                            <span class="h-1.5 w-1.5 bg-uzzai-mint rounded-full"></span>
+                        </div>
+                        <div class="flex items-center gap-2 p-2 bg-uzzai-gold/10 border border-uzzai-gold/30 rounded text-xs">
+                            <i data-lucide="dollar-sign" class="h-4 w-4 text-uzzai-gold flex-shrink-0"></i>
+                            <span class="flex-1">Split Pix R$ 5,00</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 text-xs text-uzzai-silver">
+                        <i data-lucide="clock" class="h-3 w-3 inline mr-1"></i>
+                        2 dias, 1 dia e 2h antes
+                    </div>
+                </div>
+
+                <!-- Feature 4: Gamificação -->
+                <div class="relative gradient-top bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-purple-500/50 transition-all hover-lift">
+                    <div class="flex items-start gap-3 mb-4">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-500/20 flex-shrink-0">
+                            <i data-lucide="trophy" class="h-6 w-6 text-purple-400"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-1">Gamificação</h3>
+                            <p class="text-sm text-uzzai-silver">
+                                Conquistas e badges
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Mini podium -->
+                    <div class="flex items-end justify-center gap-3 mb-3">
+                        <div class="flex flex-col items-center">
+                            <div class="h-8 w-8 rounded-full bg-gray-400/20 flex items-center justify-center mb-1">
+                                <i data-lucide="medal" class="h-4 w-4 text-gray-400"></i>
+                            </div>
+                            <div class="bg-gray-400/20 w-12 h-10 rounded-t flex items-center justify-center">
+                                <span class="text-lg font-bold text-gray-400">2º</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-center">
+                            <div class="h-10 w-10 rounded-full bg-uzzai-gold/20 flex items-center justify-center mb-1">
+                                <i data-lucide="crown" class="h-5 w-5 text-uzzai-gold"></i>
+                            </div>
+                            <div class="bg-uzzai-gold/20 w-12 h-16 rounded-t flex items-center justify-center">
+                                <span class="text-xl font-bold text-uzzai-gold">1º</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-center">
+                            <div class="h-7 w-7 rounded-full bg-orange-700/20 flex items-center justify-center mb-1">
+                                <i data-lucide="award" class="h-3 w-3 text-orange-700"></i>
+                            </div>
+                            <div class="bg-orange-700/20 w-12 h-8 rounded-t flex items-center justify-center">
+                                <span class="text-base font-bold text-orange-700">3º</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-1 text-center text-xs">
+                        <div>
+                            <div class="text-uzzai-mint font-bold">12</div>
+                            <div class="text-uzzai-silver text-[10px]">Gols</div>
+                        </div>
+                        <div>
+                            <div class="text-uzzai-gold font-bold">100%</div>
+                            <div class="text-uzzai-silver text-[10px]">Freq</div>
+                        </div>
+                        <div>
+                            <div class="text-uzzai-blue font-bold">8</div>
+                            <div class="text-uzzai-silver text-[10px]">MVP</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 5: Filtros Avançados -->
+                <div class="relative gradient-top bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-pink-500/50 transition-all hover-lift">
+                    <div class="flex items-start gap-3 mb-4">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-pink-500/20 flex-shrink-0">
+                            <i data-lucide="filter" class="h-6 w-6 text-pink-400"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-1">Filtros & Busca</h3>
+                            <p class="text-sm text-uzzai-silver">
+                                Encontre qualquer coisa rapidamente
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Barra de busca simulada -->
+                    <div class="bg-uzzai-black/50 rounded-lg p-3 mb-3">
+                        <div class="flex items-center gap-2 bg-white/5 rounded px-3 py-2 border border-white/10">
+                            <i data-lucide="search" class="h-4 w-4 text-uzzai-silver"></i>
+                            <input type="text" placeholder="Buscar..." class="bg-transparent text-sm text-white flex-1 outline-none" disabled>
+                        </div>
+                    </div>
+
+                    <!-- Filtros -->
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-2 py-1 bg-uzzai-mint/20 text-uzzai-mint rounded text-xs font-semibold">Próximos</span>
+                        <span class="px-2 py-1 bg-white/5 text-uzzai-silver rounded text-xs">Passados</span>
+                        <span class="px-2 py-1 bg-white/5 text-uzzai-silver rounded text-xs">Data</span>
+                    </div>
+
+                    <div class="mt-3 text-xs text-uzzai-silver">
+                        <i data-lucide="zap" class="h-3 w-3 inline mr-1"></i>
+                        Ctrl+K para busca rápida
+                    </div>
+                </div>
+
+                <!-- Feature 6: WhatsApp Integration -->
+                <div class="relative gradient-top bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-green-500/50 transition-all hover-lift">
+                    <div class="flex items-start gap-3 mb-4">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-500/20 flex-shrink-0">
+                            <i data-lucide="message-circle" class="h-6 w-6 text-green-400"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-1">WhatsApp API</h3>
+                            <p class="text-sm text-uzzai-silver">
+                                Confirmação direto no WhatsApp
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- WhatsApp message mockup -->
+                    <div class="bg-[#075E54] rounded-lg p-3 space-y-2">
+                        <div class="bg-[#DCF8C6] text-black rounded-lg p-2 text-xs">
+                            <p class="font-semibold mb-1">🎯 Pelada Quinta-feira</p>
+                            <p class="text-[10px] text-gray-700">Confirmar presença?</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="flex-1 bg-green-400 text-white text-xs py-1 rounded font-semibold">✅ Sim</button>
+                            <button class="flex-1 bg-red-400 text-white text-xs py-1 rounded font-semibold">❌ Não</button>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 text-xs text-uzzai-silver">
+                        <i data-lucide="smartphone" class="h-3 w-3 inline mr-1"></i>
+                        Sem precisar abrir o app
+                    </div>
+                </div>
+            </div>
+
+            <!-- MEGA FEATURES: Grid 2 colunas (linha 1) -->
+            <div class="grid gap-8 lg:grid-cols-2 mb-8">
+                <!-- MEGA Feature 1: Sistema de RSVP Avançado -->
+                <div class="relative gradient-top bg-white/5 rounded-2xl p-8 border border-white/10 hover:border-cyan-500/50 transition-all hover-lift">
+                    <div class="flex items-start gap-4 mb-6">
+                        <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-cyan-500/20 flex-shrink-0">
+                            <i data-lucide="user-check" class="h-7 w-7 text-cyan-400"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2">Sistema de RSVP Inteligente</h3>
+                            <p class="text-uzzai-silver">
+                                Lista de espera automática, check-in e gestão de vagas em tempo real
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- RSVP interface mockup -->
+                    <div class="bg-uzzai-black/50 rounded-lg p-4">
+                        <div class="space-y-3">
+                            <!-- Confirmados -->
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs font-bold text-green-400 uppercase">✅ Confirmados (18/20)</span>
+                                    <span class="text-xs text-uzzai-silver">2 vagas</span>
+                                </div>
+                                <div class="space-y-1">
+                                    <div class="flex items-center gap-2 p-2 bg-green-500/10 border border-green-500/30 rounded text-xs">
+                                        <i data-lucide="check" class="h-3 w-3 text-green-400"></i>
+                                        <span class="flex-1">Pedro Costa</span>
+                                        <span class="text-green-400 font-bold">PAGO ✓</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 p-2 bg-green-500/10 border border-green-500/30 rounded text-xs">
+                                        <i data-lucide="check" class="h-3 w-3 text-green-400"></i>
+                                        <span class="flex-1">Lucas Silva</span>
+                                        <span class="text-uzzai-gold font-bold">PENDENTE</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Lista de Espera -->
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs font-bold text-uzzai-gold uppercase">⏳ Lista de Espera (3)</span>
+                                </div>
+                                <div class="space-y-1">
+                                    <div class="flex items-center gap-2 p-2 bg-uzzai-gold/10 border border-uzzai-gold/30 rounded text-xs">
+                                        <i data-lucide="clock" class="h-3 w-3 text-uzzai-gold"></i>
+                                        <span class="flex-1">Marcos Alves</span>
+                                        <span class="text-uzzai-silver">#1</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Não Confirmados -->
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs font-bold text-red-400 uppercase">❌ Não Vem (2)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-t border-white/10 flex gap-2">
+                            <button class="flex-1 bg-green-500/20 text-green-400 px-3 py-2 rounded text-xs font-semibold">Check-in</button>
+                            <button class="flex-1 bg-uzzai-blue/20 text-uzzai-blue px-3 py-2 rounded text-xs font-semibold">Sortear Times</button>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 flex flex-wrap gap-2 text-xs">
+                        <span class="px-2 py-1 bg-green-500/20 text-green-400 rounded font-semibold">✓ Check-in Digital</span>
+                        <span class="px-2 py-1 bg-uzzai-gold/20 text-uzzai-gold rounded font-semibold">✓ Lista de Espera</span>
+                        <span class="px-2 py-1 bg-uzzai-blue/20 text-uzzai-blue rounded font-semibold">✓ Notificações Auto</span>
+                    </div>
+                </div>
+
+                <!-- MEGA Feature 2: Controle Financeiro -->
+                <div class="relative gradient-top bg-white/5 rounded-2xl p-8 border border-white/10 hover:border-green-500/50 transition-all hover-lift">
+                    <div class="flex items-start gap-4 mb-6">
+                        <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-green-500/20 flex-shrink-0">
+                            <i data-lucide="wallet" class="h-7 w-7 text-green-400"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2">Controle Financeiro Completo</h3>
+                            <p class="text-uzzai-silver">
+                                Histórico de pagamentos, relatórios e Split Pix automático
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Financial dashboard mockup -->
+                    <div class="bg-uzzai-black/50 rounded-lg p-4">
+                        <!-- Resumo financeiro -->
+                        <div class="grid grid-cols-3 gap-2 mb-4">
+                            <div class="bg-green-500/10 border border-green-500/30 rounded p-2 text-center">
+                                <div class="text-lg font-bold text-green-400">R$ 450</div>
+                                <div class="text-[10px] text-uzzai-silver">Arrecadado</div>
+                            </div>
+                            <div class="bg-uzzai-gold/10 border border-uzzai-gold/30 rounded p-2 text-center">
+                                <div class="text-lg font-bold text-uzzai-gold">R$ 50</div>
+                                <div class="text-[10px] text-uzzai-silver">Pendente</div>
+                            </div>
+                            <div class="bg-uzzai-mint/10 border border-uzzai-mint/30 rounded p-2 text-center">
+                                <div class="text-lg font-bold text-uzzai-mint">18</div>
+                                <div class="text-[10px] text-uzzai-silver">Pagaram</div>
+                            </div>
+                        </div>
+
+                        <!-- Histórico de transações -->
+                        <div class="space-y-2">
+                            <div class="text-xs font-bold text-uzzai-silver uppercase mb-2">Últimas Transações</div>
+
+                            <div class="flex items-center justify-between p-2 bg-white/5 rounded text-xs">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="arrow-down-circle" class="h-4 w-4 text-green-400"></i>
+                                    <div>
+                                        <div class="font-semibold">Pedro Costa</div>
+                                        <div class="text-[10px] text-uzzai-silver">Há 2 horas</div>
+                                    </div>
+                                </div>
+                                <div class="text-green-400 font-bold">+R$ 5,00</div>
+                            </div>
+
+                            <div class="flex items-center justify-between p-2 bg-white/5 rounded text-xs">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="arrow-down-circle" class="h-4 w-4 text-green-400"></i>
+                                    <div>
+                                        <div class="font-semibold">Lucas Silva</div>
+                                        <div class="text-[10px] text-uzzai-silver">Ontem</div>
+                                    </div>
+                                </div>
+                                <div class="text-green-400 font-bold">+R$ 5,00</div>
+                            </div>
+
+                            <div class="flex items-center justify-between p-2 bg-white/5 rounded text-xs">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="arrow-up-circle" class="h-4 w-4 text-red-400"></i>
+                                    <div>
+                                        <div class="font-semibold">Pagto Quadra</div>
+                                        <div class="text-[10px] text-uzzai-silver">Há 3 dias</div>
+                                    </div>
+                                </div>
+                                <div class="text-red-400 font-bold">-R$ 100,00</div>
+                            </div>
+                        </div>
+
+                        <button class="w-full mt-3 bg-gradient-to-r from-uzzai-mint to-uzzai-blue text-white px-4 py-2 rounded font-bold text-sm flex items-center justify-center gap-2">
+                            <i data-lucide="download" class="h-4 w-4"></i>
+                            Exportar Relatório
+                        </button>
+                    </div>
+
+                    <div class="mt-4 text-xs text-uzzai-silver">
+                        <i data-lucide="file-text" class="h-3 w-3 inline mr-1 text-uzzai-mint"></i>
+                        Relatórios mensais automáticos em CSV/PDF
+                    </div>
+                </div>
+            </div>
+
+            <!-- MEGA FEATURES: Grid 2 colunas (linha 2) -->
+            <div class="grid gap-8 lg:grid-cols-2">
+                <!-- MEGA Feature 3: Dashboard Melhorado -->
+                <div class="relative gradient-top bg-white/5 rounded-2xl p-8 border border-white/10 hover:border-uzzai-mint/50 transition-all hover-lift">
+                    <div class="flex items-start gap-4 mb-6">
+                        <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-uzzai-mint/20 flex-shrink-0">
+                            <i data-lucide="layout-dashboard" class="h-7 w-7 text-uzzai-mint"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2">Dashboard Melhorado</h3>
+                            <p class="text-uzzai-silver">
+                                Navegação hierárquica, métricas com tendências e quick actions
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard mockup mais detalhado -->
+                    <div class="bg-uzzai-black/50 rounded-lg p-4">
+                        <!-- Sidebar simulada -->
+                        <div class="grid grid-cols-5 gap-3 mb-4">
+                            <div class="col-span-2 space-y-2">
+                                <div class="text-[10px] text-uzzai-silver uppercase font-bold">Principal</div>
+                                <div class="bg-uzzai-mint/20 text-uzzai-mint px-2 py-1 rounded text-xs font-semibold flex items-center gap-1">
+                                    <i data-lucide="home" class="h-3 w-3"></i>
+                                    Dashboard
+                                </div>
+                                <div class="text-uzzai-silver px-2 py-1 text-xs flex items-center gap-1">
+                                    <i data-lucide="users" class="h-3 w-3"></i>
+                                    Grupos
+                                </div>
+
+                                <div class="text-[10px] text-uzzai-silver uppercase font-bold mt-2">Gestão</div>
+                                <div class="text-uzzai-silver px-2 py-1 text-xs flex items-center gap-1">
+                                    <i data-lucide="calendar" class="h-3 w-3"></i>
+                                    Eventos
+                                </div>
+                                <div class="text-uzzai-silver px-2 py-1 text-xs flex items-center gap-1">
+                                    <i data-lucide="dollar-sign" class="h-3 w-3"></i>
+                                    Financeiro
+                                </div>
+                            </div>
+
+                            <!-- Content area -->
+                            <div class="col-span-3 space-y-2">
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div class="bg-uzzai-mint/10 border border-uzzai-mint/30 rounded p-2">
+                                        <div class="text-lg font-bold text-uzzai-mint">18</div>
+                                        <div class="text-[10px] text-uzzai-silver">Confirmados</div>
+                                    </div>
+                                    <div class="bg-uzzai-gold/10 border border-uzzai-gold/30 rounded p-2">
+                                        <div class="text-lg font-bold text-uzzai-gold">R$90</div>
+                                        <div class="text-[10px] text-uzzai-silver">Arrecadado</div>
+                                    </div>
+                                </div>
+
+                                <!-- Quick actions buttons -->
+                                <div class="flex gap-2">
+                                    <button class="flex-1 bg-uzzai-mint/20 text-uzzai-mint px-2 py-1 rounded text-[10px] font-semibold">+ Evento</button>
+                                    <button class="flex-1 bg-uzzai-blue/20 text-uzzai-blue px-2 py-1 rounded text-[10px] font-semibold">⚽ Sortear</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 flex flex-wrap gap-2 text-xs">
+                        <span class="px-2 py-1 bg-uzzai-mint/20 text-uzzai-mint rounded font-semibold">✓ Navegação Hierárquica</span>
+                        <span class="px-2 py-1 bg-uzzai-gold/20 text-uzzai-gold rounded font-semibold">✓ Métricas com ↑↓</span>
+                        <span class="px-2 py-1 bg-uzzai-blue/20 text-uzzai-blue rounded font-semibold">✓ Quick Actions</span>
+                    </div>
+                </div>
+
+                <!-- MEGA Feature 2: Sistema de Votação -->
+                <div class="relative gradient-top bg-white/5 rounded-2xl p-8 border border-white/10 hover:border-orange-500/50 transition-all hover-lift">
+                    <div class="flex items-start gap-4 mb-6">
+                        <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-orange-500/20 flex-shrink-0">
+                            <i data-lucide="star" class="h-7 w-7 text-orange-400"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2">Sistema de Votação</h3>
+                            <p class="text-uzzai-silver">
+                                Jogadores votam nos melhores da partida. Rankings automáticos.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Voting interface mockup -->
+                    <div class="bg-uzzai-black/50 rounded-lg p-4">
+                        <div class="text-sm font-bold mb-3 text-center">Vote nos melhores do jogo</div>
+
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between p-2 bg-white/5 rounded border border-white/10">
+                                <div class="flex items-center gap-2">
+                                    <div class="h-8 w-8 rounded-full bg-uzzai-mint/30 flex items-center justify-center text-xs font-bold">PC</div>
+                                    <span class="text-sm">Pedro Costa</span>
+                                </div>
+                                <div class="flex gap-1">
+                                    <i data-lucide="star" class="h-5 w-5 fill-uzzai-gold text-uzzai-gold"></i>
+                                    <i data-lucide="star" class="h-5 w-5 fill-uzzai-gold text-uzzai-gold"></i>
+                                    <i data-lucide="star" class="h-5 w-5 fill-uzzai-gold text-uzzai-gold"></i>
+                                    <i data-lucide="star" class="h-5 w-5 text-uzzai-silver"></i>
+                                    <i data-lucide="star" class="h-5 w-5 text-uzzai-silver"></i>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between p-2 bg-white/5 rounded border border-white/10">
+                                <div class="flex items-center gap-2">
+                                    <div class="h-8 w-8 rounded-full bg-uzzai-blue/30 flex items-center justify-center text-xs font-bold">LS</div>
+                                    <span class="text-sm">Lucas Silva</span>
+                                </div>
+                                <div class="flex gap-1">
+                                    <i data-lucide="star" class="h-5 w-5 fill-uzzai-gold text-uzzai-gold"></i>
+                                    <i data-lucide="star" class="h-5 w-5 fill-uzzai-gold text-uzzai-gold"></i>
+                                    <i data-lucide="star" class="h-5 w-5 fill-uzzai-gold text-uzzai-gold"></i>
+                                    <i data-lucide="star" class="h-5 w-5 fill-uzzai-gold text-uzzai-gold"></i>
+                                    <i data-lucide="star" class="h-5 w-5 fill-uzzai-gold text-uzzai-gold"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="w-full mt-3 bg-uzzai-mint text-uzzai-black px-4 py-2 rounded font-bold text-sm">
+                            Enviar Votos
+                        </button>
+                    </div>
+
+                    <div class="mt-4 text-xs text-uzzai-silver">
+                        <i data-lucide="trophy" class="h-3 w-3 inline mr-1 text-uzzai-gold"></i>
+                        Rankings automáticos baseados em votos
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+         COMO FUNCIONA
+         ======================================== -->
+    <section id="como-funciona" class="py-20">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">
+                    Como funciona na prática
+                </h2>
+                <p class="text-xl text-uzzai-silver max-w-3xl mx-auto">
+                    Do convite dos jogadores até o Split Pix automático
+                </p>
+            </div>
+
+            <!-- Timeline vertical -->
+            <div class="max-w-3xl mx-auto space-y-12">
+                <!-- Passo 1 -->
+                <div class="flex gap-8">
+                    <div class="flex flex-col items-center">
+                        <div class="flex h-16 w-16 items-center justify-center rounded-full bg-uzzai-mint text-uzzai-black text-2xl font-bold">
+                            1
+                        </div>
+                        <div class="w-1 flex-1 bg-gradient-to-b from-uzzai-mint to-uzzai-blue mt-4"></div>
+                    </div>
+                    <div class="flex-1 pb-12">
+                        <h3 class="text-2xl font-bold mb-2">Crie seu grupo</h3>
+                        <p class="text-uzzai-silver mb-4">
+                            Dê um nome, defina privacidade e convide os jogadores pelo WhatsApp
+                        </p>
+                        <div class="bg-white/5 border border-white/10 rounded-lg p-4 text-sm">
+                            <div class="flex items-center gap-2 text-uzzai-mint mb-2">
+                                <i data-lucide="clock" class="h-4 w-4"></i>
+                                <span class="font-bold">60 segundos</span>
+                            </div>
+                            <div class="text-uzzai-silver">Link de convite compartilhável</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Passo 2 -->
+                <div class="flex gap-8">
+                    <div class="flex flex-col items-center">
+                        <div class="flex h-16 w-16 items-center justify-center rounded-full bg-uzzai-blue text-white text-2xl font-bold">
+                            2
+                        </div>
+                        <div class="w-1 flex-1 bg-gradient-to-b from-uzzai-blue to-uzzai-gold mt-4"></div>
+                    </div>
+                    <div class="flex-1 pb-12">
+                        <h3 class="text-2xl font-bold mb-2">Crie o evento</h3>
+                        <p class="text-uzzai-silver mb-4">
+                            Defina data, hora, local e valor. App envia notificação automática
+                        </p>
+                        <div class="bg-white/5 border border-white/10 rounded-lg p-4 text-sm">
+                            <div class="flex items-center gap-2 text-uzzai-blue mb-2">
+                                <i data-lucide="zap" class="h-4 w-4"></i>
+                                <span class="font-bold">30 segundos</span>
+                            </div>
+                            <div class="text-uzzai-silver">Notificações push automáticas</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Passo 3 -->
+                <div class="flex gap-8">
+                    <div class="flex flex-col items-center">
+                        <div class="flex h-16 w-16 items-center justify-center rounded-full bg-uzzai-gold text-uzzai-black text-2xl font-bold">
+                            3
+                        </div>
+                        <div class="w-1 flex-1 bg-gradient-to-b from-uzzai-gold to-green-500 mt-4"></div>
+                    </div>
+                    <div class="flex-1 pb-12">
+                        <h3 class="text-2xl font-bold mb-2">Jogadores confirmam</h3>
+                        <p class="text-uzzai-silver mb-4">
+                            Cada um confirma presença em 1 clique. Você vê contador em tempo real
+                        </p>
+                        <div class="bg-white/5 border border-white/10 rounded-lg p-4 text-sm">
+                            <div class="flex items-center gap-2 text-uzzai-gold mb-2">
+                                <i data-lucide="users-round" class="h-4 w-4"></i>
+                                <span class="font-bold">1 clique por jogador</span>
+                            </div>
+                            <div class="text-uzzai-silver">Lista de espera automática</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Passo 4 -->
+                <div class="flex gap-8">
+                    <div class="flex flex-col items-center">
+                        <div class="flex h-16 w-16 items-center justify-center rounded-full bg-green-500 text-white text-2xl font-bold">
+                            4
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-bold mb-2">Sorteio & Split Pix</h3>
+                        <p class="text-uzzai-silver mb-4">
+                            IA sorteia times balanceados. App gera QR Code individual para cada jogador
+                        </p>
+                        <div class="bg-gradient-to-r from-green-500/20 to-uzzai-mint/20 border border-green-500/30 rounded-lg p-4 text-sm">
+                            <div class="flex items-center gap-2 text-green-400 mb-2">
+                                <i data-lucide="sparkles" class="h-4 w-4"></i>
+                                <span class="font-bold">5 segundos automático</span>
+                            </div>
+                            <div class="text-uzzai-silver">Pagamento rastreado em tempo real</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+         RESULTADOS
+         ======================================== -->
+    <section class="py-20 bg-gradient-to-br from-uzzai-mint/10 via-uzzai-blue/10 to-[#0f1a1a]">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">
+                    Resultados dos <span class="text-uzzai-mint">Grupos Piloto</span>
+                </h2>
+                <p class="text-xl text-uzzai-silver max-w-3xl mx-auto">
+                    Dados reais de 50+ grupos que já usam o Peladeiros
+                </p>
+            </div>
+
+            <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-4 mb-12">
+                <!-- Métrica 1 -->
+                <div class="text-center p-8 rounded-2xl bg-white/5 border border-white/10 hover:border-uzzai-mint/50 transition-all hover-lift">
+                    <div class="text-5xl font-bold text-uzzai-mint mb-2">50+</div>
+                    <div class="text-lg font-semibold mb-1">Grupos Ativos</div>
+                    <div class="text-sm text-uzzai-silver">Em 3 cidades</div>
+                </div>
+
+                <!-- Métrica 2 -->
+                <div class="text-center p-8 rounded-2xl bg-white/5 border border-white/10 hover:border-uzzai-gold/50 transition-all hover-lift">
+                    <div class="text-5xl font-bold text-uzzai-gold mb-2">69%</div>
+                    <div class="text-lg font-semibold mb-1">Retenção D30</div>
+                    <div class="text-sm text-uzzai-silver">vs. 32% do WhatsApp</div>
+                </div>
+
+                <!-- Métrica 3 -->
+                <div class="text-center p-8 rounded-2xl bg-white/5 border border-white/10 hover:border-uzzai-blue/50 transition-all hover-lift">
+                    <div class="text-5xl font-bold text-uzzai-blue mb-2">2h</div>
+                    <div class="text-lg font-semibold mb-1">Tempo Economizado</div>
+                    <div class="text-sm text-uzzai-silver">Por semana</div>
+                </div>
+
+                <!-- Métrica 4 -->
+                <div class="text-center p-8 rounded-2xl bg-white/5 border border-white/10 hover:border-green-500/50 transition-all hover-lift">
+                    <div class="text-5xl font-bold text-green-400 mb-2">R$ 200</div>
+                    <div class="text-lg font-semibold mb-1">Economia Mensal</div>
+                    <div class="text-sm text-uzzai-silver">Split Pix automático</div>
+                </div>
+            </div>
+
+            <!-- Depoimento -->
+            <div class="max-w-3xl mx-auto">
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-8 text-center">
+                    <div class="flex items-center justify-center gap-1 mb-4">
+                        <i data-lucide="star" class="h-5 w-5 fill-uzzai-gold text-uzzai-gold"></i>
+                        <i data-lucide="star" class="h-5 w-5 fill-uzzai-gold text-uzzai-gold"></i>
+                        <i data-lucide="star" class="h-5 w-5 fill-uzzai-gold text-uzzai-gold"></i>
+                        <i data-lucide="star" class="h-5 w-5 fill-uzzai-gold text-uzzai-gold"></i>
+                        <i data-lucide="star" class="h-5 w-5 fill-uzzai-gold text-uzzai-gold"></i>
+                    </div>
+                    <blockquote class="text-xl italic mb-6">
+                        "Antes eu perdia 3h por semana cobrando galera no WhatsApp. Agora é automático.
+                        O <strong class="text-uzzai-mint">Split Pix salvou minha vida</strong> — todo mundo paga antes do jogo."
+                    </blockquote>
+                    <div class="flex items-center justify-center gap-3">
+                        <div class="h-12 w-12 rounded-full bg-uzzai-mint/20 flex items-center justify-center">
+                            <span class="text-lg font-bold text-uzzai-mint">CB</span>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-bold">Carlos, São Paulo</div>
+                            <div class="text-sm text-uzzai-silver">Grupo "Futebol de Quinta" • 24 membros</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+         FAQ
+         ======================================== -->
+    <section class="py-20">
+        <div class="mx-auto max-w-3xl px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">
+                    Perguntas Frequentes
+                </h2>
+                <p class="text-xl text-uzzai-silver">
+                    Respostas rápidas para dúvidas comuns
+                </p>
+            </div>
+
+            <div class="space-y-4">
+                <!-- FAQ 1 -->
+                <details class="group rounded-xl border border-white/10 bg-white/5 p-6 hover:border-uzzai-mint/30 transition-colors">
+                    <summary class="flex items-center justify-between cursor-pointer list-none">
+                        <span class="font-bold text-lg">É realmente 100% gratuito?</span>
+                        <i data-lucide="chevron-down" class="h-5 w-5 text-uzzai-mint transition-transform group-open:rotate-180"></i>
+                    </summary>
+                    <p class="mt-4 text-uzzai-silver leading-relaxed">
+                        Sim! O app é <strong class="text-white">100% gratuito para sempre</strong>. Confirmação, sorteio de times, rankings e estatísticas são features core gratuitas.
+                        Split Pix Automático será um add-on premium opcional no futuro (mas hoje está em beta grátis).
+                    </p>
+                </details>
+
+                <!-- FAQ 2 -->
+                <details class="group rounded-xl border border-white/10 bg-white/5 p-6 hover:border-uzzai-mint/30 transition-colors">
+                    <summary class="flex items-center justify-between cursor-pointer list-none">
+                        <span class="font-bold text-lg">E se meu grupo não quiser baixar o app?</span>
+                        <i data-lucide="chevron-down" class="h-5 w-5 text-uzzai-mint transition-transform group-open:rotate-180"></i>
+                    </summary>
+                    <p class="mt-4 text-uzzai-silver leading-relaxed">
+                        O app funciona via <strong class="text-white">link direto no navegador</strong> — não precisa instalar nada.
+                        Jogadores clicam no link do WhatsApp e confirmam presença em 1 segundo. Simples assim.
+                    </p>
+                </details>
+
+                <!-- FAQ 3 -->
+                <details class="group rounded-xl border border-white/10 bg-white/5 p-6 hover:border-uzzai-mint/30 transition-colors">
+                    <summary class="flex items-center justify-between cursor-pointer list-none">
+                        <span class="font-bold text-lg">Funciona para quantos jogadores?</span>
+                        <i data-lucide="chevron-down" class="h-5 w-5 text-uzzai-mint transition-transform group-open:rotate-180"></i>
+                    </summary>
+                    <p class="mt-4 text-uzzai-silver leading-relaxed">
+                        De <strong class="text-white">6 a 100 jogadores por grupo</strong>. Funciona para society (12 jogadores), campo (22 jogadores) ou até campeonatos maiores.
+                        Lista de espera automática quando o limite é atingido.
+                    </p>
+                </details>
+
+                <!-- FAQ 4 -->
+                <details class="group rounded-xl border border-white/10 bg-white/5 p-6 hover:border-uzzai-mint/30 transition-colors">
+                    <summary class="flex items-center justify-between cursor-pointer list-none">
+                        <span class="font-bold text-lg">Como funciona o Split Pix Automático?</span>
+                        <i data-lucide="chevron-down" class="h-5 w-5 text-uzzai-mint transition-transform group-open:rotate-180"></i>
+                    </summary>
+                    <p class="mt-4 text-uzzai-silver leading-relaxed">
+                        Você define o valor por pessoa (ex: R$ 5). O app gera um <strong class="text-white">QR Code Pix individual</strong> para cada jogador.
+                        Quando alguém paga, o status é atualizado automaticamente. Você nunca mais fica de cobrador.
+                    </p>
+                </details>
+
+                <!-- FAQ 5 -->
+                <details class="group rounded-xl border border-white/10 bg-white/5 p-6 hover:border-uzzai-mint/30 transition-colors">
+                    <summary class="flex items-center justify-between cursor-pointer list-none">
+                        <span class="font-bold text-lg">O sorteio de times é realmente balanceado?</span>
+                        <i data-lucide="chevron-down" class="h-5 w-5 text-uzzai-mint transition-transform group-open:rotate-180"></i>
+                    </summary>
+                    <p class="mt-4 text-uzzai-silver leading-relaxed">
+                        Sim! O algoritmo considera <strong class="text-white">histórico de gols, assistências e rating base</strong> de cada jogador.
+                        Distribui jogadores fortes e fracos de forma equilibrada. Você pode re-sortear quantas vezes quiser.
+                    </p>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+         WAITLIST / CTA FINAL
+         ======================================== -->
+    <section id="waitlist" class="py-20 bg-gradient-to-br from-uzzai-mint/10 via-uzzai-blue/10 to-uzzai-black">
+        <div class="mx-auto max-w-4xl px-6 lg:px-8 text-center">
+            <div class="mb-8">
+                <i data-lucide="sparkles" class="h-16 w-16 text-uzzai-gold mx-auto mb-6"></i>
+            </div>
+
+            <h2 class="text-4xl md:text-5xl font-bold mb-6">
+                Pronto para <span class="text-uzzai-mint">nunca mais ser cobrador</span>?
+            </h2>
+
+            <p class="text-xl text-uzzai-silver mb-8 max-w-2xl mx-auto leading-relaxed">
+                Entre na fila de espera e seja dos primeiros a testar o <strong class="text-white">Split Pix Automático</strong>
+                e todas as features premium <strong class="text-white">100% grátis</strong> durante a beta.
+            </p>
+
+            <!-- Waitlist Form -->
+            <div class="max-w-md mx-auto mb-8">
+                <form class="flex flex-col sm:flex-row gap-3">
+                    <input
+                        type="email"
+                        placeholder="Seu melhor e-mail"
+                        class="flex-1 px-6 py-4 rounded-full bg-white/10 border border-white/20 text-white placeholder:text-uzzai-silver focus:outline-none focus:border-uzzai-mint focus:ring-2 focus:ring-uzzai-mint/50"
+                        required
+                    />
+                    <button
+                        type="submit"
+                        class="px-8 py-4 rounded-full bg-uzzai-mint text-uzzai-black font-bold hover:bg-[#15a085] transition-all hover:scale-105 flex items-center justify-center gap-2"
+                    >
+                        <i data-lucide="arrow-right" class="h-5 w-5"></i>
+                        Entrar na Fila
+                    </button>
+                </form>
+
+                <p class="text-sm text-uzzai-silver mt-4">
+                    <i data-lucide="shield-check" class="h-4 w-4 inline mr-1"></i>
+                    Sem spam. Apenas atualizações importantes sobre a beta.
+                </p>
+            </div>
+
+            <!-- Social Proof -->
+            <div class="flex items-center justify-center gap-6 text-sm text-uzzai-silver">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="users" class="h-5 w-5 text-uzzai-mint"></i>
+                    <span><strong class="text-white">127</strong> na fila</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i data-lucide="clock" class="h-5 w-5 text-uzzai-gold"></i>
+                    <span>Vagas limitadas</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i data-lucide="zap" class="h-5 w-5 text-uzzai-blue"></i>
+                    <span>Beta em <strong class="text-white">Fevereiro 2026</strong></span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+         FOOTER
+         ======================================== -->
+    <footer class="bg-uzzai-black border-t border-white/10 py-12">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <div class="grid gap-8 md:grid-cols-4">
+                <!-- Logo & Tagline -->
+                <div class="md:col-span-2">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="flex items-center gap-1 text-2xl">
+                            <span class="font-poppins font-normal text-uzzai-mint">Uzz</span>
+                            <span class="font-exo2 font-semibold text-uzzai-blue">Ai</span>
+                        </div>
+                        <span class="text-lg text-uzzai-silver">• Peladeiros</span>
+                    </div>
+                    <p class="text-uzzai-silver mb-4 max-w-md">
+                        App 100% gratuito que automatiza confirmações, sorteio de times e Split Pix para grupos de futebol.
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <a href="#" class="text-uzzai-silver hover:text-uzzai-mint transition-colors">
+                            <i data-lucide="instagram" class="h-5 w-5"></i>
+                        </a>
+                        <a href="#" class="text-uzzai-silver hover:text-uzzai-mint transition-colors">
+                            <i data-lucide="twitter" class="h-5 w-5"></i>
+                        </a>
+                        <a href="#" class="text-uzzai-silver hover:text-uzzai-mint transition-colors">
+                            <i data-lucide="linkedin" class="h-5 w-5"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Links -->
+                <div>
+                    <h4 class="font-bold mb-4">Produto</h4>
+                    <ul class="space-y-2 text-uzzai-silver">
+                        <li><a href="#features" class="hover:text-uzzai-mint transition-colors">Features</a></li>
+                        <li><a href="#como-funciona" class="hover:text-uzzai-mint transition-colors">Como Funciona</a></li>
+                        <li><a href="#waitlist" class="hover:text-uzzai-mint transition-colors">Entrar na Fila</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold mb-4">Empresa</h4>
+                    <ul class="space-y-2 text-uzzai-silver">
+                        <li><a href="#" class="hover:text-uzzai-mint transition-colors">Sobre</a></li>
+                        <li><a href="#" class="hover:text-uzzai-mint transition-colors">Blog</a></li>
+                        <li><a href="#" class="hover:text-uzzai-mint transition-colors">Contato</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom bar -->
+            <div class="mt-12 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-uzzai-silver">
+                <div>
+                    © 2026 UzzAI Peladeiros. Todos os direitos reservados.
+                </div>
+                <div class="flex items-center gap-6">
+                    <a href="#" class="hover:text-uzzai-mint transition-colors">Termos de Uso</a>
+                    <a href="#" class="hover:text-uzzai-mint transition-colors">Privacidade</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Lucide Icons Init -->
+    <script>
+        lucide.createIcons();
+    </script>
+
+</body>
+</html>
