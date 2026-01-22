@@ -45,7 +45,7 @@ export async function GET(
       });
     }
 
-    const eventIds = (finishedEvents as Array<{ id: string }>).map(e => e.id);
+    const eventIds = (finishedEvents as any).map((e: any) => e.id);
 
     // Artilheiros (top 10)
     const topScorers = await sql`

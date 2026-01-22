@@ -20,7 +20,7 @@ export async function PATCH(
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
-    const [membership] = membershipQuery as Array<{ role: string }>;
+    const membership = membershipQuery[0];
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -34,7 +34,7 @@ export async function PATCH(
       SELECT * FROM charges
       WHERE id = ${chargeId} AND group_id = ${groupId}
     `;
-    const [existingCharge] = existingChargeQuery as any[];
+    const existingCharge = existingChargeQuery[0];
 
     if (!existingCharge) {
       return NextResponse.json(
@@ -63,7 +63,7 @@ export async function PATCH(
       WHERE id = ${chargeId}
       RETURNING *
     `;
-    const [updatedCharge] = updatedChargeQuery as any[];
+    const updatedCharge = updatedChargeQuery[0];
 
     logger.info(
       { groupId, chargeId, status, updatedBy: user.id },
@@ -74,7 +74,7 @@ export async function PATCH(
     const userInfoQuery = await sql`
       SELECT id, name, image FROM users WHERE id = ${updatedCharge.user_id}
     `;
-    const [userInfo] = userInfoQuery as any[];
+    const userInfo = userInfoQuery[0];
 
     return NextResponse.json({
       message: "Status atualizado com sucesso",
@@ -108,7 +108,7 @@ export async function DELETE(
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
-    const [membership] = membershipQuery as Array<{ role: string }>;
+    const membership = membershipQuery[0];
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -122,7 +122,7 @@ export async function DELETE(
       SELECT * FROM charges
       WHERE id = ${chargeId} AND group_id = ${groupId}
     `;
-    const [existingCharge] = existingChargeQuery as any[];
+    const existingCharge = existingChargeQuery[0];
 
     if (!existingCharge) {
       return NextResponse.json(

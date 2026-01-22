@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       SELECT * FROM invites
       WHERE code = ${code}
     `;
-    const [invite] = inviteQuery as any[];
+    const invite = inviteQuery[0];
 
     if (!invite) {
       return NextResponse.json(
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       SELECT * FROM group_members
       WHERE group_id = ${invite.group_id} AND user_id = ${user.id}
     `;
-    const [existingMember] = existingMemberQuery as any[];
+    const existingMember = existingMemberQuery[0];
 
     if (existingMember) {
       return NextResponse.json(
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
       SELECT * FROM wallets
       WHERE owner_type = 'user' AND owner_id = ${user.id}
     `;
-    const [existingWallet] = existingWalletQuery as any[];
+    const existingWallet = existingWalletQuery[0];
 
     if (!existingWallet) {
       await sql`
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
     const groupQuery = await sql`
       SELECT * FROM groups WHERE id = ${invite.group_id}
     `;
-    const [group] = groupQuery as any[];
+    const group = groupQuery[0];
 
     logger.info(
       { groupId: invite.group_id, userId: user.id, inviteId: invite.id },

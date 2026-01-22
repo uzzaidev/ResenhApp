@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
-    const [membership] = membershipResult as Array<{ role: string }>;
+    const membership = membershipResult[0];
 
     if (!membership) {
       return NextResponse.json(
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
-    const [membership] = membershipResult as Array<{ role: string }>;
+    const membership = membershipResult[0];
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
       )
       RETURNING *
     `;
-    const [event] = eventResult as any[];
+    const event = eventResult[0];
 
     logger.info({ eventId: event.id, groupId, userId: user.id }, "Event created");
 

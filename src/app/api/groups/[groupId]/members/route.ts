@@ -19,7 +19,7 @@ export async function POST(
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
-    const [membership] = membershipQuery as Array<{ role: string }>;
+    const membership = membershipQuery[0];
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -42,7 +42,7 @@ export async function POST(
     const targetUserQuery = await sql`
       SELECT id, name, email FROM users WHERE id = ${userId}
     `;
-    const [targetUser] = targetUserQuery as any[];
+    const targetUser = targetUserQuery[0];
 
     if (!targetUser) {
       return NextResponse.json(
@@ -56,7 +56,7 @@ export async function POST(
       SELECT * FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${userId}
     `;
-    const [existingMember] = existingMemberQuery as any[];
+    const existingMember = existingMemberQuery[0];
 
     if (existingMember) {
       return NextResponse.json(
@@ -71,7 +71,7 @@ export async function POST(
       VALUES (${groupId}, ${userId}, 'member', 5)
       RETURNING *
     `;
-    const [newMember] = newMemberQuery as any[];
+    const newMember = newMemberQuery[0];
 
     logger.info(
       { groupId, userId, addedBy: user.id },

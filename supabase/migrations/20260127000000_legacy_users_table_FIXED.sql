@@ -1,9 +1,10 @@
 -- =====================================================
--- Migration: Legacy Users Table (for NextAuth compatibility)
--- Version: 1.0
+-- Migration: Legacy Users Table (for NextAuth compatibility) - FIXED
+-- Version: 1.1
 -- Date: 2026-01-27
 -- Description: Create users table for NextAuth compatibility
 --              This table works alongside Supabase auth.users
+--              IDEMPOTENT: Can be run multiple times safely
 -- =====================================================
 
 -- =====================================================
@@ -24,7 +25,7 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Indexes
+-- Indexes (IF NOT EXISTS para evitar erro se já existir)
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_email_verified ON users(email_verified) WHERE email_verified IS NOT NULL;
 
@@ -35,7 +36,7 @@ CREATE INDEX IF NOT EXISTS idx_users_email_verified ON users(email_verified) WHE
 -- Enable RLS
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 
--- Drop existing policies if they exist (para evitar erro de duplicação)
+-- Drop existing policies if they exist (IDEMPOTENT)
 DROP POLICY IF EXISTS "Anyone can view users" ON users;
 DROP POLICY IF EXISTS "Service role can insert users" ON users;
 DROP POLICY IF EXISTS "Users can update own profile" ON users;

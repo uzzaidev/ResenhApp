@@ -1,4 +1,4 @@
-import { neon } from "@neondatabase/serverless";
+import postgres from 'postgres';
 
 // Suporta tanto SUPABASE_DB_URL (novo) quanto DATABASE_URL (legado/Neon)
 function getDatabaseUrl() {
@@ -19,13 +19,20 @@ function getDatabaseUrl() {
   return databaseUrl;
 }
 
-// Inicialização simples e direta - SEM PROXY
+// Inicialização com postgres
 const databaseUrl = getDatabaseUrl();
 
 // Durante build, exporta um placeholder
-// Durante runtime, cria a conexão real
+// Durante runtime, cria a conexão real com configuração para Supabase
 export const sql = databaseUrl
-  ? neon(databaseUrl)
+  ? postgres(databaseUrl, {
+      // Configurações otimizadas para Supabase + Vercel
+      max: 10, // Máximo de conexões no pool
+      idle_timeout: 20, // Fechar conexões idle após 20s
+      connect_timeout: 10, // Timeout de conexão: 10s
+      ssl: 'require', // Forçar SSL
+      prepare: false, // Desabilitar prepared statements (necessário para pooler)
+    })
   : (() => {
       throw new Error("Database URL not configured");
-    }) as unknown as ReturnType<typeof neon>;
+    }) as unknown as ReturnType<typeof postgres>;

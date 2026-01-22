@@ -31,7 +31,7 @@ export async function PATCH(
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
-    const [membership] = membershipQuery as Array<{ role: string }>;
+    const membership = membershipQuery[0];
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -45,7 +45,7 @@ export async function PATCH(
       SELECT * FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${userId}
     `;
-    const [targetMember] = targetMemberQuery as any[];
+    const targetMember = targetMemberQuery[0];
 
     if (!targetMember) {
       return NextResponse.json(
@@ -71,7 +71,7 @@ export async function PATCH(
         FROM group_members
         WHERE group_id = ${groupId} AND role = 'admin'
       `;
-      const [adminCount] = adminCountQuery as any[];
+      const adminCount = adminCountQuery[0];
 
       if (parseInt(adminCount.count) <= 1) {
         return NextResponse.json(
@@ -88,7 +88,7 @@ export async function PATCH(
       WHERE group_id = ${groupId} AND user_id = ${userId}
       RETURNING *
     `;
-    const [updated] = updatedQuery as any[];
+    const updated = updatedQuery[0];
 
     logger.info(
       { groupId, userId, newRole: role, updatedBy: user.id },
@@ -136,7 +136,7 @@ export async function DELETE(
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
-    const [membership] = membershipQuery as Array<{ role: string }>;
+    const membership = membershipQuery[0];
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -158,7 +158,7 @@ export async function DELETE(
       SELECT * FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${userId}
     `;
-    const [targetMember] = targetMemberQuery as any[];
+    const targetMember = targetMemberQuery[0];
 
     if (!targetMember) {
       return NextResponse.json(

@@ -19,7 +19,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       INNER JOIN group_members gm ON e.group_id = gm.group_id
       WHERE e.id = ${eventId} AND gm.user_id = ${user.id}
     `;
-    const [membership] = membershipQuery as Array<{ role: string }>;
+    const membership = membershipQuery[0];
 
     if (!membership) {
       return NextResponse.json(
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       ORDER BY round DESC
       LIMIT 1
     `;
-    const [tiebreaker] = tiebreakerQuery as any[];
+    const tiebreaker = tiebreakerQuery[0];
 
     if (!tiebreaker) {
       return NextResponse.json({
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       FROM users
       WHERE id = ANY(${tiedUserIds})
     `;
-    const playersArray = players as Array<{ id: number; name: string; image: string }>;
+    const playersArray = players as any;
 
     // Buscar votos atuais do desempate
     const voteCounts = await sql`
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       WHERE tiebreaker_id = ${tiebreaker.id}
       GROUP BY voted_user_id
     `;
-    const voteCountsArray = voteCounts as Array<{ voted_user_id: number; vote_count: string | number }>;
+    const voteCountsArray = voteCounts as any;
 
     // Verificar se usuário atual já votou neste desempate
     const userVoteQuery = await sql`
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       FROM mvp_tiebreaker_votes
       WHERE tiebreaker_id = ${tiebreaker.id} AND voter_user_id = ${user.id}
     `;
-    const [userVote] = userVoteQuery as any[];
+    const userVote = userVoteQuery[0];
 
     // Buscar total de participantes que devem votar
     const participantCountQuery = await sql`
@@ -77,12 +77,12 @@ export async function GET(request: NextRequest, context: RouteContext) {
       FROM event_attendance
       WHERE event_id = ${eventId} AND status = 'yes'
     `;
-    const [participantCount] = participantCountQuery as any[];
+    const participantCount = participantCountQuery[0];
 
     // Mapear jogadores com votos
-    const playersWithVotes = playersArray.map((player) => {
+    const playersWithVotes = playersArray.map((player: any) => {
       const voteCount = voteCountsArray.find(
-        (vc) => vc.voted_user_id === player.id
+        (vc: any) => vc.voted_user_id === player.id
       );
       return {
         userId: player.id,

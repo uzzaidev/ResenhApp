@@ -20,7 +20,12 @@
       "Bash(else echo \"package.json não encontrado\")",
       "Bash(tee:*)",
       "Bash(grep:*)",
-      "Bash(timeout 60 pnpm build:*)"
+      "Bash(timeout 60 pnpm build:*)",
+      "Bash(cat:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(pnpm add:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

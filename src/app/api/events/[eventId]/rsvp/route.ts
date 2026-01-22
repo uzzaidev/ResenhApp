@@ -31,7 +31,7 @@ export async function POST(
     const eventQuery = await sql`
       SELECT * FROM events WHERE id = ${eventId}
     `;
-    const [event] = eventQuery as any[];
+    const event = eventQuery[0];
 
     if (!event) {
       return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
@@ -42,7 +42,7 @@ export async function POST(
       SELECT * FROM group_members
       WHERE group_id = ${event.group_id} AND user_id = ${user.id}
     `;
-    const [membership] = membershipQuery as any[];
+    const membership = membershipQuery[0];
 
     if (!membership) {
       return NextResponse.json(
@@ -59,7 +59,7 @@ export async function POST(
       FROM event_attendance
       WHERE event_id = ${eventId} AND user_id != ${user.id}
     `;
-    const [counts] = countsQuery as any[];
+    const counts = countsQuery[0];
 
     let finalStatus = status;
 
@@ -80,7 +80,7 @@ export async function POST(
       SELECT status FROM event_attendance
       WHERE event_id = ${eventId} AND user_id = ${user.id}
     `;
-    const [currentAttendance] = currentAttendanceQuery as any[];
+    const currentAttendance = currentAttendanceQuery[0];
 
     // Determine if this is a self-removal (yes → no) or re-confirmation (no → yes)
     const isSelfRemoval = currentAttendance?.status === 'yes' && status === 'no';
@@ -112,7 +112,7 @@ export async function POST(
         updated_at = NOW()
       RETURNING *
     `;
-    const [attendance] = attendanceQuery as any[];
+    const attendance = attendanceQuery[0];
 
     // If user changed to "no" or "waitlist" to "yes", check waitlist
     if (status === "no" || (finalStatus === "yes" && event.waitlist_enabled)) {
@@ -123,7 +123,7 @@ export async function POST(
         ORDER BY created_at ASC
         LIMIT 1
       `;
-      const [firstInWaitlist] = firstInWaitlistQuery as any[];
+      const firstInWaitlist = firstInWaitlistQuery[0];
 
       if (firstInWaitlist) {
         const updatedCountsQuery = await sql`
@@ -133,7 +133,7 @@ export async function POST(
           FROM event_attendance
           WHERE event_id = ${eventId}
         `;
-        const [updatedCounts] = updatedCountsQuery as any[];
+        const updatedCounts = updatedCountsQuery[0];
 
         const totalPlayers = parseInt(updatedCounts.gk_count) + parseInt(updatedCounts.line_count);
         const gkCount = parseInt(updatedCounts.gk_count);

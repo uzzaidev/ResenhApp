@@ -37,7 +37,7 @@ export async function POST(
     const eventQuery = await sql`
       SELECT * FROM events WHERE id = ${eventId}
     `;
-    const [event] = eventQuery as any[];
+    const event = eventQuery[0];
 
     if (!event) {
       return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
@@ -48,7 +48,7 @@ export async function POST(
       SELECT role FROM group_members
       WHERE group_id = ${event.group_id} AND user_id = ${user.id}
     `;
-    const [membership] = membershipQuery as Array<{ role: string }>;
+    const membership = membershipQuery[0];
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -73,7 +73,7 @@ export async function POST(
         VALUES (${eventId}, ${teamData.name}, ${i})
         RETURNING *
       `;
-      const [team] = teamQuery as any[];
+      const team = teamQuery[0];
 
       // Add team members
       for (const member of teamData.members) {
@@ -123,7 +123,7 @@ export async function GET(
     const eventQuery = await sql`
       SELECT * FROM events WHERE id = ${eventId}
     `;
-    const [event] = eventQuery as any[];
+    const event = eventQuery[0];
 
     if (!event) {
       return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
@@ -134,7 +134,7 @@ export async function GET(
       SELECT role FROM group_members
       WHERE group_id = ${event.group_id} AND user_id = ${user.id}
     `;
-    const [membership] = membershipQuery as Array<{ role: string }>;
+    const membership = membershipQuery[0];
 
     if (!membership) {
       return NextResponse.json(

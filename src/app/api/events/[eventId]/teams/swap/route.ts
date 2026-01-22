@@ -34,7 +34,7 @@ export async function POST(
     const eventQuery = await sql`
       SELECT * FROM events WHERE id = ${eventId}
     `;
-    const [event] = eventQuery as any[];
+    const event = eventQuery[0];
 
     if (!event) {
       return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
@@ -45,7 +45,7 @@ export async function POST(
       SELECT role FROM group_members
       WHERE group_id = ${event.group_id} AND user_id = ${user.id}
     `;
-    const [membership] = membershipQuery as Array<{ role: string }>;
+    const membership = membershipQuery[0];
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -75,7 +75,7 @@ export async function POST(
       WHERE team_id = ${validatedData.player1.currentTeamId}
         AND user_id = ${validatedData.player1.userId}
     `;
-    const [player1Info] = player1InfoQuery as any[];
+    const player1Info = player1InfoQuery[0];
 
     // Get player 2 info
     const player2InfoQuery = await sql`
@@ -83,7 +83,7 @@ export async function POST(
       WHERE team_id = ${validatedData.player2.currentTeamId}
         AND user_id = ${validatedData.player2.userId}
     `;
-    const [player2Info] = player2InfoQuery as any[];
+    const player2Info = player2InfoQuery[0];
 
     if (!player1Info || !player2Info) {
       return NextResponse.json(

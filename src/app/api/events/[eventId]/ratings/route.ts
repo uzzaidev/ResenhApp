@@ -18,7 +18,7 @@ export async function GET(
     const eventQuery = await sql`
       SELECT group_id FROM events WHERE id = ${eventId}
     `;
-    const [event] = eventQuery as any[];
+    const event = eventQuery[0];
 
     if (!event) {
       return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
@@ -29,7 +29,7 @@ export async function GET(
       SELECT role FROM group_members
       WHERE group_id = ${event.group_id} AND user_id = ${user.id}
     `;
-    const [membership] = membershipQuery as Array<{ role: string }>;
+    const membership = membershipQuery[0];
 
     if (!membership) {
       return NextResponse.json(
@@ -47,7 +47,7 @@ export async function GET(
         AND 'mvp' = ANY(tags)
       LIMIT 1
     `;
-    const [vote] = voteQuery as any[];
+    const vote = voteQuery[0];
 
     return NextResponse.json({ vote: vote || null });
   } catch (error) {
@@ -86,7 +86,7 @@ export async function POST(
     const eventQuery = await sql`
       SELECT group_id FROM events WHERE id = ${eventId}
     `;
-    const [event] = eventQuery as any[];
+    const event = eventQuery[0];
 
     if (!event) {
       return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
@@ -97,7 +97,7 @@ export async function POST(
       SELECT * FROM event_attendance
       WHERE event_id = ${eventId} AND user_id = ${user.id} AND status = 'yes'
     `;
-    const [attendance] = attendanceQuery as any[];
+    const attendance = attendanceQuery[0];
 
     if (!attendance) {
       return NextResponse.json(
@@ -119,7 +119,7 @@ export async function POST(
       SELECT * FROM event_attendance
       WHERE event_id = ${eventId} AND user_id = ${ratedUserId} AND status = 'yes'
     `;
-    const [ratedAttendance] = ratedAttendanceQuery as any[];
+    const ratedAttendance = ratedAttendanceQuery[0];
 
     if (!ratedAttendance) {
       return NextResponse.json(
@@ -152,7 +152,7 @@ export async function POST(
       )
       RETURNING *
     `;
-    const [vote] = voteQuery as any[];
+    const vote = voteQuery[0];
 
     logger.info(
       { eventId, raterUserId: user.id, ratedUserId },

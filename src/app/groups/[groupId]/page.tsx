@@ -103,7 +103,7 @@ export default async function GroupPage({ params }: RouteParams) {
     redirect("/dashboard");
   }
 
-  const group = groupResult[0] as any;
+  const group = groupResult[0];
 
   // Buscar próximos eventos do grupo
   const upcomingEvents = await sql`
@@ -127,7 +127,7 @@ export default async function GroupPage({ params }: RouteParams) {
     WHERE group_id = ${groupId} AND status = 'finished'
   `;
 
-  const eventIds = (events as unknown as Array<{ id: string }>).map(e => e.id);
+  const eventIds = (events as any).map((e: any) => e.id);
 
   // Inicializar estruturas vazias
   const stats: Stats = {
@@ -165,7 +165,7 @@ export default async function GroupPage({ params }: RouteParams) {
         GROUP BY u.id, u.name
         ORDER BY goals DESC LIMIT 10
       `;
-      stats.topScorers = topScorers as Array<{ id: string; name: string; goals: string; games: string }>;
+      stats.topScorers = topScorers as any;
 
       // Garçons
       const topAssisters = await sql`
@@ -177,7 +177,7 @@ export default async function GroupPage({ params }: RouteParams) {
         GROUP BY u.id, u.name
         ORDER BY assists DESC LIMIT 10
       `;
-      stats.topAssisters = topAssisters as Array<{ id: string; name: string; assists: string; games: string }>;
+      stats.topAssisters = topAssisters as any;
 
       // Goleiros
       const topGoalkeepers = await sql`
@@ -189,7 +189,7 @@ export default async function GroupPage({ params }: RouteParams) {
         GROUP BY u.id, u.name
         ORDER BY saves DESC LIMIT 10
       `;
-      stats.topGoalkeepers = topGoalkeepers as Array<{ id: string; name: string; saves: string; games: string }>;
+      stats.topGoalkeepers = topGoalkeepers as any;
 
       // Jogos recentes
       const recentMatches = await sql`
@@ -207,7 +207,7 @@ export default async function GroupPage({ params }: RouteParams) {
         WHERE e.group_id = ${groupId} AND e.status = 'finished'
         ORDER BY e.starts_at DESC LIMIT 5
       `;
-      stats.recentMatches = recentMatches as typeof stats.recentMatches;
+      stats.recentMatches = recentMatches as any;
 
       // Frequência
       const playerFrequency = await sql`
@@ -242,7 +242,7 @@ export default async function GroupPage({ params }: RouteParams) {
         ORDER BY games_played DESC, frequency_percentage DESC
         LIMIT 15
       `;
-      stats.playerFrequency = playerFrequency as typeof stats.playerFrequency;
+      stats.playerFrequency = playerFrequency as any;
 
       // Minhas estatísticas
       const myEvents = await sql`
@@ -251,7 +251,7 @@ export default async function GroupPage({ params }: RouteParams) {
         WHERE e.group_id = ${groupId} AND e.status = 'finished'
           AND ea.user_id = ${user.id} AND ea.checked_in_at IS NOT NULL
       `;
-      const myEventIds = (myEvents as unknown as Array<{ id: string }>).map(e => e.id);
+      const myEventIds = (myEvents as any).map((e: any) => e.id);
 
       if (myEventIds.length > 0) {
         myStats.gamesPlayed = myEventIds.length;
@@ -262,7 +262,7 @@ export default async function GroupPage({ params }: RouteParams) {
           WHERE event_id = ANY(${myEventIds}) AND subject_user_id = ${user.id}
           GROUP BY action_type
         `;
-        (actions as unknown as Array<{ action_type: string; count: string }>).forEach((a) => {
+        (actions as any).forEach((a: any) => {
           if (a.action_type === 'goal') myStats.goals = parseInt(a.count);
           if (a.action_type === 'assist') myStats.assists = parseInt(a.count);
           if (a.action_type === 'save') myStats.saves = parseInt(a.count);
@@ -277,7 +277,7 @@ export default async function GroupPage({ params }: RouteParams) {
           WHERE t.event_id = ANY(${myEventIds}) AND tm.user_id = ${user.id} AND t.is_winner IS NOT NULL
           GROUP BY t.is_winner
         `;
-        (winLoss as unknown as Array<{ is_winner: boolean; count: string }>).forEach((wl) => {
+        (winLoss as any).forEach((wl: any) => {
           if (wl.is_winner === true) myStats.wins = parseInt(wl.count);
           if (wl.is_winner === false) myStats.losses = parseInt(wl.count);
         });
@@ -288,7 +288,7 @@ export default async function GroupPage({ params }: RouteParams) {
           WHERE event_id = ANY(${myEventIds}) AND rated_user_id = ${user.id} AND tags IS NOT NULL
           GROUP BY tag ORDER BY count DESC
         `;
-        (tagsResult as unknown as Array<{ tag: string; count: string }>).forEach((t) => {
+        (tagsResult as any).forEach((t: any) => {
           myStats.tags[t.tag] = parseInt(t.count);
           if (t.tag === 'mvp') myStats.mvpCount = parseInt(t.count);
         });

@@ -63,8 +63,8 @@ function drawTeams(players: Player[], numTeams: number = 2, config?: DrawConfig)
   const positions = ["gk", "defender", "midfielder", "forward"] as const;
 
   // PHASE 1: Allocate players who chose each position (prioritize by rating - highest first)
-  positions.forEach((position) => {
-    const slotsPerTeam = config.positions[position];
+  positions.forEach((position: any) => {
+    const slotsPerTeam = (config.positions as any)[position];
     console.log(`\n=== PHASE 1: Processing ${position} (${slotsPerTeam} slots per team) ===`);
 
     // Get available players who chose this position (not yet assigned)
@@ -96,8 +96,8 @@ function drawTeams(players: Player[], numTeams: number = 2, config?: DrawConfig)
   // PHASE 2: Fill unfilled position slots with remaining players (prioritize by rating - lowest first)
   console.log('\n=== PHASE 2: Filling unfilled position slots ===');
 
-  positions.forEach((position) => {
-    const slotsPerTeam = config.positions[position];
+  positions.forEach((position: any) => {
+    const slotsPerTeam = (config.positions as any)[position];
 
     // Check each team for unfilled slots
     teams.forEach((team, teamIndex) => {
@@ -186,7 +186,7 @@ export async function POST(
     const eventQuery = await sql`
       SELECT * FROM events WHERE id = ${eventId}
     `;
-    const [event] = eventQuery as any[];
+    const event = eventQuery[0];
 
     if (!event) {
       return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
@@ -197,7 +197,7 @@ export async function POST(
       SELECT role FROM group_members
       WHERE group_id = ${event.group_id} AND user_id = ${user.id}
     `;
-    const [membership] = membershipQuery as Array<{ role: string }>;
+    const membership = membershipQuery[0];
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -221,7 +221,7 @@ export async function POST(
       WHERE ea.event_id = ${eventId} AND ea.status = 'yes'
     `;
 
-    const confirmedPlayers = confirmedPlayersRaw as Player[];
+    const confirmedPlayers = confirmedPlayersRaw as any;
 
     if (confirmedPlayers.length < 4) {
       return NextResponse.json(
@@ -247,7 +247,7 @@ export async function POST(
       FROM draw_configs
       WHERE group_id = ${event.group_id}
     `;
-    const [drawConfig] = drawConfigQuery as any[];
+    const drawConfig = drawConfigQuery[0];
 
     console.log('Draw config found:', drawConfig ? 'YES' : 'NO');
     if (drawConfig) {
@@ -276,7 +276,7 @@ export async function POST(
 
     // Draw teams
     console.log('Starting team draw for event:', eventId, 'with', confirmedPlayers.length, 'players');
-    console.log('Player positions:', confirmedPlayers.map(p => ({
+    console.log('Player positions:', confirmedPlayers.map((p: any) => ({
       name: p.name,
       position: p.preferred_position || 'none'
     })));
@@ -312,7 +312,7 @@ export async function POST(
           VALUES (${eventId}, ${teamNames[i]}, ${i})
           RETURNING *
         `;
-        const [team] = teamQuery as any[];
+        const team = teamQuery[0];
         console.log(`Created team ${team.id} in database`);
 
         // Add team members with validation

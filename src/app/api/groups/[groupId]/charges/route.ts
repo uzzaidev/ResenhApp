@@ -20,7 +20,7 @@ export async function GET(
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
-    const [membership] = membershipQuery as Array<{ role: string }>;
+    const membership = membershipQuery[0];
 
     if (!membership) {
       return NextResponse.json(
@@ -215,7 +215,7 @@ export async function POST(
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
-    const [membership] = membershipQuery as Array<{ role: string }>;
+    const membership = membershipQuery[0];
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -242,7 +242,7 @@ export async function POST(
       SELECT user_id FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${userId}
     `;
-    const [targetMember] = targetMemberQuery as any[];
+    const targetMember = targetMemberQuery[0];
 
     if (!targetMember) {
       return NextResponse.json(
@@ -257,7 +257,7 @@ export async function POST(
       VALUES (${groupId}, ${userId}, ${type}, ${amountCents}, ${dueDate || null}, 'pending', ${eventId || null})
       RETURNING *
     `;
-    const [charge] = chargeQuery as any[];
+    const charge = chargeQuery[0];
 
     logger.info(
       { groupId, chargeId: charge.id, userId, createdBy: user.id },
@@ -268,7 +268,7 @@ export async function POST(
     const userInfoQuery = await sql`
       SELECT id, name, image FROM users WHERE id = ${userId}
     `;
-    const [userInfo] = userInfoQuery as any[];
+    const userInfo = userInfoQuery[0];
 
     return NextResponse.json({
       message: "Cobrança criada com sucesso",

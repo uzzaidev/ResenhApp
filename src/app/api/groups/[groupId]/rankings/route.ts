@@ -19,7 +19,7 @@ export async function GET(
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
-    const [membership] = membershipQuery as Array<{ role: string }>;
+    const membership = membershipQuery[0];
 
     if (!membership) {
       return NextResponse.json(
@@ -40,7 +40,7 @@ export async function GET(
       WHERE e.group_id = ${groupId}
       GROUP BY e.id, e.status
     `;
-    const debugEventsArray = debugEvents as any[];
+    const debugEventsArray = debugEvents;
 
     logger.info({
       groupId,
@@ -69,7 +69,7 @@ export async function GET(
       ORDER BY e.starts_at DESC
       LIMIT 20
     `;
-    const debugGoalsArray = debugGoals as any[];
+    const debugGoalsArray = debugGoals;
 
     logger.info({
       groupId,
@@ -181,7 +181,7 @@ export async function GET(
       WHERE games_played > 0  -- Só mostrar quem jogou
       ORDER BY performance_score DESC, mvp_count DESC, goals DESC
     `;
-    const rankingsArray = rankings as any[];
+    const rankingsArray = rankings;
 
     // DEBUG: Log detalhado dos rankings
     logger.info({

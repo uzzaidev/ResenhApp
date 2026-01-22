@@ -19,7 +19,7 @@ export async function DELETE(
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
-    const [membership] = membershipQuery as Array<{ role: string }>;
+    const membership = membershipQuery[0];
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -33,7 +33,7 @@ export async function DELETE(
       SELECT * FROM invites
       WHERE id = ${inviteId} AND group_id = ${groupId}
     `;
-    const [invite] = inviteQuery as any[];
+    const invite = inviteQuery[0];
 
     if (!invite) {
       return NextResponse.json(

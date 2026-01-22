@@ -34,13 +34,7 @@ export default async function GroupSettingsPage({ params }: RouteParams) {
     redirect("/dashboard");
   }
 
-  const group = groupResult[0] as {
-    id: string;
-    name: string;
-    description: string | null;
-    privacy: string;
-    user_role: string;
-  };
+  const group = groupResult[0] as any;
 
   if (group.user_role !== "admin") {
     redirect(`/groups/${groupId}`);

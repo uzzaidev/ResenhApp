@@ -20,7 +20,7 @@ export async function POST(
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
-    const [membership] = membershipQuery as Array<{ role: string }>;
+    const membership = membershipQuery[0];
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -52,7 +52,7 @@ export async function POST(
     const existingUserQuery = await sql`
       SELECT id FROM users WHERE email = ${email}
     `;
-    const [existingUser] = existingUserQuery as any[];
+    const existingUser = existingUserQuery[0];
 
     if (existingUser) {
       return NextResponse.json(
@@ -73,7 +73,7 @@ export async function POST(
       VALUES (${email}, ${name}, ${passwordHash})
       RETURNING id, email, name
     `;
-    const [newUser] = newUserQuery as any[];
+    const newUser = newUserQuery[0];
 
     // Create wallet for user
     await sql`
@@ -87,7 +87,7 @@ export async function POST(
       VALUES (${groupId}, ${newUser.id}, 'member', 5)
       RETURNING *
     `;
-    const [newMember] = newMemberQuery as any[];
+    const newMember = newMemberQuery[0];
 
     logger.info(
       { groupId, userId: newUser.id, createdBy: user.id, email },

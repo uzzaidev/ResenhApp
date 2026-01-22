@@ -14,7 +14,7 @@ export async function GET() {
       WHERE user_id = ${user.id}
       AND status = 'pending'
     `;
-    const [result] = queryResult as Array<{ count: number }>;
+    const result = queryResult[0];
 
     logger.info(
       { userId: user.id, count: result?.count },

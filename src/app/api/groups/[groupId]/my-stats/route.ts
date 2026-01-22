@@ -108,17 +108,7 @@ export async function GET(
       LEFT JOIN player_ratings pr ON pr.rated_user_id = ${user.id} AND pr.event_id = ue.id
     `;
 
-    const statsArray = stats as Array<{
-      games_played: string;
-      goals: string;
-      assists: string;
-      saves: string;
-      yellow_cards: string;
-      red_cards: string;
-      wins: string;
-      losses: string;
-      mvp_count: string;
-    }>;
+    const statsArray = stats as any;
 
     if (!Array.isArray(statsArray) || statsArray.length === 0 || statsArray[0].games_played === '0') {
       return NextResponse.json({
@@ -153,7 +143,7 @@ export async function GET(
     `;
 
     const tags: Record<string, number> = {};
-    (tagsResult as unknown as Array<{ tag: string; count: string }>).forEach((t) => {
+    (tagsResult).forEach((t: any) => {
       tags[t.tag] = parseInt(t.count);
     });
 

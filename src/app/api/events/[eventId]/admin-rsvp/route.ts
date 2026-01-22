@@ -22,7 +22,7 @@ async function promoteFromWaitlist(eventId: string, event: any) {
     ORDER BY created_at ASC
     LIMIT 1
   `;
-  const [firstInWaitlist] = firstInWaitlistQuery as any[];
+  const firstInWaitlist = firstInWaitlistQuery[0];
 
   if (!firstInWaitlist) return;
 
@@ -33,7 +33,7 @@ async function promoteFromWaitlist(eventId: string, event: any) {
     FROM event_attendance
     WHERE event_id = ${eventId}
   `;
-  const [counts] = countsQuery as any[];
+  const counts = countsQuery[0];
 
   const totalPlayers = parseInt(counts.gk_count) + parseInt(counts.line_count);
   const gkCount = parseInt(counts.gk_count);
@@ -79,7 +79,7 @@ export async function POST(
     const eventQuery = await sql`
       SELECT * FROM events WHERE id = ${eventId}
     `;
-    const [event] = eventQuery as any[];
+    const event = eventQuery[0];
 
     if (!event) {
       return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
@@ -90,7 +90,7 @@ export async function POST(
       SELECT * FROM group_members
       WHERE group_id = ${event.group_id} AND user_id = ${admin.id}
     `;
-    const [adminMembership] = adminMembershipQuery as any[];
+    const adminMembership = adminMembershipQuery[0];
 
     if (!adminMembership || adminMembership.role !== "admin") {
       return NextResponse.json(
@@ -104,7 +104,7 @@ export async function POST(
       SELECT * FROM group_members
       WHERE group_id = ${event.group_id} AND user_id = ${userId}
     `;
-    const [userMembership] = userMembershipQuery as any[];
+    const userMembership = userMembershipQuery[0];
 
     if (!userMembership) {
       return NextResponse.json(
@@ -156,7 +156,7 @@ export async function POST(
       FROM event_attendance
       WHERE event_id = ${eventId} AND user_id != ${userId}
     `;
-    const [counts] = countsQuery as any[];
+    const counts = countsQuery[0];
 
     let finalStatus = "yes";
 
@@ -183,7 +183,7 @@ export async function POST(
         updated_at = NOW()
       RETURNING *
     `;
-    const [attendance] = attendanceQuery as any[];
+    const attendance = attendanceQuery[0];
 
     logger.info(
       { eventId, userId, adminId: admin.id, status: finalStatus },

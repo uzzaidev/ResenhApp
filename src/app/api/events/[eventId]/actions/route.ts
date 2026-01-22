@@ -18,7 +18,7 @@ export async function GET(
     const eventResult = await sql`
       SELECT group_id FROM events WHERE id = ${eventId}
     `;
-    const [event] = eventResult as Array<{ group_id: number }>;
+    const event = eventResult[0];
 
     if (!event) {
       return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
@@ -29,7 +29,7 @@ export async function GET(
       SELECT role FROM group_members
       WHERE group_id = ${event.group_id} AND user_id = ${user.id}
     `;
-    const [membership] = membershipResult as Array<{ role: string }>;
+    const membership = membershipResult[0];
 
     if (!membership) {
       return NextResponse.json(
@@ -96,7 +96,7 @@ export async function POST(
     const eventCheckResult = await sql`
       SELECT * FROM events WHERE id = ${eventId}
     `;
-    const [event] = eventCheckResult as any[];
+    const event = eventCheckResult[0];
 
     if (!event) {
       return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
@@ -107,7 +107,7 @@ export async function POST(
       SELECT role FROM group_members
       WHERE group_id = ${event.group_id} AND user_id = ${user.id}
     `;
-    const [membership] = membershipCheckResult as Array<{ role: string }>;
+    const membership = membershipCheckResult[0];
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -137,7 +137,7 @@ export async function POST(
       )
       RETURNING *
     `;
-    const [action] = actionResult as any[];
+    const action = actionResult[0];
 
     logger.info(
       { eventId, actionType, actorUserId },
@@ -179,7 +179,7 @@ export async function DELETE(
     const eventDeleteResult = await sql`
       SELECT * FROM events WHERE id = ${eventId}
     `;
-    const [event] = eventDeleteResult as any[];
+    const event = eventDeleteResult[0];
 
     if (!event) {
       return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
@@ -190,7 +190,7 @@ export async function DELETE(
       SELECT role FROM group_members
       WHERE group_id = ${event.group_id} AND user_id = ${user.id}
     `;
-    const [membership] = membershipDeleteResult as Array<{ role: string }>;
+    const membership = membershipDeleteResult[0];
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(

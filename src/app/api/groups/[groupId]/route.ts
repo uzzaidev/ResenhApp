@@ -19,7 +19,7 @@ export async function GET(
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
-    const [membership] = membershipQuery as Array<{ role: string }>;
+    const membership = membershipQuery[0];
 
     if (!membership) {
       return NextResponse.json(
@@ -31,7 +31,7 @@ export async function GET(
     const groupQuery = await sql`
       SELECT * FROM groups WHERE id = ${groupId}
     `;
-    const [group] = groupQuery as any[];
+    const group = groupQuery[0];
 
     if (!group) {
       return NextResponse.json({ error: "Grupo não encontrado" }, { status: 404 });
@@ -101,7 +101,7 @@ export async function PATCH(
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
-    const [membership] = membershipQuery as Array<{ role: string }>;
+    const membership = membershipQuery[0];
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -123,7 +123,7 @@ export async function PATCH(
       WHERE id = ${groupId}
       RETURNING *
     `;
-    const [updated] = updatedQuery as any[];
+    const updated = updatedQuery[0];
 
     logger.info({ groupId, userId: user.id }, "Group updated");
 

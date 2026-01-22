@@ -35,7 +35,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       FROM event_attendance
       WHERE event_id = ${eventId} AND user_id = ${user.id}
     `;
-    const [attendance] = attendanceQuery as any[];
+    const attendance = attendanceQuery[0];
 
     if (!attendance || attendance.status !== "yes") {
       return NextResponse.json(
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       SELECT * FROM mvp_tiebreakers
       WHERE id = ${tiebreakerId} AND event_id = ${eventId}
     `;
-    const [tiebreaker] = tiebreakerQuery as any[];
+    const tiebreaker = tiebreakerQuery[0];
 
     if (!tiebreaker) {
       return NextResponse.json(
@@ -106,14 +106,14 @@ export async function POST(request: NextRequest, context: RouteContext) {
       FROM event_attendance
       WHERE event_id = ${eventId} AND status = 'yes'
     `;
-    const [participantCount] = participantCountQuery as any[];
+    const participantCount = participantCountQuery[0];
 
     const voteCountQuery = await sql`
       SELECT COUNT(DISTINCT voter_user_id) as count
       FROM mvp_tiebreaker_votes
       WHERE tiebreaker_id = ${tiebreakerId}
     `;
-    const [voteCount] = voteCountQuery as any[];
+    const voteCount = voteCountQuery[0];
 
     const totalParticipants = parseInt(participantCount.count as string);
     const totalVotes = parseInt(voteCount.count as string);
@@ -129,11 +129,11 @@ export async function POST(request: NextRequest, context: RouteContext) {
         GROUP BY voted_user_id
         ORDER BY vote_count DESC
       `;
-      const voteCountsArray = voteCounts as Array<{ voted_user_id: number; vote_count: string | number }>;
+      const voteCountsArray = voteCounts as any;
 
       const maxVotes = parseInt(voteCountsArray[0].vote_count as string);
       const stillTied = voteCountsArray.filter(
-        (vc) => parseInt(vc.vote_count as string) === maxVotes
+        (vc: any) => parseInt(vc.vote_count as string) === maxVotes
       );
 
       if (Array.isArray(stillTied) && stillTied.length === 1) {

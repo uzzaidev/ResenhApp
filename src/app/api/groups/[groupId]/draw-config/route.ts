@@ -30,7 +30,7 @@ export async function GET(
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
-    const [membership] = membershipQuery as Array<{ role: string }>;
+    const membership = membershipQuery[0];
 
     if (!membership) {
       return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
@@ -48,7 +48,7 @@ export async function GET(
       FROM draw_configs
       WHERE group_id = ${groupId}
     `;
-    const [config] = configQuery as any[];
+    const config = configQuery[0];
 
     if (config) {
       return NextResponse.json({
@@ -112,7 +112,7 @@ export async function POST(
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
-    const [membership] = membershipQuery as Array<{ role: string }>;
+    const membership = membershipQuery[0];
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(

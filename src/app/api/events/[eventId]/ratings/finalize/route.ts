@@ -19,7 +19,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       INNER JOIN group_members gm ON e.group_id = gm.group_id
       WHERE e.id = ${eventId} AND gm.user_id = ${user.id}
     `;
-    const [membership] = membershipQuery as Array<{ role: string }>;
+    const membership = membershipQuery[0];
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -49,10 +49,10 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }
 
     // Identificar jogadores com o máximo de votos
-    const voteCountsArray = voteCounts as Array<{ voted_user_id: number; user_name: string; vote_count: string | number }>;
+    const voteCountsArray = voteCounts as any;
     const maxVotes = parseInt(voteCountsArray[0].vote_count as string);
     const tiedPlayers = voteCountsArray.filter(
-      (v) => parseInt(v.vote_count as string) === maxVotes
+      (v: any) => parseInt(v.vote_count as string) === maxVotes
     );
 
     // Se apenas 1 jogador tem o máximo, não há empate
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }
 
     // Há empate! Criar registro de tiebreaker
-    const tiedUserIds = Array.isArray(tiedPlayers) ? tiedPlayers.map((p) => p.voted_user_id) : [];
+    const tiedUserIds = Array.isArray(tiedPlayers) ? tiedPlayers.map((p: any) => p.voted_user_id) : [];
 
     // Verificar se já existe tiebreaker para este evento
     const existingTiebreakerQuery = await sql`
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       ORDER BY round DESC
       LIMIT 1
     `;
-    const [existingTiebreaker] = existingTiebreakerQuery as any[];
+    const existingTiebreaker = existingTiebreakerQuery[0];
 
     if (existingTiebreaker && existingTiebreaker.status !== "completed" && existingTiebreaker.status !== "admin_decided") {
       return NextResponse.json(
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       )
       RETURNING *
     `;
-    const [tiebreaker] = tiebreakerQuery as any[];
+    const tiebreaker = tiebreakerQuery[0];
 
     logger.info(
       { eventId, tiedUserIds, round, userId: user.id },
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
         id: tiebreaker.id,
         round,
         status: tiebreaker.status,
-        tiedPlayers: tiedPlayers.map((p) => ({
+        tiedPlayers: tiedPlayers.map((p: any) => ({
           userId: p.voted_user_id,
           userName: p.user_name,
           voteCount: maxVotes,

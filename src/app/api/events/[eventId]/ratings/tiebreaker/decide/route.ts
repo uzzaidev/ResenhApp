@@ -36,7 +36,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       INNER JOIN group_members gm ON e.group_id = gm.group_id
       WHERE e.id = ${eventId} AND gm.user_id = ${user.id}
     `;
-    const [membership] = membershipQuery as Array<{ role: string }>;
+    const membership = membershipQuery[0];
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       SELECT * FROM mvp_tiebreakers
       WHERE id = ${tiebreakerId} AND event_id = ${eventId}
     `;
-    const [tiebreaker] = tiebreakerQuery as any[];
+    const tiebreaker = tiebreakerQuery[0];
 
     if (!tiebreaker) {
       return NextResponse.json(

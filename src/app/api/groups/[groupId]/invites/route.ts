@@ -20,7 +20,7 @@ export async function GET(
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
-    const [membership] = membershipQuery as Array<{ role: string }>;
+    const membership = membershipQuery[0];
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -71,7 +71,7 @@ export async function POST(
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
-    const [membership] = membershipQuery as Array<{ role: string }>;
+    const membership = membershipQuery[0];
 
     if (!membership || membership.role !== "admin") {
       return NextResponse.json(
@@ -96,7 +96,7 @@ export async function POST(
       )
       RETURNING *
     `;
-    const [invite] = inviteQuery as any[];
+    const invite = inviteQuery[0];
 
     logger.info({ groupId, inviteId: invite.id, userId: user.id }, "Invite created");
 

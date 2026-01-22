@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
       VALUES (${name}, ${description || null}, ${privacy}, ${user.id})
       RETURNING *
     `;
-    const [group] = groupQuery as any[];
+    const group = groupQuery[0];
 
     // Add creator as admin
     await sql`
