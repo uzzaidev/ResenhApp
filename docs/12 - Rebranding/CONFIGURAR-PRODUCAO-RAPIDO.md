@@ -12,18 +12,36 @@
 
 ## 📋 CHECKLIST RÁPIDO
 
-### 1. Cloudflare (5 min)
+### 1. Cloudflare (10 min)
 
 **Acessar:** https://dash.cloudflare.com/ → Selecionar `uzzai.com.br` → DNS → Records
 
-**Adicionar novo registro:**
-- **Type:** `CNAME`
-- **Name:** `resenhapp`
-- **Content:** `cname.vercel-dns.com` (ou o CNAME fornecido pelo Vercel)
-- **Proxy status:** ✅ **Proxied** (nuvem laranja)
+**⚠️ IMPORTANTE:** O Vercel precisa de verificação via TXT record primeiro!
+
+**PASSO 1: Adicionar TXT Record (Verificação)**
+- **Type:** `TXT`
+- **Name:** `_vercel`
+- **Content:** `vc-domain-verify=resenhapp.uzzai.com.br,XXXXX`
+  - ⚠️ **Copiar valor exato do Vercel Dashboard**
+- **Proxy status:** ❌ **DNS only** (nuvem cinza)
 - **TTL:** Auto
 
-**✅ Resultado:** `resenhapp.uzzai.com.br` apontando para Vercel
+**PASSO 2: Adicionar CNAME Record (Subdomínio)**
+- **Type:** `CNAME`
+- **Name:** `resenhapp`
+- **Content:** `26835d59d72f3832.vercel-dns-017.com.`
+  - ⚠️ **Copiar valor exato do Vercel Dashboard**
+  - ⚠️ **Incluir ponto final (.) no final**
+- **Proxy status:** ❌ **DNS only** (inicialmente)
+- **TTL:** Auto
+
+**PASSO 3: Após Verificação (Opcional)**
+- Editar CNAME `resenhapp`
+- Ativar **Proxy** (nuvem laranja) para SSL e CDN
+
+**📋 Guia completo:** [VERIFICAR-DOMINIO-VERCEL.md](./VERIFICAR-DOMINIO-VERCEL.md)
+
+**✅ Resultado:** `resenhapp.uzzai.com.br` verificado e apontando para Vercel
 
 ---
 

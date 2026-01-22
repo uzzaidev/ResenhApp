@@ -199,14 +199,41 @@ Redefinir sua senha - ResenhApp
 1. **Ir em:** Project Settings → Domains
 2. **Adicionar domínio:**
    - `resenhapp.uzzai.com.br`
-3. **Configurar DNS no Cloudflare:**
-   - Vercel fornecerá um CNAME (ex: `cname.vercel-dns.com`)
-   - Adicionar registro CNAME no Cloudflare:
-     - **Type:** CNAME
-     - **Name:** `resenhapp`
-     - **Content:** (CNAME fornecido pelo Vercel)
-     - **Proxy:** ✅ Proxied
-   - Aguardar propagação DNS (5-10 minutos)
+3. **⚠️ VERIFICAÇÃO NECESSÁRIA:**
+   - O Vercel mostrará "Verification Needed"
+   - Isso acontece porque o domínio pode estar linkado a outra conta Vercel
+   - **Solução:** Adicionar registro TXT para verificar propriedade
+
+4. **Configurar DNS no Cloudflare:**
+
+   **PASSO 1: Adicionar TXT para Verificação (OBRIGATÓRIO)**
+   
+   - **Type:** `TXT`
+   - **Name:** `_vercel`
+   - **Content:** `vc-domain-verify=resenhapp.uzzai.com.br,b8bd4ba63defff40fd92`
+     - ⚠️ **IMPORTANTE:** Use o valor exato fornecido pelo Vercel (pode variar)
+   - **Proxy status:** ❌ **DNS only** (nuvem cinza - desabilitar proxy)
+   - **TTL:** Auto
+   
+   **PASSO 2: Adicionar CNAME para o Subdomínio**
+   
+   - **Type:** `CNAME`
+   - **Name:** `resenhapp`
+   - **Content:** `26835d59d72f3832.vercel-dns-017.com.`
+     - ⚠️ **IMPORTANTE:** Use o valor exato fornecido pelo Vercel (pode variar)
+   - **Proxy status:** ❌ **DNS only** (inicialmente, para verificação)
+   - **TTL:** Auto
+
+5. **Aguardar Verificação:**
+   - Aguardar 5-10 minutos para propagação DNS
+   - Voltar no Vercel e clicar em "Refresh"
+   - Após verificação, você pode ativar Proxy no Cloudflare (nuvem laranja)
+
+6. **Após Verificação (Opcional - Melhor Performance):**
+   - Voltar no Cloudflare
+   - Editar o registro CNAME `resenhapp`
+   - Ativar **Proxy** (nuvem laranja) para SSL automático e CDN
+   - O registro TXT pode ser removido após verificação completa
 
 ### 3.3 Configurar Variáveis de Ambiente
 

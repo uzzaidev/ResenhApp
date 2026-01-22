@@ -1449,8 +1449,9 @@ export function MetricCard({
   - **Status:** ⏳ Pendente
   - **Migration:** `20260127000004_rls_policies.sql`
 - [ ] Auth providers configurados
-  - **Status:** ⏳ Pendente
-  - **Próximo passo:** Habilitar Email/Password no Supabase Dashboard
+  - **Status:** ⏳ Em progresso
+  - **Próximo passo:** Configurar URLs de produção no Supabase
+  - **Guia:** [SETUP-AUTH-PROVIDERS.md](./SETUP-AUTH-PROVIDERS.md)
 - [x] ✅ 4 Storage buckets criados
   - **Status:** ✅ **COMPLETO**
   - **Buckets criados:** avatars, group-photos, venue-photos, receipts
