@@ -75,6 +75,7 @@ CREATE TABLE IF NOT EXISTS event_attendance (
   secondary_position VARCHAR(20) CHECK (secondary_position IN ('gk', 'defender', 'midfielder', 'forward')),
   checked_in_at TIMESTAMP,
   order_of_arrival INTEGER,
+  removed_by_self_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW(),
   UNIQUE(event_id, user_id)
@@ -188,6 +189,7 @@ CREATE INDEX IF NOT EXISTS idx_events_status ON events(status);
 CREATE INDEX IF NOT EXISTS idx_events_starts_at ON events(starts_at);
 CREATE INDEX IF NOT EXISTS idx_event_attendance_event ON event_attendance(event_id);
 CREATE INDEX IF NOT EXISTS idx_event_attendance_user ON event_attendance(user_id);
+CREATE INDEX IF NOT EXISTS idx_event_attendance_removed_by_self ON event_attendance(removed_by_self_at) WHERE removed_by_self_at IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_event_actions_event ON event_actions(event_id);
 CREATE INDEX IF NOT EXISTS idx_event_actions_type ON event_actions(action_type);
 CREATE INDEX IF NOT EXISTS idx_player_ratings_event ON player_ratings(event_id);
