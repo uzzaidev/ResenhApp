@@ -25,8 +25,21 @@ export function PendingPaymentsCard({ userId }: { userId: string }) {
   useEffect(() => {
     const fetchPendingCharges = async () => {
       try {
-        // Buscar contagem
-        const countRes = await fetch("/api/users/me/pending-charges-count");
+        // Buscar contagem com timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
+
+        const countRes = await fetch("/api/users/me/pending-charges-count", {
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (!countRes.ok) {
+          console.error("Failed to fetch pending charges:", countRes.status);
+          setLoading(false);
+          return;
+        }
+
         const countData = await countRes.json();
         setCount(countData.count || 0);
 
@@ -65,6 +78,9 @@ export function PendingPaymentsCard({ userId }: { userId: string }) {
         }
       } catch (error) {
         console.error("Error fetching pending charges:", error);
+        // Garantir que para de carregar mesmo com erro
+        setCount(0);
+        setCharges([]);
       } finally {
         setLoading(false);
       }
