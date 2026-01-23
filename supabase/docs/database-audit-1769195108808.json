@@ -1,0 +1,2542 @@
+{
+  "timestamp": "2026-01-23T19:04:29.771Z",
+  "database": "ResenhApp - Supabase",
+  "summary": {
+    "totalTables": 17,
+    "totalColumns": 126,
+    "totalRelationships": 27,
+    "totalIndexes": 55,
+    "totalRows": 8506,
+    "criticalIssues": 0,
+    "performanceIssues": 13,
+    "warnings": 1
+  },
+  "tables": {
+    "charges": {
+      "size": "24 kB",
+      "rowCount": 0,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "uuid_generate_v4()",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "group_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "type",
+          "type": "character varying",
+          "nullable": true,
+          "default": null,
+          "maxLength": 20,
+          "precision": null
+        },
+        {
+          "name": "amount_cents",
+          "type": "integer",
+          "nullable": false,
+          "default": null,
+          "maxLength": null,
+          "precision": 32
+        },
+        {
+          "name": "due_date",
+          "type": "date",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "status",
+          "type": "character varying",
+          "nullable": true,
+          "default": "'pending'::character varying",
+          "maxLength": 20,
+          "precision": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": "now()",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": "now()",
+          "maxLength": null,
+          "precision": null
+        }
+      ],
+      "primaryKeys": [
+        "id"
+      ],
+      "foreignKeys": [
+        {
+          "constraintName": "charges_group_id_fkey",
+          "column": "group_id",
+          "referencedTable": "groups",
+          "referencedColumn": "id",
+          "onDelete": "CASCADE",
+          "onUpdate": "NO ACTION"
+        },
+        {
+          "constraintName": "charges_user_id_fkey",
+          "column": "user_id",
+          "referencedTable": "users",
+          "referencedColumn": "id",
+          "onDelete": "CASCADE",
+          "onUpdate": "NO ACTION"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "charges_pkey",
+          "column": "id",
+          "type": "btree",
+          "unique": true,
+          "primary": true
+        },
+        {
+          "name": "idx_charges_due_date",
+          "column": "due_date",
+          "type": "btree",
+          "unique": false,
+          "primary": false
+        },
+        {
+          "name": "idx_charges_user_status",
+          "column": "user_id",
+          "type": "btree",
+          "unique": false,
+          "primary": false
+        },
+        {
+          "name": "idx_charges_user_status",
+          "column": "status",
+          "type": "btree",
+          "unique": false,
+          "primary": false
+        }
+      ],
+      "uniqueConstraints": [],
+      "checkConstraints": [
+        {
+          "name": "charges_status_check",
+          "clause": "((status)::text = ANY ((ARRAY['pending'::character varying, 'paid'::character varying, 'canceled'::character varying])::text[]))"
+        },
+        {
+          "name": "charges_type_check",
+          "clause": "((type)::text = ANY ((ARRAY['monthly'::character varying, 'daily'::character varying, 'fine'::character varying, 'other'::character varying])::text[]))"
+        },
+        {
+          "name": "2200_21937_1_not_null",
+          "clause": "id IS NOT NULL"
+        },
+        {
+          "name": "2200_21937_2_not_null",
+          "clause": "group_id IS NOT NULL"
+        },
+        {
+          "name": "2200_21937_3_not_null",
+          "clause": "user_id IS NOT NULL"
+        },
+        {
+          "name": "2200_21937_5_not_null",
+          "clause": "amount_cents IS NOT NULL"
+        }
+      ]
+    },
+    "draw_configs": {
+      "size": "16 kB",
+      "rowCount": 0,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "uuid_generate_v4()",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "group_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "players_per_team",
+          "type": "integer",
+          "nullable": true,
+          "default": "7",
+          "maxLength": null,
+          "precision": 32
+        },
+        {
+          "name": "reserves_per_team",
+          "type": "integer",
+          "nullable": true,
+          "default": "2",
+          "maxLength": null,
+          "precision": 32
+        },
+        {
+          "name": "gk_count",
+          "type": "integer",
+          "nullable": true,
+          "default": "1",
+          "maxLength": null,
+          "precision": 32
+        },
+        {
+          "name": "defender_count",
+          "type": "integer",
+          "nullable": true,
+          "default": "2",
+          "maxLength": null,
+          "precision": 32
+        },
+        {
+          "name": "midfielder_count",
+          "type": "integer",
+          "nullable": true,
+          "default": "2",
+          "maxLength": null,
+          "precision": 32
+        },
+        {
+          "name": "forward_count",
+          "type": "integer",
+          "nullable": true,
+          "default": "2",
+          "maxLength": null,
+          "precision": 32
+        },
+        {
+          "name": "created_by",
+          "type": "uuid",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": "now()",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": "now()",
+          "maxLength": null,
+          "precision": null
+        }
+      ],
+      "primaryKeys": [
+        "id"
+      ],
+      "foreignKeys": [
+        {
+          "constraintName": "draw_configs_created_by_fkey",
+          "column": "created_by",
+          "referencedTable": "users",
+          "referencedColumn": "id",
+          "onDelete": "SET NULL",
+          "onUpdate": "NO ACTION"
+        },
+        {
+          "constraintName": "draw_configs_group_id_fkey",
+          "column": "group_id",
+          "referencedTable": "groups",
+          "referencedColumn": "id",
+          "onDelete": "CASCADE",
+          "onUpdate": "NO ACTION"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "draw_configs_group_id_key",
+          "column": "group_id",
+          "type": "btree",
+          "unique": true,
+          "primary": false
+        },
+        {
+          "name": "draw_configs_pkey",
+          "column": "id",
+          "type": "btree",
+          "unique": true,
+          "primary": true
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "draw_configs_group_id_key",
+          "column": "group_id"
+        }
+      ],
+      "checkConstraints": [
+        {
+          "name": "draw_configs_defender_count_check",
+          "clause": "((defender_count >= 0) AND (defender_count <= 11))"
+        },
+        {
+          "name": "draw_configs_forward_count_check",
+          "clause": "((forward_count >= 0) AND (forward_count <= 11))"
+        },
+        {
+          "name": "draw_configs_gk_count_check",
+          "clause": "((gk_count >= 0) AND (gk_count <= 5))"
+        },
+        {
+          "name": "draw_configs_midfielder_count_check",
+          "clause": "((midfielder_count >= 0) AND (midfielder_count <= 11))"
+        },
+        {
+          "name": "draw_configs_players_per_team_check",
+          "clause": "((players_per_team >= 1) AND (players_per_team <= 22))"
+        },
+        {
+          "name": "draw_configs_reserves_per_team_check",
+          "clause": "((reserves_per_team >= 0) AND (reserves_per_team <= 11))"
+        },
+        {
+          "name": "2200_21958_1_not_null",
+          "clause": "id IS NOT NULL"
+        },
+        {
+          "name": "2200_21958_2_not_null",
+          "clause": "group_id IS NOT NULL"
+        }
+      ]
+    },
+    "event_actions": {
+      "size": "32 kB",
+      "rowCount": 0,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "uuid_generate_v4()",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "event_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "actor_user_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "action_type",
+          "type": "character varying",
+          "nullable": false,
+          "default": null,
+          "maxLength": 30,
+          "precision": null
+        },
+        {
+          "name": "subject_user_id",
+          "type": "uuid",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "team_id",
+          "type": "uuid",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "minute",
+          "type": "integer",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": 32
+        },
+        {
+          "name": "metadata",
+          "type": "jsonb",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": "now()",
+          "maxLength": null,
+          "precision": null
+        }
+      ],
+      "primaryKeys": [
+        "id"
+      ],
+      "foreignKeys": [
+        {
+          "constraintName": "event_actions_actor_user_id_fkey",
+          "column": "actor_user_id",
+          "referencedTable": "users",
+          "referencedColumn": "id",
+          "onDelete": "CASCADE",
+          "onUpdate": "NO ACTION"
+        },
+        {
+          "constraintName": "event_actions_event_id_fkey",
+          "column": "event_id",
+          "referencedTable": "events",
+          "referencedColumn": "id",
+          "onDelete": "CASCADE",
+          "onUpdate": "NO ACTION"
+        },
+        {
+          "constraintName": "event_actions_subject_user_id_fkey",
+          "column": "subject_user_id",
+          "referencedTable": "users",
+          "referencedColumn": "id",
+          "onDelete": "SET NULL",
+          "onUpdate": "NO ACTION"
+        },
+        {
+          "constraintName": "event_actions_team_id_fkey",
+          "column": "team_id",
+          "referencedTable": "teams",
+          "referencedColumn": "id",
+          "onDelete": "SET NULL",
+          "onUpdate": "NO ACTION"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "event_actions_pkey",
+          "column": "id",
+          "type": "btree",
+          "unique": true,
+          "primary": true
+        },
+        {
+          "name": "idx_event_actions_event",
+          "column": "event_id",
+          "type": "btree",
+          "unique": false,
+          "primary": false
+        },
+        {
+          "name": "idx_event_actions_type",
+          "column": "action_type",
+          "type": "btree",
+          "unique": false,
+          "primary": false
+        }
+      ],
+      "uniqueConstraints": [],
+      "checkConstraints": [
+        {
+          "name": "event_actions_action_type_check",
+          "clause": "((action_type)::text = ANY ((ARRAY['goal'::character varying, 'assist'::character varying, 'save'::character varying, 'tackle'::character varying, 'error'::character varying, 'yellow_card'::character varying, 'red_card'::character varying, 'period_start'::character varying, 'period_end'::character varying])::text[]))"
+        },
+        {
+          "name": "2200_21850_1_not_null",
+          "clause": "id IS NOT NULL"
+        },
+        {
+          "name": "2200_21850_2_not_null",
+          "clause": "event_id IS NOT NULL"
+        },
+        {
+          "name": "2200_21850_3_not_null",
+          "clause": "actor_user_id IS NOT NULL"
+        },
+        {
+          "name": "2200_21850_4_not_null",
+          "clause": "action_type IS NOT NULL"
+        }
+      ]
+    },
+    "event_attendance": {
+      "size": "40 kB",
+      "rowCount": 0,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "uuid_generate_v4()",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "event_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "role",
+          "type": "character varying",
+          "nullable": true,
+          "default": "'line'::character varying",
+          "maxLength": 20,
+          "precision": null
+        },
+        {
+          "name": "status",
+          "type": "character varying",
+          "nullable": true,
+          "default": "'no'::character varying",
+          "maxLength": 20,
+          "precision": null
+        },
+        {
+          "name": "preferred_position",
+          "type": "character varying",
+          "nullable": true,
+          "default": null,
+          "maxLength": 20,
+          "precision": null
+        },
+        {
+          "name": "secondary_position",
+          "type": "character varying",
+          "nullable": true,
+          "default": null,
+          "maxLength": 20,
+          "precision": null
+        },
+        {
+          "name": "checked_in_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "order_of_arrival",
+          "type": "integer",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": 32
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": "now()",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": "now()",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "removed_by_self_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        }
+      ],
+      "primaryKeys": [
+        "id"
+      ],
+      "foreignKeys": [
+        {
+          "constraintName": "event_attendance_event_id_fkey",
+          "column": "event_id",
+          "referencedTable": "events",
+          "referencedColumn": "id",
+          "onDelete": "CASCADE",
+          "onUpdate": "NO ACTION"
+        },
+        {
+          "constraintName": "event_attendance_user_id_fkey",
+          "column": "user_id",
+          "referencedTable": "users",
+          "referencedColumn": "id",
+          "onDelete": "CASCADE",
+          "onUpdate": "NO ACTION"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "event_attendance_event_id_user_id_key",
+          "column": "event_id",
+          "type": "btree",
+          "unique": true,
+          "primary": false
+        },
+        {
+          "name": "event_attendance_event_id_user_id_key",
+          "column": "user_id",
+          "type": "btree",
+          "unique": true,
+          "primary": false
+        },
+        {
+          "name": "event_attendance_pkey",
+          "column": "id",
+          "type": "btree",
+          "unique": true,
+          "primary": true
+        },
+        {
+          "name": "idx_event_attendance_event",
+          "column": "event_id",
+          "type": "btree",
+          "unique": false,
+          "primary": false
+        },
+        {
+          "name": "idx_event_attendance_removed_by_self",
+          "column": "removed_by_self_at",
+          "type": "btree",
+          "unique": false,
+          "primary": false
+        },
+        {
+          "name": "idx_event_attendance_user",
+          "column": "user_id",
+          "type": "btree",
+          "unique": false,
+          "primary": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "event_attendance_event_id_user_id_key",
+          "column": "event_id"
+        },
+        {
+          "name": "event_attendance_event_id_user_id_key",
+          "column": "user_id"
+        }
+      ],
+      "checkConstraints": [
+        {
+          "name": "event_attendance_preferred_position_check",
+          "clause": "((preferred_position)::text = ANY ((ARRAY['gk'::character varying, 'defender'::character varying, 'midfielder'::character varying, 'forward'::character varying])::text[]))"
+        },
+        {
+          "name": "event_attendance_role_check",
+          "clause": "((role)::text = ANY ((ARRAY['gk'::character varying, 'line'::character varying])::text[]))"
+        },
+        {
+          "name": "event_attendance_secondary_position_check",
+          "clause": "((secondary_position)::text = ANY ((ARRAY['gk'::character varying, 'defender'::character varying, 'midfielder'::character varying, 'forward'::character varying])::text[]))"
+        },
+        {
+          "name": "event_attendance_status_check",
+          "clause": "((status)::text = ANY ((ARRAY['yes'::character varying, 'no'::character varying, 'waitlist'::character varying, 'dm'::character varying])::text[]))"
+        },
+        {
+          "name": "2200_21789_1_not_null",
+          "clause": "id IS NOT NULL"
+        },
+        {
+          "name": "2200_21789_2_not_null",
+          "clause": "event_id IS NOT NULL"
+        },
+        {
+          "name": "2200_21789_3_not_null",
+          "clause": "user_id IS NOT NULL"
+        }
+      ]
+    },
+    "event_settings": {
+      "size": "16 kB",
+      "rowCount": 0,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "uuid_generate_v4()",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "group_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "min_players",
+          "type": "integer",
+          "nullable": true,
+          "default": "4",
+          "maxLength": null,
+          "precision": 32
+        },
+        {
+          "name": "max_players",
+          "type": "integer",
+          "nullable": true,
+          "default": "22",
+          "maxLength": null,
+          "precision": 32
+        },
+        {
+          "name": "max_waitlist",
+          "type": "integer",
+          "nullable": true,
+          "default": "10",
+          "maxLength": null,
+          "precision": 32
+        },
+        {
+          "name": "created_by",
+          "type": "uuid",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": "now()",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": "now()",
+          "maxLength": null,
+          "precision": null
+        }
+      ],
+      "primaryKeys": [
+        "id"
+      ],
+      "foreignKeys": [
+        {
+          "constraintName": "event_settings_created_by_fkey",
+          "column": "created_by",
+          "referencedTable": "users",
+          "referencedColumn": "id",
+          "onDelete": "SET NULL",
+          "onUpdate": "NO ACTION"
+        },
+        {
+          "constraintName": "event_settings_group_id_fkey",
+          "column": "group_id",
+          "referencedTable": "groups",
+          "referencedColumn": "id",
+          "onDelete": "CASCADE",
+          "onUpdate": "NO ACTION"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "event_settings_group_id_key",
+          "column": "group_id",
+          "type": "btree",
+          "unique": true,
+          "primary": false
+        },
+        {
+          "name": "event_settings_pkey",
+          "column": "id",
+          "type": "btree",
+          "unique": true,
+          "primary": true
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "event_settings_group_id_key",
+          "column": "group_id"
+        }
+      ],
+      "checkConstraints": [
+        {
+          "name": "event_settings_max_players_check",
+          "clause": "((max_players >= 1) AND (max_players <= 50))"
+        },
+        {
+          "name": "event_settings_max_waitlist_check",
+          "clause": "((max_waitlist >= 0) AND (max_waitlist <= 50))"
+        },
+        {
+          "name": "event_settings_min_players_check",
+          "clause": "((min_players >= 1) AND (min_players <= 22))"
+        },
+        {
+          "name": "2200_22003_1_not_null",
+          "clause": "id IS NOT NULL"
+        },
+        {
+          "name": "2200_22003_2_not_null",
+          "clause": "group_id IS NOT NULL"
+        }
+      ]
+    },
+    "events": {
+      "size": "72 kB",
+      "rowCount": 1,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "uuid_generate_v4()",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "group_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "starts_at",
+          "type": "timestamp without time zone",
+          "nullable": false,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "venue_id",
+          "type": "uuid",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "max_players",
+          "type": "integer",
+          "nullable": true,
+          "default": "10",
+          "maxLength": null,
+          "precision": 32
+        },
+        {
+          "name": "max_goalkeepers",
+          "type": "integer",
+          "nullable": true,
+          "default": "2",
+          "maxLength": null,
+          "precision": 32
+        },
+        {
+          "name": "status",
+          "type": "character varying",
+          "nullable": true,
+          "default": "'scheduled'::character varying",
+          "maxLength": 20,
+          "precision": null
+        },
+        {
+          "name": "waitlist_enabled",
+          "type": "boolean",
+          "nullable": true,
+          "default": "true",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "created_by",
+          "type": "uuid",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": "now()",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": "now()",
+          "maxLength": null,
+          "precision": null
+        }
+      ],
+      "primaryKeys": [
+        "id"
+      ],
+      "foreignKeys": [
+        {
+          "constraintName": "events_created_by_fkey",
+          "column": "created_by",
+          "referencedTable": "users",
+          "referencedColumn": "id",
+          "onDelete": "SET NULL",
+          "onUpdate": "NO ACTION"
+        },
+        {
+          "constraintName": "events_group_id_fkey",
+          "column": "group_id",
+          "referencedTable": "groups",
+          "referencedColumn": "id",
+          "onDelete": "CASCADE",
+          "onUpdate": "NO ACTION"
+        },
+        {
+          "constraintName": "events_venue_id_fkey",
+          "column": "venue_id",
+          "referencedTable": "venues",
+          "referencedColumn": "id",
+          "onDelete": "SET NULL",
+          "onUpdate": "NO ACTION"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "events_pkey",
+          "column": "id",
+          "type": "btree",
+          "unique": true,
+          "primary": true
+        },
+        {
+          "name": "idx_events_group",
+          "column": "group_id",
+          "type": "btree",
+          "unique": false,
+          "primary": false
+        },
+        {
+          "name": "idx_events_starts_at",
+          "column": "starts_at",
+          "type": "btree",
+          "unique": false,
+          "primary": false
+        },
+        {
+          "name": "idx_events_status",
+          "column": "status",
+          "type": "btree",
+          "unique": false,
+          "primary": false
+        }
+      ],
+      "uniqueConstraints": [],
+      "checkConstraints": [
+        {
+          "name": "events_status_check",
+          "clause": "((status)::text = ANY ((ARRAY['scheduled'::character varying, 'live'::character varying, 'finished'::character varying, 'canceled'::character varying])::text[]))"
+        },
+        {
+          "name": "2200_21761_1_not_null",
+          "clause": "id IS NOT NULL"
+        },
+        {
+          "name": "2200_21761_2_not_null",
+          "clause": "group_id IS NOT NULL"
+        },
+        {
+          "name": "2200_21761_3_not_null",
+          "clause": "starts_at IS NOT NULL"
+        }
+      ]
+    },
+    "group_members": {
+      "size": "72 kB",
+      "rowCount": 1,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "uuid_generate_v4()",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "group_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "role",
+          "type": "character varying",
+          "nullable": true,
+          "default": "'member'::character varying",
+          "maxLength": 20,
+          "precision": null
+        },
+        {
+          "name": "is_goalkeeper",
+          "type": "boolean",
+          "nullable": true,
+          "default": "false",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "base_rating",
+          "type": "integer",
+          "nullable": true,
+          "default": "5",
+          "maxLength": null,
+          "precision": 32
+        },
+        {
+          "name": "joined_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": "now()",
+          "maxLength": null,
+          "precision": null
+        }
+      ],
+      "primaryKeys": [
+        "id"
+      ],
+      "foreignKeys": [
+        {
+          "constraintName": "group_members_group_id_fkey",
+          "column": "group_id",
+          "referencedTable": "groups",
+          "referencedColumn": "id",
+          "onDelete": "CASCADE",
+          "onUpdate": "NO ACTION"
+        },
+        {
+          "constraintName": "group_members_user_id_fkey",
+          "column": "user_id",
+          "referencedTable": "users",
+          "referencedColumn": "id",
+          "onDelete": "CASCADE",
+          "onUpdate": "NO ACTION"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "group_members_pkey",
+          "column": "id",
+          "type": "btree",
+          "unique": true,
+          "primary": true
+        },
+        {
+          "name": "group_members_user_id_group_id_key",
+          "column": "user_id",
+          "type": "btree",
+          "unique": true,
+          "primary": false
+        },
+        {
+          "name": "group_members_user_id_group_id_key",
+          "column": "group_id",
+          "type": "btree",
+          "unique": true,
+          "primary": false
+        },
+        {
+          "name": "idx_group_members_group",
+          "column": "group_id",
+          "type": "btree",
+          "unique": false,
+          "primary": false
+        },
+        {
+          "name": "idx_group_members_user",
+          "column": "user_id",
+          "type": "btree",
+          "unique": false,
+          "primary": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "group_members_user_id_group_id_key",
+          "column": "user_id"
+        },
+        {
+          "name": "group_members_user_id_group_id_key",
+          "column": "group_id"
+        }
+      ],
+      "checkConstraints": [
+        {
+          "name": "group_members_base_rating_check",
+          "clause": "((base_rating >= 0) AND (base_rating <= 10))"
+        },
+        {
+          "name": "group_members_role_check",
+          "clause": "((role)::text = ANY ((ARRAY['admin'::character varying, 'member'::character varying])::text[]))"
+        },
+        {
+          "name": "2200_21723_1_not_null",
+          "clause": "id IS NOT NULL"
+        },
+        {
+          "name": "2200_21723_2_not_null",
+          "clause": "user_id IS NOT NULL"
+        },
+        {
+          "name": "2200_21723_3_not_null",
+          "clause": "group_id IS NOT NULL"
+        }
+      ]
+    },
+    "groups": {
+      "size": "32 kB",
+      "rowCount": 1,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "uuid_generate_v4()",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "name",
+          "type": "character varying",
+          "nullable": false,
+          "default": null,
+          "maxLength": 255,
+          "precision": null
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "privacy",
+          "type": "character varying",
+          "nullable": true,
+          "default": "'private'::character varying",
+          "maxLength": 20,
+          "precision": null
+        },
+        {
+          "name": "photo_url",
+          "type": "text",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "created_by",
+          "type": "uuid",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": "now()",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": "now()",
+          "maxLength": null,
+          "precision": null
+        }
+      ],
+      "primaryKeys": [
+        "id"
+      ],
+      "foreignKeys": [
+        {
+          "constraintName": "groups_created_by_fkey",
+          "column": "created_by",
+          "referencedTable": "users",
+          "referencedColumn": "id",
+          "onDelete": "SET NULL",
+          "onUpdate": "NO ACTION"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "groups_pkey",
+          "column": "id",
+          "type": "btree",
+          "unique": true,
+          "primary": true
+        }
+      ],
+      "uniqueConstraints": [],
+      "checkConstraints": [
+        {
+          "name": "groups_privacy_check",
+          "clause": "((privacy)::text = ANY ((ARRAY['private'::character varying, 'public'::character varying])::text[]))"
+        },
+        {
+          "name": "2200_21706_1_not_null",
+          "clause": "id IS NOT NULL"
+        },
+        {
+          "name": "2200_21706_2_not_null",
+          "clause": "name IS NOT NULL"
+        }
+      ]
+    },
+    "invites": {
+      "size": "40 kB",
+      "rowCount": 1,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "uuid_generate_v4()",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "group_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "code",
+          "type": "character varying",
+          "nullable": false,
+          "default": null,
+          "maxLength": 20,
+          "precision": null
+        },
+        {
+          "name": "created_by",
+          "type": "uuid",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "expires_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "max_uses",
+          "type": "integer",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": 32
+        },
+        {
+          "name": "used_count",
+          "type": "integer",
+          "nullable": true,
+          "default": "0",
+          "maxLength": null,
+          "precision": 32
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": "now()",
+          "maxLength": null,
+          "precision": null
+        }
+      ],
+      "primaryKeys": [
+        "id"
+      ],
+      "foreignKeys": [
+        {
+          "constraintName": "invites_created_by_fkey",
+          "column": "created_by",
+          "referencedTable": "users",
+          "referencedColumn": "id",
+          "onDelete": "SET NULL",
+          "onUpdate": "NO ACTION"
+        },
+        {
+          "constraintName": "invites_group_id_fkey",
+          "column": "group_id",
+          "referencedTable": "groups",
+          "referencedColumn": "id",
+          "onDelete": "CASCADE",
+          "onUpdate": "NO ACTION"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "invites_code_key",
+          "column": "code",
+          "type": "btree",
+          "unique": true,
+          "primary": false
+        },
+        {
+          "name": "invites_pkey",
+          "column": "id",
+          "type": "btree",
+          "unique": true,
+          "primary": true
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "invites_code_key",
+          "column": "code"
+        }
+      ],
+      "checkConstraints": [
+        {
+          "name": "2200_21907_1_not_null",
+          "clause": "id IS NOT NULL"
+        },
+        {
+          "name": "2200_21907_2_not_null",
+          "clause": "group_id IS NOT NULL"
+        },
+        {
+          "name": "2200_21907_3_not_null",
+          "clause": "code IS NOT NULL"
+        }
+      ]
+    },
+    "player_ratings": {
+      "size": "40 kB",
+      "rowCount": 0,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "uuid_generate_v4()",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "event_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "rater_user_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "rated_user_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "score",
+          "type": "integer",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": 32
+        },
+        {
+          "name": "tags",
+          "type": "ARRAY",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": "now()",
+          "maxLength": null,
+          "precision": null
+        }
+      ],
+      "primaryKeys": [
+        "id"
+      ],
+      "foreignKeys": [
+        {
+          "constraintName": "player_ratings_event_id_fkey",
+          "column": "event_id",
+          "referencedTable": "events",
+          "referencedColumn": "id",
+          "onDelete": "CASCADE",
+          "onUpdate": "NO ACTION"
+        },
+        {
+          "constraintName": "player_ratings_rated_user_id_fkey",
+          "column": "rated_user_id",
+          "referencedTable": "users",
+          "referencedColumn": "id",
+          "onDelete": "CASCADE",
+          "onUpdate": "NO ACTION"
+        },
+        {
+          "constraintName": "player_ratings_rater_user_id_fkey",
+          "column": "rater_user_id",
+          "referencedTable": "users",
+          "referencedColumn": "id",
+          "onDelete": "CASCADE",
+          "onUpdate": "NO ACTION"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "idx_player_ratings_event",
+          "column": "event_id",
+          "type": "btree",
+          "unique": false,
+          "primary": false
+        },
+        {
+          "name": "idx_player_ratings_rated",
+          "column": "rated_user_id",
+          "type": "btree",
+          "unique": false,
+          "primary": false
+        },
+        {
+          "name": "player_ratings_event_id_rater_user_id_rated_user_id_key",
+          "column": "event_id",
+          "type": "btree",
+          "unique": true,
+          "primary": false
+        },
+        {
+          "name": "player_ratings_event_id_rater_user_id_rated_user_id_key",
+          "column": "rater_user_id",
+          "type": "btree",
+          "unique": true,
+          "primary": false
+        },
+        {
+          "name": "player_ratings_event_id_rater_user_id_rated_user_id_key",
+          "column": "rated_user_id",
+          "type": "btree",
+          "unique": true,
+          "primary": false
+        },
+        {
+          "name": "player_ratings_pkey",
+          "column": "id",
+          "type": "btree",
+          "unique": true,
+          "primary": true
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "player_ratings_event_id_rater_user_id_rated_user_id_key",
+          "column": "event_id"
+        },
+        {
+          "name": "player_ratings_event_id_rater_user_id_rated_user_id_key",
+          "column": "rater_user_id"
+        },
+        {
+          "name": "player_ratings_event_id_rater_user_id_rated_user_id_key",
+          "column": "rated_user_id"
+        }
+      ],
+      "checkConstraints": [
+        {
+          "name": "player_ratings_score_check",
+          "clause": "((score >= 0) AND (score <= 10))"
+        },
+        {
+          "name": "2200_21880_1_not_null",
+          "clause": "id IS NOT NULL"
+        },
+        {
+          "name": "2200_21880_2_not_null",
+          "clause": "event_id IS NOT NULL"
+        },
+        {
+          "name": "2200_21880_3_not_null",
+          "clause": "rater_user_id IS NOT NULL"
+        },
+        {
+          "name": "2200_21880_4_not_null",
+          "clause": "rated_user_id IS NOT NULL"
+        }
+      ]
+    },
+    "spatial_ref_sys": {
+      "size": "7144 kB",
+      "rowCount": 8500,
+      "columns": [
+        {
+          "name": "srid",
+          "type": "integer",
+          "nullable": false,
+          "default": null,
+          "maxLength": null,
+          "precision": 32
+        },
+        {
+          "name": "auth_name",
+          "type": "character varying",
+          "nullable": true,
+          "default": null,
+          "maxLength": 256,
+          "precision": null
+        },
+        {
+          "name": "auth_srid",
+          "type": "integer",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": 32
+        },
+        {
+          "name": "srtext",
+          "type": "character varying",
+          "nullable": true,
+          "default": null,
+          "maxLength": 2048,
+          "precision": null
+        },
+        {
+          "name": "proj4text",
+          "type": "character varying",
+          "nullable": true,
+          "default": null,
+          "maxLength": 2048,
+          "precision": null
+        }
+      ],
+      "primaryKeys": [
+        "srid"
+      ],
+      "foreignKeys": [],
+      "indexes": [
+        {
+          "name": "spatial_ref_sys_pkey",
+          "column": "srid",
+          "type": "btree",
+          "unique": true,
+          "primary": true
+        }
+      ],
+      "uniqueConstraints": [],
+      "checkConstraints": []
+    },
+    "team_members": {
+      "size": "16 kB",
+      "rowCount": 0,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "uuid_generate_v4()",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "team_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "position",
+          "type": "character varying",
+          "nullable": true,
+          "default": "'line'::character varying",
+          "maxLength": 20,
+          "precision": null
+        },
+        {
+          "name": "starter",
+          "type": "boolean",
+          "nullable": true,
+          "default": "true",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": "now()",
+          "maxLength": null,
+          "precision": null
+        }
+      ],
+      "primaryKeys": [
+        "id"
+      ],
+      "foreignKeys": [
+        {
+          "constraintName": "team_members_team_id_fkey",
+          "column": "team_id",
+          "referencedTable": "teams",
+          "referencedColumn": "id",
+          "onDelete": "CASCADE",
+          "onUpdate": "NO ACTION"
+        },
+        {
+          "constraintName": "team_members_user_id_fkey",
+          "column": "user_id",
+          "referencedTable": "users",
+          "referencedColumn": "id",
+          "onDelete": "CASCADE",
+          "onUpdate": "NO ACTION"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "team_members_pkey",
+          "column": "id",
+          "type": "btree",
+          "unique": true,
+          "primary": true
+        },
+        {
+          "name": "team_members_team_id_user_id_key",
+          "column": "team_id",
+          "type": "btree",
+          "unique": true,
+          "primary": false
+        },
+        {
+          "name": "team_members_team_id_user_id_key",
+          "column": "user_id",
+          "type": "btree",
+          "unique": true,
+          "primary": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "team_members_team_id_user_id_key",
+          "column": "team_id"
+        },
+        {
+          "name": "team_members_team_id_user_id_key",
+          "column": "user_id"
+        }
+      ],
+      "checkConstraints": [
+        {
+          "name": "team_members_position_check",
+          "clause": "((\"position\")::text = ANY ((ARRAY['gk'::character varying, 'defender'::character varying, 'midfielder'::character varying, 'forward'::character varying, 'line'::character varying])::text[]))"
+        },
+        {
+          "name": "2200_21828_1_not_null",
+          "clause": "id IS NOT NULL"
+        },
+        {
+          "name": "2200_21828_2_not_null",
+          "clause": "team_id IS NOT NULL"
+        },
+        {
+          "name": "2200_21828_3_not_null",
+          "clause": "user_id IS NOT NULL"
+        }
+      ]
+    },
+    "teams": {
+      "size": "8192 bytes",
+      "rowCount": 0,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "uuid_generate_v4()",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "event_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "name",
+          "type": "character varying",
+          "nullable": false,
+          "default": null,
+          "maxLength": 50,
+          "precision": null
+        },
+        {
+          "name": "seed",
+          "type": "integer",
+          "nullable": true,
+          "default": "0",
+          "maxLength": null,
+          "precision": 32
+        },
+        {
+          "name": "is_winner",
+          "type": "boolean",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": "now()",
+          "maxLength": null,
+          "precision": null
+        }
+      ],
+      "primaryKeys": [
+        "id"
+      ],
+      "foreignKeys": [
+        {
+          "constraintName": "teams_event_id_fkey",
+          "column": "event_id",
+          "referencedTable": "events",
+          "referencedColumn": "id",
+          "onDelete": "CASCADE",
+          "onUpdate": "NO ACTION"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "teams_pkey",
+          "column": "id",
+          "type": "btree",
+          "unique": true,
+          "primary": true
+        }
+      ],
+      "uniqueConstraints": [],
+      "checkConstraints": [
+        {
+          "name": "2200_21815_1_not_null",
+          "clause": "id IS NOT NULL"
+        },
+        {
+          "name": "2200_21815_2_not_null",
+          "clause": "event_id IS NOT NULL"
+        },
+        {
+          "name": "2200_21815_3_not_null",
+          "clause": "name IS NOT NULL"
+        }
+      ]
+    },
+    "users": {
+      "size": "48 kB",
+      "rowCount": 1,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "uuid_generate_v4()",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "name",
+          "type": "character varying",
+          "nullable": false,
+          "default": null,
+          "maxLength": 255,
+          "precision": null
+        },
+        {
+          "name": "email",
+          "type": "character varying",
+          "nullable": false,
+          "default": null,
+          "maxLength": 255,
+          "precision": null
+        },
+        {
+          "name": "email_verified",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "password_hash",
+          "type": "text",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "image",
+          "type": "text",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": "now()",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": "now()",
+          "maxLength": null,
+          "precision": null
+        }
+      ],
+      "primaryKeys": [
+        "id"
+      ],
+      "foreignKeys": [],
+      "indexes": [
+        {
+          "name": "confirmation_token_idx",
+          "column": "confirmation_token",
+          "type": "btree",
+          "unique": true,
+          "primary": false
+        },
+        {
+          "name": "email_change_token_current_idx",
+          "column": "email_change_token_current",
+          "type": "btree",
+          "unique": true,
+          "primary": false
+        },
+        {
+          "name": "email_change_token_new_idx",
+          "column": "email_change_token_new",
+          "type": "btree",
+          "unique": true,
+          "primary": false
+        },
+        {
+          "name": "reauthentication_token_idx",
+          "column": "reauthentication_token",
+          "type": "btree",
+          "unique": true,
+          "primary": false
+        },
+        {
+          "name": "recovery_token_idx",
+          "column": "recovery_token",
+          "type": "btree",
+          "unique": true,
+          "primary": false
+        },
+        {
+          "name": "users_email_key",
+          "column": "email",
+          "type": "btree",
+          "unique": true,
+          "primary": false
+        },
+        {
+          "name": "users_email_partial_key",
+          "column": "email",
+          "type": "btree",
+          "unique": true,
+          "primary": false
+        },
+        {
+          "name": "users_instance_id_email_idx",
+          "column": "instance_id",
+          "type": "btree",
+          "unique": false,
+          "primary": false
+        },
+        {
+          "name": "users_instance_id_idx",
+          "column": "instance_id",
+          "type": "btree",
+          "unique": false,
+          "primary": false
+        },
+        {
+          "name": "users_is_anonymous_idx",
+          "column": "is_anonymous",
+          "type": "btree",
+          "unique": false,
+          "primary": false
+        },
+        {
+          "name": "users_phone_key",
+          "column": "phone",
+          "type": "btree",
+          "unique": true,
+          "primary": false
+        },
+        {
+          "name": "users_pkey",
+          "column": "id",
+          "type": "btree",
+          "unique": true,
+          "primary": true
+        },
+        {
+          "name": "users_pkey",
+          "column": "id",
+          "type": "btree",
+          "unique": true,
+          "primary": true
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "users_email_key",
+          "column": "email"
+        }
+      ],
+      "checkConstraints": [
+        {
+          "name": "2200_21694_1_not_null",
+          "clause": "id IS NOT NULL"
+        },
+        {
+          "name": "2200_21694_2_not_null",
+          "clause": "name IS NOT NULL"
+        },
+        {
+          "name": "2200_21694_3_not_null",
+          "clause": "email IS NOT NULL"
+        }
+      ]
+    },
+    "venues": {
+      "size": "16 kB",
+      "rowCount": 0,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "uuid_generate_v4()",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "group_id",
+          "type": "uuid",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "name",
+          "type": "character varying",
+          "nullable": false,
+          "default": null,
+          "maxLength": 255,
+          "precision": null
+        },
+        {
+          "name": "address",
+          "type": "text",
+          "nullable": true,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": "now()",
+          "maxLength": null,
+          "precision": null
+        }
+      ],
+      "primaryKeys": [
+        "id"
+      ],
+      "foreignKeys": [
+        {
+          "constraintName": "venues_group_id_fkey",
+          "column": "group_id",
+          "referencedTable": "groups",
+          "referencedColumn": "id",
+          "onDelete": "CASCADE",
+          "onUpdate": "NO ACTION"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "venues_pkey",
+          "column": "id",
+          "type": "btree",
+          "unique": true,
+          "primary": true
+        }
+      ],
+      "uniqueConstraints": [],
+      "checkConstraints": [
+        {
+          "name": "2200_21747_1_not_null",
+          "clause": "id IS NOT NULL"
+        },
+        {
+          "name": "2200_21747_3_not_null",
+          "clause": "name IS NOT NULL"
+        }
+      ]
+    },
+    "wallets": {
+      "size": "24 kB",
+      "rowCount": 1,
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "uuid_generate_v4()",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "owner_type",
+          "type": "character varying",
+          "nullable": true,
+          "default": null,
+          "maxLength": 10,
+          "precision": null
+        },
+        {
+          "name": "owner_id",
+          "type": "uuid",
+          "nullable": false,
+          "default": null,
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "balance_cents",
+          "type": "integer",
+          "nullable": true,
+          "default": "0",
+          "maxLength": null,
+          "precision": 32
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": "now()",
+          "maxLength": null,
+          "precision": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp without time zone",
+          "nullable": true,
+          "default": "now()",
+          "maxLength": null,
+          "precision": null
+        }
+      ],
+      "primaryKeys": [
+        "id"
+      ],
+      "foreignKeys": [],
+      "indexes": [
+        {
+          "name": "wallets_pkey",
+          "column": "id",
+          "type": "btree",
+          "unique": true,
+          "primary": true
+        }
+      ],
+      "uniqueConstraints": [],
+      "checkConstraints": [
+        {
+          "name": "wallets_owner_type_check",
+          "clause": "((owner_type)::text = ANY ((ARRAY['group'::character varying, 'user'::character varying])::text[]))"
+        },
+        {
+          "name": "2200_21927_1_not_null",
+          "clause": "id IS NOT NULL"
+        },
+        {
+          "name": "2200_21927_3_not_null",
+          "clause": "owner_id IS NOT NULL"
+        }
+      ]
+    }
+  },
+  "relationships": [
+    {
+      "from": "charges",
+      "fromColumn": "group_id",
+      "to": "groups",
+      "toColumn": "id",
+      "onDelete": "CASCADE",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "charges",
+      "fromColumn": "user_id",
+      "to": "users",
+      "toColumn": "id",
+      "onDelete": "CASCADE",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "draw_configs",
+      "fromColumn": "created_by",
+      "to": "users",
+      "toColumn": "id",
+      "onDelete": "SET NULL",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "draw_configs",
+      "fromColumn": "group_id",
+      "to": "groups",
+      "toColumn": "id",
+      "onDelete": "CASCADE",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "event_actions",
+      "fromColumn": "actor_user_id",
+      "to": "users",
+      "toColumn": "id",
+      "onDelete": "CASCADE",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "event_actions",
+      "fromColumn": "event_id",
+      "to": "events",
+      "toColumn": "id",
+      "onDelete": "CASCADE",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "event_actions",
+      "fromColumn": "subject_user_id",
+      "to": "users",
+      "toColumn": "id",
+      "onDelete": "SET NULL",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "event_actions",
+      "fromColumn": "team_id",
+      "to": "teams",
+      "toColumn": "id",
+      "onDelete": "SET NULL",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "event_attendance",
+      "fromColumn": "event_id",
+      "to": "events",
+      "toColumn": "id",
+      "onDelete": "CASCADE",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "event_attendance",
+      "fromColumn": "user_id",
+      "to": "users",
+      "toColumn": "id",
+      "onDelete": "CASCADE",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "event_settings",
+      "fromColumn": "created_by",
+      "to": "users",
+      "toColumn": "id",
+      "onDelete": "SET NULL",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "event_settings",
+      "fromColumn": "group_id",
+      "to": "groups",
+      "toColumn": "id",
+      "onDelete": "CASCADE",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "events",
+      "fromColumn": "created_by",
+      "to": "users",
+      "toColumn": "id",
+      "onDelete": "SET NULL",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "events",
+      "fromColumn": "group_id",
+      "to": "groups",
+      "toColumn": "id",
+      "onDelete": "CASCADE",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "events",
+      "fromColumn": "venue_id",
+      "to": "venues",
+      "toColumn": "id",
+      "onDelete": "SET NULL",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "group_members",
+      "fromColumn": "group_id",
+      "to": "groups",
+      "toColumn": "id",
+      "onDelete": "CASCADE",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "group_members",
+      "fromColumn": "user_id",
+      "to": "users",
+      "toColumn": "id",
+      "onDelete": "CASCADE",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "groups",
+      "fromColumn": "created_by",
+      "to": "users",
+      "toColumn": "id",
+      "onDelete": "SET NULL",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "invites",
+      "fromColumn": "created_by",
+      "to": "users",
+      "toColumn": "id",
+      "onDelete": "SET NULL",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "invites",
+      "fromColumn": "group_id",
+      "to": "groups",
+      "toColumn": "id",
+      "onDelete": "CASCADE",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "player_ratings",
+      "fromColumn": "event_id",
+      "to": "events",
+      "toColumn": "id",
+      "onDelete": "CASCADE",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "player_ratings",
+      "fromColumn": "rated_user_id",
+      "to": "users",
+      "toColumn": "id",
+      "onDelete": "CASCADE",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "player_ratings",
+      "fromColumn": "rater_user_id",
+      "to": "users",
+      "toColumn": "id",
+      "onDelete": "CASCADE",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "team_members",
+      "fromColumn": "team_id",
+      "to": "teams",
+      "toColumn": "id",
+      "onDelete": "CASCADE",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "team_members",
+      "fromColumn": "user_id",
+      "to": "users",
+      "toColumn": "id",
+      "onDelete": "CASCADE",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "teams",
+      "fromColumn": "event_id",
+      "to": "events",
+      "toColumn": "id",
+      "onDelete": "CASCADE",
+      "onUpdate": "NO ACTION"
+    },
+    {
+      "from": "venues",
+      "fromColumn": "group_id",
+      "to": "groups",
+      "toColumn": "id",
+      "onDelete": "CASCADE",
+      "onUpdate": "NO ACTION"
+    }
+  ],
+  "indexes": [],
+  "constraints": [],
+  "potentialIssues": [
+    {
+      "type": "ORPHAN_TABLE",
+      "severity": "WARNING",
+      "table": "wallets",
+      "message": "Tabela wallets não tem relacionamentos com outras tabelas"
+    },
+    {
+      "type": "MISSING_INDEX_ON_FK",
+      "severity": "PERFORMANCE",
+      "table": "charges",
+      "column": "group_id",
+      "message": "Foreign key group_id não tem índice, pode impactar performance"
+    },
+    {
+      "type": "MISSING_INDEX_ON_FK",
+      "severity": "PERFORMANCE",
+      "table": "draw_configs",
+      "column": "created_by",
+      "message": "Foreign key created_by não tem índice, pode impactar performance"
+    },
+    {
+      "type": "MISSING_INDEX_ON_FK",
+      "severity": "PERFORMANCE",
+      "table": "event_actions",
+      "column": "actor_user_id",
+      "message": "Foreign key actor_user_id não tem índice, pode impactar performance"
+    },
+    {
+      "type": "MISSING_INDEX_ON_FK",
+      "severity": "PERFORMANCE",
+      "table": "event_actions",
+      "column": "subject_user_id",
+      "message": "Foreign key subject_user_id não tem índice, pode impactar performance"
+    },
+    {
+      "type": "MISSING_INDEX_ON_FK",
+      "severity": "PERFORMANCE",
+      "table": "event_actions",
+      "column": "team_id",
+      "message": "Foreign key team_id não tem índice, pode impactar performance"
+    },
+    {
+      "type": "MISSING_INDEX_ON_FK",
+      "severity": "PERFORMANCE",
+      "table": "event_settings",
+      "column": "created_by",
+      "message": "Foreign key created_by não tem índice, pode impactar performance"
+    },
+    {
+      "type": "MISSING_INDEX_ON_FK",
+      "severity": "PERFORMANCE",
+      "table": "events",
+      "column": "created_by",
+      "message": "Foreign key created_by não tem índice, pode impactar performance"
+    },
+    {
+      "type": "MISSING_INDEX_ON_FK",
+      "severity": "PERFORMANCE",
+      "table": "events",
+      "column": "venue_id",
+      "message": "Foreign key venue_id não tem índice, pode impactar performance"
+    },
+    {
+      "type": "MISSING_INDEX_ON_FK",
+      "severity": "PERFORMANCE",
+      "table": "groups",
+      "column": "created_by",
+      "message": "Foreign key created_by não tem índice, pode impactar performance"
+    },
+    {
+      "type": "MISSING_INDEX_ON_FK",
+      "severity": "PERFORMANCE",
+      "table": "invites",
+      "column": "created_by",
+      "message": "Foreign key created_by não tem índice, pode impactar performance"
+    },
+    {
+      "type": "MISSING_INDEX_ON_FK",
+      "severity": "PERFORMANCE",
+      "table": "invites",
+      "column": "group_id",
+      "message": "Foreign key group_id não tem índice, pode impactar performance"
+    },
+    {
+      "type": "MISSING_INDEX_ON_FK",
+      "severity": "PERFORMANCE",
+      "table": "teams",
+      "column": "event_id",
+      "message": "Foreign key event_id não tem índice, pode impactar performance"
+    },
+    {
+      "type": "MISSING_INDEX_ON_FK",
+      "severity": "PERFORMANCE",
+      "table": "venues",
+      "column": "group_id",
+      "message": "Foreign key group_id não tem índice, pode impactar performance"
+    },
+    {
+      "type": "UNBOUNDED_TEXT",
+      "severity": "INFO",
+      "table": "groups",
+      "column": "photo_url",
+      "message": "Coluna photo_url é TEXT sem limite, considere VARCHAR(n) se houver limite esperado"
+    },
+    {
+      "type": "UNBOUNDED_TEXT",
+      "severity": "INFO",
+      "table": "users",
+      "column": "password_hash",
+      "message": "Coluna password_hash é TEXT sem limite, considere VARCHAR(n) se houver limite esperado"
+    },
+    {
+      "type": "UNBOUNDED_TEXT",
+      "severity": "INFO",
+      "table": "users",
+      "column": "image",
+      "message": "Coluna image é TEXT sem limite, considere VARCHAR(n) se houver limite esperado"
+    }
+  ],
+  "recommendations": []
+}

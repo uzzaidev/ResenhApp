@@ -4,10 +4,12 @@
 
 ## 🗓️ Timeline
 
-### 2026-01-23 - Schema Reset e Modernização
+### 2026-01-23, 19:05 UTC - Schema Reset e Modernização (v1.0.0)
 
 **Versão:** 1.0.0
 **Status:** ✅ Aplicado em produção
+**Arquivo principal:** `src/db/migrations/schema.sql`
+**Tabelas resultantes:** 17 (16 app + 1 sistema)
 
 #### Contexto
 Migração completa do Stack Auth (schema legado) para Supabase com schema limpo e moderno.
@@ -146,10 +148,18 @@ psql $DATABASE_URL < src/db/migrations/003_soft_delete.sql
 
 | Métrica | Valor |
 |---------|-------|
-| Total de migrations aplicadas | 1 (reset completo) |
-| Total de migrations disponíveis | 4 |
-| Migrations pendentes | 1 (soft delete) |
-| Última migration | 2026-01-23 |
+| **Tabelas em produção** | 17 (16 app + 1 sistema) |
+| **Arquivos SQL na pasta** | 19 |
+| **Schema principal aplicado** | 1 (`schema.sql`) |
+| **Migrations incluídas no schema** | 8 (já incorporadas) |
+| **Migrations pendentes** | 1 (`003_soft_delete.sql` - opcional) |
+| **Arquivos legado** | 9 (não aplicar) |
+| **Última migration aplicada** | 2026-01-23, 19:05 UTC |
+| **Versão atual** | 1.0.0 |
+
+⚠️ **IMPORTANTE:** Se você contar CREATE TABLE em TODOS os 19 arquivos SQL, encontrará ~40+ tabelas, mas isso seria duplicação. Apenas `schema.sql` está aplicado com 17 tabelas únicas.
+
+Ver [MIGRATIONS_STATUS.md](docs/MIGRATIONS_STATUS.md) para breakdown completo.
 
 ---
 

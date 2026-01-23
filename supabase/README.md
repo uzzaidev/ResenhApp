@@ -6,12 +6,16 @@
 ## 📊 Status Atual do Database
 
 - **Database:** PostgreSQL 15+ (Supabase)
-- **Última Auditoria:** 23 de Janeiro de 2026
-- **Tabelas:** 17 (16 da aplicação + 1 sistema)
+- **Última Auditoria:** 23 de Janeiro de 2026, 19:05 UTC
+- **Versão do Schema:** 1.0.0
+- **Tabelas em Produção:** 17 (16 da aplicação + 1 sistema)
+- **Arquivos SQL na pasta:** 19 (1 aplicado + 8 incluídos + 1 opcional + 9 legado)
 - **Colunas:** 126 total
 - **Relacionamentos:** 27 foreign keys
 - **Índices:** 55 total
 - **Saúde:** ✅ **100% Funcional**
+
+⚠️ **Nota Importante:** Há 19 arquivos SQL em `src/db/migrations/`, mas apenas `schema.sql` está aplicado (contém as 17 tabelas). Ver [MIGRATIONS_STATUS.md](docs/MIGRATIONS_STATUS.md) para detalhes.
 
 ### ✅ Verificações de Saúde
 
@@ -34,12 +38,10 @@
 
 ### Documentos Principais
 
-1. **[SCHEMA.md](docs/SCHEMA.md)** - Schema completo com todas as tabelas e colunas
-2. **[RELATIONSHIPS.md](docs/RELATIONSHIPS.md)** - Diagrama de relacionamentos entre tabelas
-3. **[API_USAGE.md](docs/API_USAGE.md)** - Como cada endpoint usa o database
-4. **[MIGRATIONS.md](docs/MIGRATIONS.md)** - Histórico de migrações e setup
-5. **[PERFORMANCE.md](docs/PERFORMANCE.md)** - Índices e otimizações
-6. **[HEALTH_REPORT.md](docs/HEALTH_REPORT.md)** - Relatório detalhado de saúde
+1. **[SCHEMA.md](docs/SCHEMA.md)** - Schema completo com todas as 17 tabelas e 126 colunas
+2. **[HEALTH_REPORT.md](docs/HEALTH_REPORT.md)** - Relatório detalhado de saúde (95/100)
+3. **[MIGRATIONS_STATUS.md](docs/MIGRATIONS_STATUS.md)** - Status de cada arquivo SQL (aplicado/pendente/legado)
+4. **[database-audit-*.json](docs/)** - Auditorias completas em JSON
 
 ### Scripts Úteis
 
