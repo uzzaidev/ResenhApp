@@ -54,7 +54,7 @@ export interface CreditsCheckOptions {
 export async function withCreditsCheck<T = any>(
   request: NextRequest,
   feature: FeatureType,
-  handler: (user: any, groupId: string, eventId?: string) => Promise<NextResponse<T>>,
+  handler: (user: any, groupId: string, eventId?: string) => Promise<NextResponse<T> | NextResponse<{ error: string }>>,
   options: CreditsCheckOptions = {}
 ): Promise<NextResponse> {
   const {
@@ -69,6 +69,7 @@ export async function withCreditsCheck<T = any>(
     const user = await requireAuth();
 
     // 2. Get groupId from request (body or query)
+    // IMPORTANTE: Não consumir body aqui, deixar handler fazer isso
     let groupId: string | null = null;
     let requestEventId: string | undefined = eventId;
 
@@ -77,9 +78,19 @@ export async function withCreditsCheck<T = any>(
       groupId = searchParams.get("group_id");
       requestEventId = requestEventId || searchParams.get("event_id") || undefined;
     } else {
-      const body = await request.json();
-      groupId = body.groupId || body.group_id;
-      requestEventId = requestEventId || body.eventId || body.event_id;
+      // Para POST/PATCH, tentar pegar groupId do body sem consumir completamente
+      // Se não conseguir, o handler precisará parsear
+      try {
+        const clonedRequest = request.clone();
+        const body = await clonedRequest.json();
+        groupId = body.groupId || body.group_id;
+        requestEventId = requestEventId || body.eventId || body.event_id;
+      } catch {
+        // Se falhar, tentar pegar de query params como fallback
+        const { searchParams } = new URL(request.url);
+        groupId = searchParams.get("group_id");
+        requestEventId = requestEventId || searchParams.get("event_id") || undefined;
+      }
     }
 
     if (!groupId) {

@@ -116,8 +116,8 @@ export function CreditsBalance({
           title="Saldo Atual"
           value={isLoading ? "..." : balance.toString()}
           description="Créditos disponíveis"
-          icon={Sparkles}
-          variant="gradient"
+          icon={<Sparkles className="h-4 w-4" />}
+          variant="gold"
           className={cn(
             "border-2",
             balance < 20 && "border-red-500/50 bg-red-50/50"
@@ -129,7 +129,7 @@ export function CreditsBalance({
           title="Total Comprado"
           value={isLoading ? "..." : purchased.toString()}
           description="Lifetime"
-          icon={TrendingUp}
+          icon={<TrendingUp className="h-4 w-4" />}
           variant="blue"
         />
 
@@ -138,7 +138,7 @@ export function CreditsBalance({
           title="Total Consumido"
           value={isLoading ? "..." : consumed.toString()}
           description={`${usageRate.toFixed(0)}% de uso`}
-          icon={History}
+          icon={<History className="h-4 w-4" />}
           variant="silver"
         />
       </div>

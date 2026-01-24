@@ -62,7 +62,13 @@ export async function getGroupHierarchy(groupId: string): Promise<GroupHierarchy
       return null;
     }
 
-    const root = rootQuery[0] as GroupHierarchy;
+    const rootRow = rootQuery[0] as any;
+    const root: GroupHierarchy = {
+      id: rootRow.id,
+      name: rootRow.name,
+      groupType: rootRow.groupType,
+      parentGroupId: rootRow.parentGroupId,
+    };
 
     // If this is a child group, get the parent first
     if (root.parentGroupId) {
@@ -77,7 +83,13 @@ export async function getGroupHierarchy(groupId: string): Promise<GroupHierarchy
       `;
 
       if (parentQuery && parentQuery.length > 0) {
-        const parent = parentQuery[0] as GroupHierarchy;
+        const parentRow = parentQuery[0] as any;
+        const parent: GroupHierarchy = {
+          id: parentRow.id,
+          name: parentRow.name,
+          groupType: parentRow.groupType,
+          parentGroupId: parentRow.parentGroupId,
+        };
         parent.children = await getChildGroups(parent.id);
         return parent;
       }
@@ -109,7 +121,12 @@ async function getChildGroups(parentId: string): Promise<GroupHierarchy[]> {
       ORDER BY created_at ASC
     `;
 
-    return (children as GroupHierarchy[]) || [];
+    return children.map((row: any) => ({
+      id: row.id,
+      name: row.name,
+      groupType: row.groupType,
+      parentGroupId: row.parentGroupId,
+    })) as GroupHierarchy[];
   } catch (error) {
     logger.error({ error, parentId }, "Error getting child groups");
     return [];
@@ -138,7 +155,14 @@ export async function getManagedGroups(userId: string): Promise<GroupHierarchy[]
 
     const groups: GroupHierarchy[] = [];
 
-    for (const group of adminGroups as GroupHierarchy[]) {
+    const mappedGroups = adminGroups.map((row: any) => ({
+      id: row.id,
+      name: row.name,
+      groupType: row.groupType,
+      parentGroupId: row.parentGroupId,
+    })) as GroupHierarchy[];
+
+    for (const group of mappedGroups) {
       // If athletic, include children
       if (group.groupType === "athletic" && !group.parentGroupId) {
         group.children = await getChildGroups(group.id);

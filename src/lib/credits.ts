@@ -211,7 +211,15 @@ export async function getCreditPackages(): Promise<CreditPackage[]> {
       ORDER BY credits_amount ASC
     `;
 
-    return result as CreditPackage[];
+    return result.map((row: any) => ({
+      id: row.id,
+      name: row.name,
+      creditsAmount: Number(row.credits_amount),
+      priceCents: Number(row.price_cents),
+      isActive: Boolean(row.is_active),
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    })) as CreditPackage[];
   } catch (error) {
     logger.error({ error }, "Error getting credit packages");
     throw error;
@@ -479,7 +487,17 @@ export async function getCreditTransactions(
       LIMIT ${limit}
     `;
 
-    return result as CreditTransaction[];
+    return result.map((row: any) => ({
+      id: row.id,
+      groupId: row.groupId,
+      transactionType: row.transactionType,
+      amount: Number(row.amount),
+      description: row.description,
+      featureUsed: row.featureUsed,
+      eventId: row.eventId,
+      createdBy: row.createdBy,
+      createdAt: row.createdAt,
+    })) as CreditTransaction[];
   } catch (error) {
     logger.error({ error, groupId }, "Error getting credit transactions");
     return [];

@@ -27,6 +27,17 @@ const createRecurringSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  // Parse body once before passing to middleware
+  let body: any;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Body inválido" },
+      { status: 400 }
+    );
+  }
+
   // Wrapper automático: verifica auth, membership, créditos e consome
   return withCreditsCheck(
     request,
@@ -35,7 +46,7 @@ export async function POST(request: NextRequest) {
       // Créditos já foram consumidos automaticamente!
       // Agora implementar a lógica da feature
 
-      const body = await request.json();
+      // Body já foi parseado antes do middleware
       const validation = createRecurringSchema.safeParse(body);
 
       if (!validation.success) {
