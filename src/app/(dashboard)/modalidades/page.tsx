@@ -25,7 +25,7 @@ interface Modality {
   icon?: string;
   color?: string;
   description?: string;
-  athleteCount: number;
+  athletesCount: number;
   trainingsPerWeek?: number;
 }
 
@@ -45,7 +45,7 @@ export default function ModalidadesPage() {
   async function loadModalities() {
     setLoading(true);
     try {
-      const response = await fetch(`/api/modalities?groupId=${groupId}`);
+      const response = await fetch(`/api/modalities?group_id=${groupId}`);
       if (!response.ok) throw new Error('Erro ao carregar modalidades');
 
       const data = await response.json();
@@ -83,7 +83,7 @@ export default function ModalidadesPage() {
     setEditingModality(null);
   };
 
-  const totalAthletes = modalities.reduce((sum, m) => sum + m.athleteCount, 0);
+  const totalAthletes = modalities.reduce((sum, m) => sum + (m.athletesCount || 0), 0);
   const avgTrainings =
     modalities.length > 0
       ? (

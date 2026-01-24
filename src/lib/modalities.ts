@@ -66,7 +66,7 @@ export async function getGroupModalities(
       sm.is_active as "isActive",
       sm.created_at as "createdAt",
       sm.updated_at as "updatedAt",
-      COUNT(DISTINCT am.user_id) FILTER (WHERE am.is_active = true) as "athletesCount"
+      COALESCE(COUNT(DISTINCT am.user_id) FILTER (WHERE am.is_active = true), 0)::INTEGER as "athletesCount"
     FROM sport_modalities sm
     LEFT JOIN athlete_modalities am ON sm.id = am.modality_id
     WHERE sm.group_id = ${groupId}
@@ -75,7 +75,10 @@ export async function getGroupModalities(
     ORDER BY sm.name
   `;
 
-  return modalities as ModalityWithStats[];
+  return modalities.map((m: any) => ({
+    ...m,
+    athletesCount: Number(m.athletesCount) || 0,
+  })) as ModalityWithStats[];
 }
 
 /**
@@ -97,7 +100,7 @@ export async function getModalityById(
       sm.is_active as "isActive",
       sm.created_at as "createdAt",
       sm.updated_at as "updatedAt",
-      COUNT(DISTINCT am.user_id) FILTER (WHERE am.is_active = true) as "athletesCount"
+      COALESCE(COUNT(DISTINCT am.user_id) FILTER (WHERE am.is_active = true), 0)::INTEGER as "athletesCount"
     FROM sport_modalities sm
     LEFT JOIN athlete_modalities am ON sm.id = am.modality_id
     WHERE sm.id = ${modalityId}
@@ -105,7 +108,15 @@ export async function getModalityById(
     GROUP BY sm.id
   `;
 
-  return result[0] as ModalityWithStats | null;
+  if (!result || result.length === 0) {
+    return null;
+  }
+
+  const modality = result[0] as any;
+  return {
+    ...modality,
+    athletesCount: Number(modality.athletesCount) || 0,
+  } as ModalityWithStats;
 }
 
 /**
