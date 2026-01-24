@@ -51,6 +51,15 @@ const config: Config = {
           "4": "hsl(var(--chart-4))",
           "5": "hsl(var(--chart-5))",
         },
+        // UzzAI Design System - Paleta Retrofuturista
+        uzzai: {
+          mint: "#1ABC9C", // Cor principal - CTAs, destaques
+          black: "#1C1C1C", // Base sólida - Fundos, estruturas
+          silver: "#B0B0B0", // Neutro - Textos secundários
+          blue: "#2E86AB", // Confiança - Elementos de apoio
+          gold: "#FFD700", // Premium - Destaques especiais
+        },
+        // Legacy colors (manter compatibilidade)
         navy: {
           DEFAULT: "hsl(var(--navy))",
           light: "hsl(var(--navy-light))",
@@ -64,6 +73,12 @@ const config: Config = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        poppins: ["Poppins", "sans-serif"],
+        inter: ["Inter", "sans-serif"],
+        exo2: ["Exo 2", "sans-serif"],
+        "fira-code": ["Fira Code", "monospace"],
       },
     },
   },

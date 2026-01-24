@@ -43,3 +43,10 @@ next-env.d.ts
 .kiro/steering/byterover-rules.md
 .qoder/rules/byterover-rules.md
 .augment/rules/byterover-rules.md
+
+# Build outputs
+build-output.log
+*.log
+
+# Temporary files
+nul

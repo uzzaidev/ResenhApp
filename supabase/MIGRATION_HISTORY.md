@@ -239,37 +239,117 @@ Antes de aplicar qualquer migration:
 - [ ] Verificar impacto em queries existentes
 - [ ] Atualizar código da aplicação (se necessário)
 - [ ] Rodar `full-database-audit.js` antes e depois
-- [ ] Verificar com `verify-schema.js`
+- [ ] Verificar com `check-supabase-schema.js`
 - [ ] Testar funcionalidades afetadas
 - [ ] Documentar mudanças neste arquivo
 
 ---
 
-## 🔮 Migrations Planejadas
+## 🔮 Migrations V2.0 (Planejadas - Não Aplicadas)
 
-### Q1 2026
+### Status
 
-**1. Row Level Security (RLS)**
-- Arquivo: `004_enable_rls.sql` (a criar)
-- Prioridade: 🔴 ALTA
-- Descrição: Habilitar RLS em todas as tabelas
+- **Versão:** 2.0.0-SUPABASE
+- **Status:** ⏸️ Ainda não aplicadas em produção
+- **Localização:** `supabase/migrations/`
+- **Total de Migrations:** 10 arquivos
+- **Total de Tabelas:** 40+ (vs 17 em V1.0)
 
-**2. Audit Trail Completo**
-- Arquivo: `005_audit_trail.sql` (a criar)
-- Prioridade: 🟡 MÉDIA
-- Descrição: Adicionar `updated_by`, `deleted_by`
+### Migrations Disponíveis
 
-### Q2 2026
+#### Core Migrations (Foundation)
 
-**3. Notificações**
-- Arquivo: `006_notifications.sql` (a criar)
-- Prioridade: 🟢 BAIXA
-- Tabelas: `notifications`, `push_tokens`
+1. **20260127000001_initial_schema.sql**
+   - Extensions: uuid-ossp, pgcrypto, pg_trgm, postgis
+   - Enums: Todos os enums do sistema
 
-**4. Achievements**
-- Arquivo: `007_achievements.sql` (a criar)
-- Prioridade: 🟢 BAIXA
-- Tabelas: `achievements`, `user_achievements`
+2. **20260127000002_auth_profiles.sql**
+   - Tabelas: `profiles`, `user_roles`
+   - Sistema de autenticação completo
+
+3. **20260127000003_groups_and_events.sql**
+   - Tabelas: `groups`, `group_members`, `invites`, `venues`, `events`, `event_attendance`, `teams`, `team_members`, `event_actions`, `votes`
+   - Sistema core completo
+
+4. **20260127000004_rls_policies.sql**
+   - Row Level Security para todas as tabelas
+   - Políticas de acesso granulares
+
+#### Feature Migrations
+
+5. **20260204000001_financial_system.sql**
+   - Tabelas: `wallets`, `charges`, `charge_splits`, `transactions`, `pix_payments`, `group_pix_config`
+   - Sistema financeiro completo
+
+6. **20260211000001_notifications.sql**
+   - Tabelas: `notifications`, `notification_templates`, `push_tokens`, `email_queue`, `notification_batches`
+   - Sistema de notificações completo
+
+7. **20260218000001_analytics.sql**
+   - Tabelas: `player_stats`, `event_stats`, `group_stats`, `leaderboards`, `activity_log`
+   - Analytics e estatísticas
+
+8. **20260225000001_gamification.sql**
+   - Tabelas: `achievement_types`, `user_achievements`, `badges`, `user_badges`, `milestones`, `challenges`, `challenge_participants`
+   - Sistema de gamificação completo
+
+### Diferenças V1.0 vs V2.0
+
+| Aspecto | V1.0 (Produção) | V2.0 (Planejado) |
+|---------|-----------------|------------------|
+| **Tabelas** | 17 | 40+ |
+| **RLS** | ❌ Não implementado | ✅ Implementado |
+| **Notificações** | ❌ Não implementado | ✅ Implementado |
+| **Analytics** | ❌ Básico | ✅ Completo |
+| **Gamificação** | ❌ Não implementado | ✅ Implementado |
+| **Sistema Financeiro** | ✅ Básico | ✅ Avançado |
+
+### Quando Aplicar V2.0
+
+**Pré-requisitos:**
+- [ ] Backup completo do database V1.0
+- [ ] Teste em ambiente de desenvolvimento
+- [ ] Validação de todas as migrations
+- [ ] Plano de rollback preparado
+
+**Processo:**
+1. Aplicar migrations em ordem sequencial
+2. Verificar integridade após cada migration
+3. Testar funcionalidades afetadas
+4. Documentar mudanças
+
+**Documentação Completa:** Ver [migrations/README.md](migrations/README.md)
+
+---
+
+## 🔮 Migrations Planejadas (Ainda Não Implementadas)
+
+**Nota:** As migrations abaixo já existem como V2.0, mas ainda não foram aplicadas. Ver seção [Migrations V2.0](#-migrations-v20-planejadas---não-aplicadas) acima.
+
+### Já Implementadas em V2.0 (Não Aplicadas)
+
+1. ✅ **Row Level Security (RLS)**
+   - Arquivo: `20260127000004_rls_policies.sql`
+   - Prioridade: 🔴 ALTA
+   - Status: ⏸️ Disponível mas não aplicado
+
+2. ✅ **Notificações**
+   - Arquivo: `20260211000001_notifications.sql`
+   - Prioridade: 🟢 BAIXA
+   - Status: ⏸️ Disponível mas não aplicado
+
+3. ✅ **Achievements (Gamificação)**
+   - Arquivo: `20260225000001_gamification.sql`
+   - Prioridade: 🟢 BAIXA
+   - Status: ⏸️ Disponível mas não aplicado
+
+### Ainda Não Implementadas
+
+1. **Audit Trail Completo**
+   - Arquivo: `005_audit_trail.sql` (a criar)
+   - Prioridade: 🟡 MÉDIA
+   - Descrição: Adicionar `updated_by`, `deleted_by`
+   - Status: 📝 Planejado
 
 ---
 
@@ -282,6 +362,6 @@ Antes de aplicar qualquer migration:
 
 ---
 
-**Última atualização:** 23 de Janeiro de 2026
-**Versão atual do schema:** 1.0.0
-**Próxima migration planejada:** 004_enable_rls.sql
+**Última atualização:** 27 de Janeiro de 2026
+**Versão atual do schema:** 1.0.0 (V2.0 planejada)
+**Próxima migration planejada:** Aplicar migrations V2.0 quando decidido

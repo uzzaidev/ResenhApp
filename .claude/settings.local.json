@@ -25,7 +25,17 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(pnpm add:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(taskkill //F //PID 28528)",
+      "Bash(pkill:*)",
+      "Bash(node test-db-connection.js:*)",
+      "Bash(node -e \"\nconst postgres = require(''postgres'');\n\nconst url = ''postgresql://postgres.ujrvfkkkssfdhwizjucq:Uzzai2025%40%40@aws-1-us-east-2.pooler.supabase.com:6543/postgres'';\n\nconsole.log(''🔍 Testando conexão com Shared Pooler (IPv4 Compatible)\\n'');\n\nconst sql = postgres(url, {\n  max: 1,\n  idle_timeout: 5,\n  connect_timeout: 10,\n  ssl: ''require'',\n  prepare: false,\n});\n\n(async () => {\n  try {\n    console.log(''→ Conectando...'');\n    const result = await sql\\`SELECT 1 as test\\`;\n    console.log(''✅ CONEXÃO FUNCIONOU!'');\n    console.log(''→ Resultado:'', result);\n    \n    console.log(''\\n→ Testando tabela users...'');\n    const users = await sql\\`SELECT COUNT(*) as count FROM users\\`;\n    console.log(''✅ Total de usuários:'', users[0].count);\n    \n    await sql.end();\n    console.log(''\\n🎉 SUCESSO TOTAL! Conexão está funcionando perfeitamente!'');\n  } catch (error) {\n    console.error(''❌ ERRO:'', error.message);\n    console.error(''Código:'', error.code);\n    process.exit(1);\n  }\n})();\n\")",
+      "Bash(taskkill:*)",
+      "Bash(pnpm dev)",
+      "Bash(node check-supabase-schema.js:*)",
+      "Bash(curl:*)",
+      "Bash(node apply-missing-columns.js:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []

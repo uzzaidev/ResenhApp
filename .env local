@@ -2,7 +2,8 @@
 NEXT_PUBLIC_SUPABASE_URL=https://ujrvfkkkssfdhwizjucq.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable__qrQJ5NFYQU9Lc1QNPOJ1Q_z9mEOcEa
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqcnZma2trc3NmZGh3aXpqdWNxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2OTA5MjgyNiwiZXhwIjoyMDg0NjY4ODI2fQ.qGYdYDRdt0EgVmnxNkrENy-jOLUqxXsk_x03fCropw8
-SUPABASE_DB_URL=postgresql://postgres:Uzzai2025@@db.ujrvfkkkssfdhwizjucq.supabase.co:5432/postgres
+SUPABASE_DB_URL=postgresql://postgres.ujrvfkkkssfdhwizjucq:Uzzai2025%40%40@aws-1-us-east-2.pooler.supabase.com:6543/postgres
+DATABASE_URL=postgresql://postgres.ujrvfkkkssfdhwizjucq:Uzzai2025%40%40@aws-1-us-east-2.pooler.supabase.com:6543/postgres=postgresql://postgres:Uzzai2025@@db.ujrvfkkkssfdhwizjucq.supabase.co:5432/postgres
 
 # NextAuth
 NEXTAUTH_URL=http://localhost:3000

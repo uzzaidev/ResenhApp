@@ -53,12 +53,49 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, description, privacy } = validation.data;
+    const { name, description, privacy, groupType, parentGroupId } = validation.data;
+
+    // Validate hierarchy if parentGroupId is provided
+    if (parentGroupId) {
+      const { validateHierarchy, canCreateGroup } = await import("@/lib/permissions");
+      
+      // Check if user can create child group
+      const createCheck = await canCreateGroup(user.id, parentGroupId);
+      if (!createCheck.canCreate) {
+        return NextResponse.json(
+          { error: createCheck.reason || "Não é possível criar grupo filho" },
+          { status: 403 }
+        );
+      }
+
+      // Validate hierarchy rules
+      const hierarchyCheck = await validateHierarchy(groupType, parentGroupId);
+      if (!hierarchyCheck.valid) {
+        return NextResponse.json(
+          { error: hierarchyCheck.error || "Hierarquia inválida" },
+          { status: 400 }
+        );
+      }
+    }
 
     // Create group
     const groupQuery = await sql`
-      INSERT INTO groups (name, description, privacy, created_by)
-      VALUES (${name}, ${description || null}, ${privacy}, ${user.id})
+      INSERT INTO groups (
+        name, 
+        description, 
+        privacy, 
+        group_type,
+        parent_group_id,
+        created_by
+      )
+      VALUES (
+        ${name}, 
+        ${description || null}, 
+        ${privacy},
+        ${groupType},
+        ${parentGroupId || null},
+        ${user.id}
+      )
       RETURNING *
     `;
     const group = groupQuery[0];
@@ -82,7 +119,12 @@ export async function POST(request: NextRequest) {
       VALUES (${group.id}, ${inviteCode}, ${user.id})
     `;
 
-    logger.info({ groupId: group.id, userId: user.id }, "Group created");
+    logger.info({ 
+      groupId: group.id, 
+      userId: user.id, 
+      groupType,
+      parentGroupId 
+    }, "Group created");
 
     return NextResponse.json({
       group: { ...group, inviteCode },

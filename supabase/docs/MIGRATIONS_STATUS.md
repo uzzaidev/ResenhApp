@@ -1,6 +1,6 @@
 # 📋 Status de Migrations - ResenhApp
 
-> **Última atualização:** 23 de Janeiro de 2026, 19:05 UTC
+> **Última atualização:** 27 de Fevereiro de 2026
 > **Database:** Supabase PostgreSQL
 
 ## 🎯 Resumo Executivo
@@ -211,6 +211,50 @@ psql $DATABASE_URL -c "SELECT COUNT(*) FROM information_schema.tables WHERE tabl
    ```bash
    psql $DATABASE_URL < src/db/migrations/check-table-structure.sql
    ```
+
+---
+
+## ✅ Migrations V2.0 Aplicadas (2026-02-27)
+
+### FASE 0: Preparação e Fundação
+
+| Migration | Arquivo | Status | Data | Descrição |
+|-----------|---------|--------|------|-----------|
+| 1 | `20260227000001_sport_modalities.sql` | ✅ APLICADA | 2026-02-27 | Sistema de Modalidades Esportivas |
+| 2 | `20260227000002_athlete_modalities.sql` | ✅ APLICADA | 2026-02-27 | Atletas por Modalidade (Many-to-Many) |
+| 3 | `20260227000003_recurring_trainings.sql` | ✅ APLICADA | 2026-02-27 | Treinos Recorrentes |
+| 4 | `20260227000004_game_convocations.sql` | ✅ APLICADA | 2026-02-27 | Jogos Oficiais e Convocações |
+| 5 | `20260227000005_checkin_qrcodes.sql` | ✅ APLICADA | 2026-02-27 | Check-in via QR Code |
+| 6 | `20260227000006_saved_tactics.sql` | ✅ APLICADA | 2026-02-27 | Táticas Salvas |
+| 7 | `20260227000007_financial_by_training.sql` | ✅ APLICADA | 2026-02-27 | Financeiro por Treino |
+| 8 | `20260227000008_hierarchy_and_credits.sql` | ✅ APLICADA | 2026-02-27 | Hierarquia e Sistema de Créditos |
+
+### Resumo das Migrations V2.0
+
+**Tabelas Criadas:** 9
+- `sport_modalities`
+- `athlete_modalities`
+- `checkin_qrcodes`
+- `checkins`
+- `game_convocations`
+- `convocation_responses`
+- `saved_tactics`
+- `credit_transactions`
+- `credit_packages`
+
+**Colunas Adicionadas:**
+- `events`: `is_recurring`, `recurrence_pattern`, `event_type`, `parent_event_id`, `modality_id`
+- `groups`: `parent_group_id`, `group_type`, `pix_code`, `credits_balance`, `credits_purchased`, `credits_consumed`
+- `charges`: `event_id`
+
+**Funções Criadas:** 26
+- Ver seção "Documentação de Funções SQL" abaixo
+
+**Views Criadas:** 2
+- `v_training_payments`
+- `v_training_payment_details`
+
+**Foreign Keys:** 20+ relacionamentos criados
 
 ---
 

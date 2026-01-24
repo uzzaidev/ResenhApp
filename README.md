@@ -17,7 +17,7 @@ App para gestão de peladas de futebol - criação de grupos, organização de p
 
 ## 📋 Setup Rápido
 
-> **📚 Documentação Completa**: Veja [docs/12 - Rebranding/](./docs/12%20-%20Rebranding/) para guias detalhados
+> **📚 Documentação Completa**: Veja [docs/README.md](./docs/README.md) para índice completo da documentação
 
 ### 1. Instalar dependências
 
@@ -43,7 +43,7 @@ NEXTAUTH_URL=http://localhost:3000
 AUTH_SECRET=gerar-com-openssl-rand-base64-32
 ```
 
-**📖 Guia completo:** [SETUP-SUPABASE-PASSO-A-PASSO.md](./docs/12%20-%20Rebranding/SETUP-SUPABASE-PASSO-A-PASSO.md)
+**📖 Guia completo:** [SETUP-SUPABASE-PASSO-A-PASSO.md](./docs/12-rebranding/SETUP-SUPABASE-PASSO-A-PASSO.md)
 
 ### 3. Aplicar Migrations
 
@@ -56,13 +56,13 @@ supabase db push
 # Ou manualmente via SQL Editor no Supabase Dashboard
 ```
 
-**📖 Guia completo:** [APLICAR-MIGRATIONS-SUPABASE.md](./docs/12%20-%20Rebranding/APLICAR-MIGRATIONS-SUPABASE.md)
+**📖 Guia completo:** [APLICAR-MIGRATIONS-SUPABASE.md](./docs/12-rebranding/APLICAR-MIGRATIONS-SUPABASE.md)
 
 ### 4. Configurar Storage e Realtime
 
 Execute o script `supabase/setup_storage_and_realtime.sql` no SQL Editor do Supabase.
 
-**📖 Guia completo:** [SETUP-STORAGE-REALTIME.md](./docs/12%20-%20Rebranding/SETUP-STORAGE-REALTIME.md)
+**📖 Guia completo:** [SETUP-STORAGE-REALTIME.md](./docs/12-rebranding/SETUP-STORAGE-REALTIME.md)
 
 ### 5. Desenvolvimento
 
@@ -125,13 +125,23 @@ peladeiros-main/
 │   │   └── 20260225000001_gamification.sql
 │   ├── setup_storage_and_realtime.sql
 │   └── verify_migrations_simple.sql
-├── docs/                      # Documentação
-│   └── 12 - Rebranding/      # Documentação V2.0
-│       ├── PLANOR00.md       # Plano mestre
-│       ├── CHECKLIST-INICIO-V2.md
-│       ├── SETUP-SUPABASE-PASSO-A-PASSO.md
-│       ├── SETUP-PRODUCAO.md
-│       └── ... (20+ documentos)
+├── docs/                      # Documentação completa
+│   ├── 00-project-overview/  # Visão geral e resumos
+│   ├── 01-getting-started/   # Guias de início
+│   ├── 02-architecture/      # Arquitetura do sistema
+│   ├── 03-api/               # Documentação da API
+│   ├── 04-database/          # Database e migrations
+│   ├── 05-authentication/     # Autenticação
+│   ├── 06-features/           # Features específicas
+│   ├── 07-deployment/         # Deploy e produção
+│   ├── 08-guides/             # Guias diversos
+│   ├── 09-troubleshooting/    # Solução de problemas
+│   ├── 10-improvements/       # Melhorias futuras
+│   ├── 11-app/                # App mobile
+│   ├── 12-rebranding/         # Rebranding para ResenhApp
+│   ├── 13-decisions/          # Decisões técnicas
+│   ├── 14-planning/           # Planejamento
+│   └── 15-reference/         # Referências e resumos
 └── public/                    # Arquivos estáticos
 ```
 
@@ -169,7 +179,7 @@ peladeiros-main/
 - `badges` - Badges
 - `leaderboards` - Rankings
 
-**📖 Documentação completa:** [DATABASE-ARCHITECTURE-COMPLETE-V2.md](./docs/12%20-%20Rebranding/DATABASE-ARCHITECTURE-COMPLETE-V2.md)
+**📖 Documentação completa:** [Database Architecture V2](./docs/04-database/ARCHITECTURE_V2.md) | [Supabase V2](./docs/04-database/SUPABASE_V2.md)
 
 ## 🚀 Deploy
 
@@ -182,7 +192,7 @@ peladeiros-main/
 - **Cloudflare**: DNS, SSL/TLS, CDN
 - **Supabase**: Database, Auth, Storage, Realtime
 
-**📖 Guia completo:** [SETUP-PRODUCAO.md](./docs/12%20-%20Rebranding/SETUP-PRODUCAO.md)
+**📖 Guia completo:** [SETUP-PRODUCAO.md](./docs/12-rebranding/SETUP-PRODUCAO.md)
 
 ### Variáveis de Ambiente (Vercel)
 
@@ -195,24 +205,23 @@ SUPABASE_DB_URL (Secret)
 
 ## 📚 Documentação
 
-### Guias Principais
+### Documentação Essencial
 
-- **[PLANOR00.md](./docs/12%20-%20Rebranding/PLANOR00.md)** - Plano mestre do projeto
-- **[CHECKLIST-INICIO-V2.md](./docs/12%20-%20Rebranding/CHECKLIST-INICIO-V2.md)** - Checklist completo
-- **[RESUMO-GERAL-PROJETO.md](./docs/12%20-%20Rebranding/RESUMO-GERAL-PROJETO.md)** - Resumo do status atual
+- **[Executive Summary](docs/00-project-overview/EXECUTIVE_SUMMARY_V2.md)** - Sumário executivo
+- **[System Architecture V2](docs/02-architecture/SYSTEM_V2.md)** - Arquitetura completa
+- **[Database Architecture V2](docs/04-database/ARCHITECTURE_V2.md)** - Arquitetura do database
+- **[Supabase V2](docs/04-database/SUPABASE_V2.md)** - Arquitetura Supabase
+- **[Technical Decisions V2](docs/13-decisions/TECHNICAL_DECISIONS_V2.md)** - Decisões técnicas
+- **[Planning V2](docs/14-planning/PLANNING_V2_INDEX.md)** - Planejamento V2.0
 
-### Setup
+### Guias de Setup
 
-- **[SETUP-SUPABASE-PASSO-A-PASSO.md](./docs/12%20-%20Rebranding/SETUP-SUPABASE-PASSO-A-PASSO.md)** - Setup inicial Supabase
-- **[SETUP-STORAGE-REALTIME.md](./docs/12%20-%20Rebranding/SETUP-STORAGE-REALTIME.md)** - Configurar Storage e Realtime
-- **[SETUP-AUTH-PROVIDERS.md](./docs/12%20-%20Rebranding/SETUP-AUTH-PROVIDERS.md)** - Configurar autenticação
-- **[SETUP-PRODUCAO.md](./docs/12%20-%20Rebranding/SETUP-PRODUCAO.md)** - Deploy em produção
+- **[Setup Supabase](docs/12-rebranding/SETUP-SUPABASE-PASSO-A-PASSO.md)** - Setup inicial Supabase
+- **[Setup Storage/Realtime](docs/12-rebranding/SETUP-STORAGE-REALTIME.md)** - Configurar Storage e Realtime
+- **[Setup Auth Providers](docs/12-rebranding/SETUP-AUTH-PROVIDERS.md)** - Configurar autenticação
+- **[Setup Produção](docs/12-rebranding/SETUP-PRODUCAO.md)** - Deploy em produção
 
-### Arquitetura
-
-- **[ARQUITETURA-COMPLETA-SISTEMA-V2.md](./docs/12%20-%20Rebranding/ARQUITETURA-COMPLETA-SISTEMA-V2.md)** - Arquitetura completa
-- **[DATABASE-ARCHITECTURE-COMPLETE-V2.md](./docs/12%20-%20Rebranding/DATABASE-ARCHITECTURE-COMPLETE-V2.md)** - Schema do banco
-- **[DECISOES-TECNICAS-V2.md](./docs/12%20-%20Rebranding/DECISOES-TECNICAS-V2.md)** - Decisões técnicas
+**📖 [Ver índice completo da documentação](docs/README.md)**
 
 ## 🎯 Status do Projeto
 
