@@ -1,9 +1,9 @@
+/* Importar fontes do Google Fonts - DEVE VIR ANTES DOS @tailwind */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600&family=Exo+2:wght@400;600&family=Fira+Code:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Importar fontes do Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600&family=Exo+2:wght@400;600&family=Fira+Code:wght@400;500&display=swap');
 
 @layer base {
   :root {

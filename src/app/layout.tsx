@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { Toaster } from "@/components/ui/toaster";
+import { Toaster as SonnerToaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "Peladeiros - Gestão de Peladas",
@@ -44,6 +45,7 @@ export default function RootLayout({
       <body className="font-sans min-h-screen overflow-x-hidden" suppressHydrationWarning>
         <AuthProvider>{children}</AuthProvider>
         <Toaster />
+        <SonnerToaster />
       </body>
     </html>
   );
