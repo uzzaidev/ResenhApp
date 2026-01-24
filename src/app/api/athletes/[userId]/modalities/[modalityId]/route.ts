@@ -10,11 +10,11 @@ import logger from "@/lib/logger";
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { userId: string; modalityId: string } }
+  { params }: { params: Promise<{ userId: string; modalityId: string }> }
 ) {
   try {
     const user = await requireAuth();
-    const { userId, modalityId } = params;
+    const { userId, modalityId } = await params;
     const body = await request.json();
 
     // Validate
@@ -142,11 +142,11 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { userId: string; modalityId: string } }
+  { params }: { params: Promise<{ userId: string; modalityId: string }> }
 ) {
   try {
     const user = await requireAuth();
-    const { userId, modalityId } = params;
+    const { userId, modalityId } = await params;
 
     // Get relationship
     const relationshipQuery = await sql`
