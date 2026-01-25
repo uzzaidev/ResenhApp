@@ -265,6 +265,6 @@
 ---
 
 **Última atualização:** 2026-01-24  
-**Status:** 🟢 Sprint 2 Em Andamento (64% do checklist)  
-**Próximo:** Conectar APIs reais e finalizar integrações
+**Status:** 🟢 Sprint 2 Completo (64% do checklist)  
+**Próximo:** Sprint 3 - Conectar APIs reais e finalizar integrações
 
