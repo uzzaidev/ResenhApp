@@ -239,6 +239,12 @@ export async function POST(
             }
 
             // Create charge split for this user
+            // chargeId is bigint, need to ensure it's not null
+            if (!chargeId) {
+              throw new Error("Charge ID is null");
+            }
+            // Convert bigint to string for SQL template (PostgreSQL will cast it)
+            const chargeIdStr = chargeId.toString();
             const chargeSplitQuery = await sql`
               INSERT INTO charge_splits (
                 charge_id,
@@ -247,7 +253,7 @@ export async function POST(
                 status
               )
               VALUES (
-                ${chargeId},
+                ${chargeIdStr}::BIGINT,
                 ${user.id},
                 ${parseFloat(eventPricing.price)},
                 'pending'
@@ -257,7 +263,7 @@ export async function POST(
 
             // Get full charge details for response
             const chargeDetailsQuery = await sql`
-              SELECT * FROM charges WHERE id = ${chargeId}
+              SELECT * FROM charges WHERE id = ${chargeIdStr}::BIGINT
             `;
             charge = chargeDetailsQuery[0];
 

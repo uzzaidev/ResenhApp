@@ -24,6 +24,9 @@ export async function generatePixForCharge(
   chargeId: bigint
 ): Promise<GeneratePixForChargeResult> {
   try {
+    // Convert bigint to string for SQL template
+    const chargeIdStr = chargeId.toString();
+    
     // Fetch charge with receiver profile
     const chargeQuery = await sql`
       SELECT 
@@ -40,7 +43,7 @@ export async function generatePixForCharge(
         rp.city as receiver_city
       FROM charges c
       LEFT JOIN receiver_profiles rp ON c.receiver_profile_id = rp.id
-      WHERE c.id = ${chargeId}
+      WHERE c.id = ${chargeIdStr}::BIGINT
       LIMIT 1
     `;
 
@@ -96,7 +99,7 @@ export async function generatePixForCharge(
         pix_payload = ${payload},
         qr_image_url = ${qrImage},
         pix_generated_at = NOW()
-      WHERE id = ${chargeId}
+      WHERE id = ${chargeIdStr}::BIGINT
     `;
 
     logger.info({ chargeId: charge.id.toString() }, "Pix QR Code generated");

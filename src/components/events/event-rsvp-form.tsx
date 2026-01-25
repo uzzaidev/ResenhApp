@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import { Check, X, Loader2, Goal, Shield, Zap, TrendingUp } from "lucide-react";
 
 type Position = "gk" | "defender" | "midfielder" | "forward";
@@ -102,12 +103,14 @@ export function EventRsvpForm({ eventId, currentAttendance, eventStatus }: Event
         toast({
           title: "Presença confirmada!",
           description: `Cobrança de ${formattedAmount} gerada automaticamente.`,
-          action: data.charge.id
-            ? {
-                label: "Ver cobrança",
-                onClick: () => router.push(`/financeiro/charges/${data.charge.id}`),
-              }
-            : undefined,
+          action: data.charge.id ? (
+            <ToastAction
+              altText="Ver cobrança"
+              onClick={() => router.push(`/financeiro/charges/${data.charge.id}`)}
+            >
+              Ver cobrança
+            </ToastAction>
+          ) : undefined,
         });
       } else {
         toast({
