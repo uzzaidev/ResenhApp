@@ -266,5 +266,16 @@
 
 **Última atualização:** 2026-01-24  
 **Status:** 🟢 Sprint 2 Completo (64% do checklist)  
+**Build:** ✅ 30 páginas compiladas com sucesso  
 **Próximo:** Sprint 3 - Conectar APIs reais e finalizar integrações
+
+---
+
+## 🔧 CORREÇÕES APLICADAS (Sprint 2)
+
+### Erro de Build: Módulos Node.js no Cliente
+**Problema:** `postgres` (módulo Node.js) sendo importado no cliente via `getGroupModalities`  
+**Solução:** Substituído import direto por chamada à API route `/api/modalities`  
+**Arquivo corrigido:** `src/components/dashboard/modalities-grid.tsx`  
+**Status:** ✅ Resolvido - Build passando
 

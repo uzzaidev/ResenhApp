@@ -8,7 +8,6 @@
  */
 
 import { ModalityCard } from "@/components/modalities/modality-card";
-import { getGroupModalities, type ModalityWithStats } from "@/lib/modalities";
 import { useGroup } from "@/contexts/group-context";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -16,6 +15,16 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Dumbbell } from "lucide-react";
+
+interface ModalityWithStats {
+  id: string;
+  name: string;
+  icon?: string;
+  color?: string;
+  athletesCount: number;
+  trainingsPerWeek?: number;
+  isActive: boolean;
+}
 
 export function ModalitiesGrid() {
   const { currentGroup } = useGroup();
@@ -30,8 +39,13 @@ export function ModalitiesGrid() {
       }
 
       try {
-        const data = await getGroupModalities(currentGroup.id);
-        setModalities(data.filter((m) => m.isActive).slice(0, 6)); // Top 6
+        // Usar API route ao invés de importar diretamente do lib
+        const response = await fetch(`/api/modalities?group_id=${currentGroup.id}`);
+        if (!response.ok) {
+          throw new Error("Erro ao carregar modalidades");
+        }
+        const data = await response.json();
+        setModalities((data.modalities || []).filter((m: ModalityWithStats) => m.isActive).slice(0, 6)); // Top 6
       } catch (error) {
         console.error("Error loading modalities:", error);
       } finally {
@@ -105,7 +119,14 @@ export function ModalitiesGrid() {
         {modalities.map((modality) => (
           <ModalityCard
             key={modality.id}
-            modality={modality}
+            modality={{
+              id: modality.id,
+              name: modality.name,
+              icon: modality.icon,
+              color: modality.color,
+              athletesCount: modality.athletesCount,
+              trainingsPerWeek: modality.trainingsPerWeek,
+            }}
             onEdit={() => {}}
             onDelete={() => {}}
             onViewDetails={() => window.location.href = `/modalidades/${modality.id}`}
