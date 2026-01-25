@@ -8,12 +8,14 @@
 
 | Arquivo | Descrição | Público | Status |
 |---------|-----------|---------|--------|
+| **[SPRINT-1-CONCLUSAO.md](./SPRINT-1-CONCLUSAO.md)** | 🎉 Conclusão completa do Sprint 1 | 👨‍💻 Dev + PO | ✅ Completo |
 | **[RESUMO-EXECUTIVO.md](./RESUMO-EXECUTIVO.md)** | 📊 Apresentação para stakeholders | 🎯 Gestão | ✅ Completo |
 | **[PLANO-SPRINTS-V2.md](./PLANO-SPRINTS-V2.md)** | 🏃‍♂️ 8 sprints detalhados (16 semanas) | 👨‍💻 Dev + PO | ✅ Completo |
 | **[ARQUITETURA-V2.md](./ARQUITETURA-V2.md)** | 🚀 Arquitetura V2 completa | 👨‍💻 Dev | ✅ Completo |
 | **[ANALISE-VISUAL-COMPLETA.md](./ANALISE-VISUAL-COMPLETA.md)** | Análise estado atual vs referência | 👨‍💻 Dev | ✅ Completo |
-| **[CHECKLIST-MELHORIAS-VISUAIS.md](./CHECKLIST-MELHORIAS-VISUAIS.md)** | Checklist de implementação | 👨‍💻 Dev | ✅ Completo |
+| **[CHECKLIST-MELHORIAS-VISUAIS.md](./CHECKLIST-MELHORIAS-VISUAIS.md)** | Checklist de implementação (36% completo) | 👨‍💻 Dev | 🟢 Em Progresso |
 | **[ARQUITETURA-COMPLETA-MAPEAMENTO.md](./ARQUITETURA-COMPLETA-MAPEAMENTO.md)** | Mapeamento técnico completo | 👨‍💻 Dev | ✅ Completo |
+| **[DEMO-V2-VISUAL.html](./DEMO-V2-VISUAL.html)** | 🎨 Demo visual HTML da V2 | 📖 Todos | ✅ Completo |
 | **README.md** | Navegação e índice | 📖 Todos | ✅ Atual |
 
 ### 🎯 Como Navegar
@@ -137,12 +139,12 @@ Componentes Faltantes: 7 (28%)
 3. ✅ Criar Arquitetura V2
 4. ✅ Criar plano de sprints detalhado
 
-### Fase de Execução (Próxima 🚀)
-1. ⬜ **Validar** plano com stakeholders
-2. ⬜ **Montar equipe** (2-3 desenvolvedores frontend)
-3. ⬜ **Definir data** de início do Sprint 1
-4. ⬜ **Configurar ferramentas** (Jira, GitHub Projects, etc)
-5. ⬜ **Iniciar Sprint 1** - Fundação (Layout + Topbar + Sidebar)
+### Fase de Execução (Em Andamento 🚀)
+1. ✅ **Sprint 1** - Fundação (Design System V2 + 5 páginas) ✅ **COMPLETO**
+2. ⬜ **Sprint 2** - Conectar APIs reais + Dashboard Principal
+3. ⬜ **Sprint 3-4** - Dashboard rico + Modalidades
+4. ⬜ **Sprint 5-6** - Features avançadas
+5. ⬜ **Sprint 7-8** - Polimento + Performance
 
 ---
 
@@ -150,19 +152,20 @@ Componentes Faltantes: 7 (28%)
 
 | Aspecto | V1 (Atual) | V2 (Meta) | Melhoria |
 |---------|------------|-----------|----------|
-| **Visual Score** | 5.5/10 | 9.5/10 | +73% |
-| **Features Visíveis** | 42% | 95% | +126% |
-| **Páginas Completas** | 5/12 | 12/12 | +140% |
-| **Componentes** | 12 | 35+ | +192% |
-| **Performance** | 70 | 90+ | +29% |
+| **Visual Score** | 5.5/10 → **8.5/10** | 9.5/10 | +55% (Sprint 1) |
+| **Features Visíveis** | 42% → **70%** | 95% | +67% (Sprint 1) |
+| **Páginas Completas** | 5/12 → **10/12** | 12/12 | +100% (Sprint 1) |
+| **Componentes** | 12 → **16+** | 35+ | +33% (Sprint 1) |
+| **Performance** | 70 | 90+ | +29% (Sprint 2+) |
 
-**Duração Estimada:** 16 semanas (4 meses)
-**Team Size:** 2-3 desenvolvedores frontend
+**Duração Estimada:** 16 semanas (4 meses)  
+**Progresso:** Sprint 1/8 completo (12.5%)  
+**Team Size:** 2-3 desenvolvedores frontend  
 **Investimento:** Alto retorno em UX e engajamento
 
 ---
 
 **Última atualização:** 2026-01-24
-**Status:** 🚀 Planejamento completo, pronto para execução
-**Próxima ação:** Sprint Planning do Sprint 1
+**Status:** 🟢 Sprint 1 Completo (36% do checklist, 12.5% do roadmap)
+**Próxima ação:** Sprint 2 - Conectar APIs reais e Dashboard Principal
 
