@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { GroupProvider } from "@/contexts/group-context";
+import { DirectModeProvider } from "@/contexts/direct-mode-context";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
 
@@ -46,7 +47,9 @@ export default function RootLayout({
       <body className="font-sans min-h-screen overflow-x-hidden" suppressHydrationWarning>
         <AuthProvider>
           <GroupProvider>
-            {children}
+            <DirectModeProvider>
+              {children}
+            </DirectModeProvider>
           </GroupProvider>
         </AuthProvider>
         <Toaster />

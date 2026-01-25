@@ -92,6 +92,30 @@
     --chart-4: 0 0% 69%; /* Silver */
     --chart-5: 0 0% 98%; /* White */
   }
+
+  /* Modo Direto - Layout otimizado para agilidade */
+  .direct-mode {
+    /* Scrollbar customizada para modo direto */
+    scrollbar-width: thin;
+    scrollbar-color: #1ABC9C #0f242a;
+  }
+
+  .direct-mode::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .direct-mode::-webkit-scrollbar-track {
+    background: #0f242a;
+  }
+
+  .direct-mode::-webkit-scrollbar-thumb {
+    background: #1ABC9C;
+    border-radius: 4px;
+  }
+
+  .direct-mode::-webkit-scrollbar-thumb:hover {
+    background: #15a085;
+  }
 }
 
 @layer base {

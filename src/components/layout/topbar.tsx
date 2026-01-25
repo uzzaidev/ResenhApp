@@ -18,6 +18,7 @@ import { Sidebar } from './sidebar';
 import { NotificationsDropdown } from '@/components/notifications/notifications-dropdown';
 import { SearchCommand } from '@/components/ui/search-command';
 import { GroupSwitcher } from './group-switcher';
+import { DirectModeToggle } from './direct-mode-toggle';
 import { usePathname } from 'next/navigation';
 import { useGroup } from '@/contexts/group-context';
 
@@ -160,6 +161,9 @@ export function Topbar() {
 
           {/* Search Command Dialog */}
           <SearchCommand open={searchOpen} onOpenChange={setSearchOpen} />
+
+          {/* Direct Mode Toggle */}
+          <DirectModeToggle />
 
           {/* Notifications */}
           <NotificationsDropdown />

@@ -10,6 +10,7 @@ import { HeroSection } from "@/components/dashboard/hero-section";
 import { MetricsOverview } from "@/components/dashboard/metrics-overview";
 import { ModalitiesGrid } from "@/components/dashboard/modalities-grid";
 import { UpcomingTrainings } from "@/components/dashboard/upcoming-trainings";
+import { DashboardWrapper } from "@/components/dashboard/dashboard-wrapper";
 import { Plus, Users } from "lucide-react";
 
 type Group = {
@@ -90,28 +91,59 @@ export default async function DashboardPage() {
     console.error("Error fetching upcoming events:", error);
   }
 
+  // Preparar dados para modo direto
+  const upcomingEvent = upcomingEvents.length > 0 ? {
+    id: upcomingEvents[0].id,
+    starts_at: upcomingEvents[0].starts_at,
+    confirmed_count: upcomingEvents[0].confirmed_count,
+    max_players: upcomingEvents[0].max_players,
+    venue_name: upcomingEvents[0].venue_name || undefined,
+    group_name: upcomingEvents[0].group_name,
+  } : undefined;
+
+  // Stats mockados (pode ser substituído por dados reais)
+  const stats = {
+    games: 12,
+    goals: 8,
+    assists: 5,
+    winRate: 75,
+  };
+
+  // Top scorers mockados (pode ser substituído por dados reais)
+  const topScorers = [
+    { name: 'Lucas Silva', goals: 12, position: 1 },
+    { name: 'Pedro Costa', goals: 8, position: 2 },
+    { name: 'Marcos Alves', goals: 7, position: 3 },
+  ];
+
   return (
-    <div className="space-y-8">
-      {/* Hero Section V2 */}
-      <HeroSection />
+    <DashboardWrapper
+      upcomingEvent={upcomingEvent}
+      stats={stats}
+      topScorers={topScorers}
+    >
+      <div className="space-y-8">
+        {/* Hero Section V2 */}
+        <HeroSection />
 
-      {/* 4 Métricas Principais */}
-      <MetricsOverview />
+        {/* 4 Métricas Principais */}
+        <MetricsOverview />
 
-      {/* Grid de Modalidades */}
-      <ModalitiesGrid />
+        {/* Grid de Modalidades */}
+        <ModalitiesGrid />
 
-      {/* Próximos Treinos */}
-      <UpcomingTrainings />
+        {/* Próximos Treinos */}
+        <UpcomingTrainings />
 
-      {/* Payment Notifications */}
-      <PendingPaymentsCard userId={user.id} />
+        {/* Payment Notifications */}
+        <PendingPaymentsCard userId={user.id} />
 
-      {/* Main Content Grid (Legacy - manter para compatibilidade) */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <GroupsCard groups={groups} />
-        <UpcomingEventsCard events={upcomingEvents} />
+        {/* Main Content Grid (Legacy - manter para compatibilidade) */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <GroupsCard groups={groups} />
+          <UpcomingEventsCard events={upcomingEvents} />
+        </div>
       </div>
-    </div>
+    </DashboardWrapper>
   );
 }
