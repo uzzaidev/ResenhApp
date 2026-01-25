@@ -52,13 +52,38 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           const { email, password } = credentialsSchema.parse(credentials);
 
           // Buscar usuário no banco
-          const result = await sql`
-            SELECT id, name, email, password_hash
-            FROM users
-            WHERE email = ${email.toLowerCase()}
-          `;
+          // Tenta primeiro 'users', depois 'profiles' se users não existir
+          let result;
+          try {
+            result = await sql`
+              SELECT id, name, email, password_hash
+              FROM users
+              WHERE email = ${email.toLowerCase()}
+            `;
+          } catch (tableError: any) {
+            // Se tabela users não existe, tenta profiles
+            if (tableError?.code === '42P01' || tableError?.message?.includes('does not exist')) {
+              try {
+                result = await sql`
+                  SELECT p.id, p.full_name as name, u.email, u.encrypted_password as password_hash
+                  FROM profiles p
+                  INNER JOIN auth.users u ON p.id = u.id
+                  WHERE u.email = ${email.toLowerCase()}
+                `;
+              } catch (profilesError) {
+                console.error('[AUTH] Error querying profiles table:', profilesError);
+                throw tableError; // Re-throw original error
+              }
+            } else {
+              throw tableError;
+            }
+          }
 
           if (!Array.isArray(result) || result.length === 0) {
+            // Log apenas em desenvolvimento para não expor informações
+            if (process.env.NODE_ENV === 'development') {
+              console.log('[AUTH] User not found for email:', email.toLowerCase());
+            }
             return null;
           }
 
@@ -66,6 +91,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           // Verificar senha
           if (!user.password_hash) {
+            if (process.env.NODE_ENV === 'development') {
+              console.log('[AUTH] User found but no password_hash');
+            }
             return null;
           }
 
@@ -75,6 +103,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           );
 
           if (!isValidPassword) {
+            if (process.env.NODE_ENV === 'development') {
+              console.log('[AUTH] Invalid password for user');
+            }
             return null;
           }
 
@@ -86,10 +117,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             image: null,
           };
         } catch (error) {
-          // Log error without exposing PII
-          if (process.env.NODE_ENV === 'development') {
-            console.error('[AUTH] Authentication failed:', error instanceof Error ? error.message : 'Unknown error');
-          }
+          // Log error with more context (sem expor PII)
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorStack = error instanceof Error ? error.stack : undefined;
+          
+          // Log sempre em produção para debugging (sem dados sensíveis)
+          console.error('[AUTH] Authentication error:', {
+            message: errorMessage,
+            code: (error as any)?.code,
+            // Não logar email ou senha
+          });
+          
           return null;
         }
       },
