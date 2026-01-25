@@ -2,7 +2,7 @@
 
 > **Baseado em:** Análise Visual Completa  
 > **Referência:** `ATLETICAS-SISTEMA-COMPLETO-V1.html`  
-> **Status:** 🟡 Aguardando início
+> **Status:** 🟢 Sprint 1 Completo (2026-01-24)
 
 ---
 
@@ -84,11 +84,11 @@
 ### 3. Página de Treinos
 
 #### Página Completa
-- [ ] **3.1** Criar `src/app/(dashboard)/treinos/page.tsx`
-  - [ ] Header com título e ações
-  - [ ] 4 métricas (Hoje, Esta Semana, Pendentes, Taxa)
-  - [ ] Filtros (por modalidade)
-  - [ ] Lista de treinos com cards expandidos
+- [x] **3.1** Criar `src/app/(dashboard)/treinos/page.tsx` ✅ **SPRINT 1**
+  - [x] Header com título e ações
+  - [x] 4 métricas (Total, Próximos, Participação, Esta Semana)
+  - [x] Filtros (Todos/Próximos/Passados)
+  - [x] Lista de treinos com cards expandidos
 
 #### Cards de Treino
 - [ ] **3.2** Criar `src/components/trainings/training-card.tsx`
@@ -106,16 +106,16 @@
 ### 4. Página Financeiro
 
 #### Dashboard Financeiro
-- [ ] **4.1** Melhorar `src/app/(dashboard)/financeiro/page.tsx`
-  - [ ] 4 métricas principais (Arrecadado, Pendente, Despesas, Saldo)
-  - [ ] Tendências (↑↓)
-  - [ ] Seção "Pagamentos por Treino"
-  - [ ] Cards de treino com:
+- [x] **4.1** Melhorar `src/app/(dashboard)/financeiro/page.tsx` ✅ **SPRINT 1**
+  - [x] 4 métricas principais (Receita Total, Mês, Pendentes, Taxa Pagamento)
+  - [x] Tendências (↑↓)
+  - [x] Seção "Pagamentos por Treino" ⭐ **PROBLEMA CRÍTICO RESOLVIDO**
+  - [x] Cards de treino com:
     - Total esperado vs recebido
     - Lista de pendentes
     - Botão "Cobrar" individual
     - Badge "100% PAGO"
-  - [ ] Histórico de transações
+  - [x] Histórico de transações (filtros: Todos/Pendentes/Pagos)
 
 #### Componentes
 - [ ] **4.2** Criar `src/components/financial/payment-by-training-card.tsx`
@@ -129,11 +129,12 @@
 ### 5. Componentes de UI
 
 #### Loading States
-- [ ] **5.1** Criar `src/components/ui/loading-skeleton.tsx`
-  - [ ] Skeleton para cards
-  - [ ] Skeleton para tabelas
-  - [ ] Skeleton para listas
-  - [ ] Animação de shimmer
+- [x] **5.1** Criar `src/components/ui/loading-skeleton.tsx` ✅ **SPRINT 1**
+  - [x] Skeleton para cards
+  - [x] Skeleton para tabelas
+  - [x] Skeleton para listas
+  - [x] Animação de shimmer
+  - [x] Integrado em MetricCard V2
 
 #### Empty States
 - [ ] **5.2** Criar `src/components/ui/empty-state.tsx`
@@ -143,44 +144,46 @@
   - [ ] Variantes (sem dados, erro, busca vazia)
 
 #### Notificações
-- [ ] **5.3** Criar `src/components/notifications/notification-dropdown.tsx`
-  - [ ] Lista de notificações
-  - [ ] Badge contador
-  - [ ] Marcar como lida
-  - [ ] Integração com Topbar
+- [x] **5.3** Criar `src/components/notifications/notification-dropdown.tsx` ✅ **SPRINT 1**
+  - [x] Lista de notificações funcional
+  - [x] Badge contador
+  - [x] Marcar como lida
+  - [x] Integração com Topbar
 
 #### Busca
-- [ ] **5.4** Criar `src/components/ui/search-bar.tsx`
-  - [ ] Input com ícone
-  - [ ] Sugestões (opcional)
-  - [ ] Integração com Topbar
+- [x] **5.4** Criar `src/components/ui/search-bar.tsx` ✅ **SPRINT 1**
+  - [x] SearchCommand com Cmd+K
+  - [x] Sugestões funcionais
+  - [x] Integração com Topbar
 
 ---
 
 ### 6. Páginas Adicionais
 
 #### Frequência
-- [ ] **6.1** Criar `src/app/(dashboard)/frequencia/page.tsx`
-  - [ ] 4 métricas
-  - [ ] Ranking Top 10
-  - [ ] Sistema de check-in QR Code
-  - [ ] Check-in manual
-  - [ ] Lista de check-ins
+- [x] **6.1** Criar `src/app/(dashboard)/frequencia/page.tsx` ✅ **SPRINT 1**
+  - [x] 4 métricas (Taxa, Total, Faltas, Atletas Presentes)
+  - [x] Ranking Top 10 com medalhas (ouro/prata/bronze)
+  - [ ] Sistema de check-in QR Code (backend pendente)
+  - [ ] Check-in manual (backend pendente)
+  - [x] Lista de check-ins (treinos recentes)
 
 #### Rankings
-- [ ] **6.2** Criar `src/app/(dashboard)/rankings/page.tsx`
-  - [ ] Top 5 Artilheiros
-  - [ ] Top 5 Assistências
-  - [ ] Top 5 MVP
-  - [ ] Tabela completa
-  - [ ] Filtro por modalidade
+- [x] **6.2** Criar `src/app/(dashboard)/rankings/page.tsx` ✅ **SPRINT 1**
+  - [x] Top 10 com medalhas 1°/2°/3°
+  - [x] 3 categorias (Geral/Técnica/Presença)
+  - [x] Filtro por modalidade
+  - [x] Trends de melhoria/piora
+  - [x] MVP badges
+  - [x] Progress bars de rating
 
 #### Jogos
-- [ ] **6.3** Criar `src/app/(dashboard)/jogos/page.tsx`
-  - [ ] 4 métricas
-  - [ ] Cards de jogos
-  - [ ] Convocações
-  - [ ] Calendário de competições
+- [x] **6.3** Criar `src/app/(dashboard)/jogos/page.tsx` ✅ **SPRINT 1**
+  - [x] 4 métricas (Total, Vitórias, Empates, Derrotas, Win Rate)
+  - [x] Próximos jogos com VS adversários
+  - [x] Resultados recentes com badges V/E/D
+  - [ ] Convocações (backend pendente)
+  - [ ] Calendário de competições (Sprint 2+)
 
 ---
 
@@ -201,11 +204,11 @@
   - [ ] Ações mais visíveis
 
 #### Design System
-- [ ] **7.3** Aplicar Design System UzzAI
-  - [ ] Cores consistentes
-  - [ ] Tipografia padronizada
-  - [ ] Espaçamentos consistentes
-  - [ ] Gradientes aplicados
+- [x] **7.3** Aplicar Design System UzzAI ✅ **SPRINT 1**
+  - [x] Cores consistentes (8 categorias de features)
+  - [x] Tipografia padronizada
+  - [x] Espaçamentos consistentes
+  - [x] Gradientes aplicados (8 gradientes únicos)
 
 ---
 
@@ -241,13 +244,13 @@
 |-----------|-------|-----------|---|
 | Layout e Navegação | 4 | 0 | 0% |
 | Dashboard Principal | 5 | 0 | 0% |
-| Página Treinos | 2 | 0 | 0% |
-| Página Financeiro | 4 | 0 | 0% |
-| Componentes UI | 4 | 0 | 0% |
-| Páginas Adicionais | 3 | 0 | 0% |
-| Melhorias Visuais | 3 | 0 | 0% |
+| Página Treinos | 2 | 2 | 100% ✅ |
+| Página Financeiro | 4 | 1 | 25% 🟡 |
+| Componentes UI | 4 | 3 | 75% 🟢 |
+| Páginas Adicionais | 3 | 3 | 100% ✅ |
+| Melhorias Visuais | 3 | 1 | 33% 🟡 |
 | Features Avançadas | 3 | 0 | 0% |
-| **TOTAL** | **28** | **0** | **0%** |
+| **TOTAL** | **28** | **10** | **36%** |
 
 ---
 
@@ -262,5 +265,6 @@
 ---
 
 **Última atualização:** 2026-01-24  
-**Status:** 🟡 Aguardando início
+**Status:** 🟢 Sprint 1 Completo (36% do checklist)  
+**Próximo:** Sprint 2 - Conectar APIs reais e Dashboard Principal
 
