@@ -50,19 +50,21 @@ export default function AthletesPage() {
   });
   const [showAddModalityModal, setShowAddModalityModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string>('');
-
-  // Temporary groupId - would come from context in production
-  const groupId = 'temp-group-id';
+  const { currentGroup } = useGroup();
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (currentGroup?.id) {
+      fetchData();
+    }
+  }, [currentGroup?.id]);
 
   const fetchData = async () => {
+    if (!currentGroup?.id) return;
+    
     setIsLoading(true);
     try {
       // Fetch modalities
-      const modalitiesResponse = await fetch(`/api/modalities?groupId=${groupId}`);
+      const modalitiesResponse = await fetch(`/api/modalities?group_id=${currentGroup.id}`);
       if (modalitiesResponse.ok) {
         const modalitiesData = await modalitiesResponse.json();
         setModalities(modalitiesData.modalities || []);
@@ -70,7 +72,7 @@ export default function AthletesPage() {
 
       // Fetch athletes with their modalities
       // In production, this would be a proper API endpoint
-      const athletesResponse = await fetch(`/api/group-members?groupId=${groupId}`);
+      const athletesResponse = await fetch(`/api/group-members?groupId=${currentGroup.id}`);
       if (athletesResponse.ok) {
         const athletesData = await athletesResponse.json();
 
@@ -79,7 +81,7 @@ export default function AthletesPage() {
           (athletesData.members || []).map(async (member: any) => {
             try {
               const modalitiesResponse = await fetch(
-                `/api/athletes/${member.user.id}/modalities?groupId=${groupId}`
+                `/api/athletes/${member.user.id}/modalities?group_id=${currentGroup.id}`
               );
               if (modalitiesResponse.ok) {
                 const modalitiesData = await modalitiesResponse.json();
@@ -235,7 +237,7 @@ export default function AthletesPage() {
         open={showAddModalityModal}
         onOpenChange={setShowAddModalityModal}
         userId={selectedUserId}
-        groupId={groupId}
+        groupId={currentGroup?.id || ''}
         onSuccess={fetchData}
       />
     </div>

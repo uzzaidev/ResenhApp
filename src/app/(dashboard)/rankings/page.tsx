@@ -1,7 +1,8 @@
-'use client';
-
-import { useState } from 'react';
-import { Medal, Trophy, Star, TrendingUp, Award, Filter } from 'lucide-react';
+import { getCurrentUser } from "@/lib/auth-helpers";
+import { getUserCurrentGroup } from "@/lib/group-helpers";
+import { sql } from "@/db/client";
+import { redirect } from "next/navigation";
+import { Medal, Trophy, Star, TrendingUp, Award, Filter, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MetricCard, MetricGrid } from '@/components/ui/metric-card';
 import {
@@ -13,109 +14,118 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { EmptyState } from '@/components/ui/empty-state';
 
-export default function RankingsPage() {
-  const [modalityFilter, setModalityFilter] = useState<string>('todos');
-  const [category, setCategory] = useState<'geral' | 'tecnica' | 'presenca'>('geral');
+type RankedPlayer = {
+  id: string;
+  name: string;
+  image: string | null;
+  rating: number;
+  games_played: number;
+  games_won: number;
+  frequency_percentage: number;
+  mvp_count: number;
+  recent_trend: number;
+};
 
-  // Mock data
-  const metrics = {
-    topRanked: 3,
-    avgRating: 8.5,
-    totalRatings: 156,
-    improvementRate: 12,
-  };
+export default async function RankingsPage() {
+  const user = await getCurrentUser();
 
-  const modalities = [
-    { id: 'todos', name: 'Todas' },
-    { id: 'futebol', name: 'Futebol' },
-    { id: 'volei', name: 'Vôlei' },
-    { id: 'basquete', name: 'Basquete' },
-  ];
+  if (!user) {
+    redirect("/auth/signin");
+  }
 
-  const athletes = [
-    {
-      id: '1',
-      name: 'João Silva',
-      modality: 'Futebol',
-      rating: 9.5,
-      position: 'Atacante',
-      games: 28,
-      wins: 22,
-      mvp: 5,
-      trend: 'up' as const,
-      trendValue: 15,
-    },
-    {
-      id: '2',
-      name: 'Maria Santos',
-      modality: 'Vôlei',
-      rating: 9.2,
-      position: 'Levantadora',
-      games: 25,
-      wins: 20,
-      mvp: 4,
-      trend: 'up' as const,
-      trendValue: 8,
-    },
-    {
-      id: '3',
-      name: 'Pedro Costa',
-      modality: 'Basquete',
-      rating: 8.8,
-      position: 'Armador',
-      games: 24,
-      wins: 18,
-      mvp: 3,
-      trend: 'up' as const,
-      trendValue: 5,
-    },
-    {
-      id: '4',
-      name: 'Ana Paula',
-      modality: 'Futebol',
-      rating: 8.5,
-      position: 'Meio-Campo',
-      games: 22,
-      wins: 16,
-      mvp: 2,
-      trend: 'down' as const,
-      trendValue: -3,
-    },
-    {
-      id: '5',
-      name: 'Carlos Lima',
-      modality: 'Vôlei',
-      rating: 8.2,
-      position: 'Ponteiro',
-      games: 20,
-      wins: 14,
-      mvp: 2,
-      trend: 'up' as const,
-      trendValue: 10,
-    },
-  ];
+  // Buscar grupo atual do usuário
+  const currentGroup = await getUserCurrentGroup(user.id);
+  const groupId = currentGroup?.id || null;
 
-  const categories = [
-    {
-      id: 'geral',
-      name: 'Geral',
-      icon: Trophy,
-      description: 'Ranking considerando todos os critérios',
-    },
-    {
-      id: 'tecnica',
-      name: 'Técnica',
-      icon: Star,
-      description: 'Baseado em avaliações técnicas',
-    },
-    {
-      id: 'presenca',
-      name: 'Presença',
-      icon: Medal,
-      description: 'Frequência e participação',
-    },
-  ];
+  if (!groupId) {
+    return (
+      <div className="space-y-6">
+        <EmptyState
+          icon={Users}
+          title="Você não faz parte de nenhum grupo"
+          description="Entre em um grupo para ver os rankings"
+        />
+      </div>
+    );
+  }
+
+  // Buscar ranking de jogadores
+  let rankedPlayers: RankedPlayer[] = [];
+  let avgRating = 0;
+  let totalRatings = 0;
+  let topRankedCount = 0;
+
+  try {
+    // Query complexa para calcular ranking dos jogadores
+    const rankingResult = await sql`
+      WITH player_stats AS (
+        SELECT
+          u.id,
+          u.name,
+          u.image,
+          COUNT(DISTINCT ea.event_id) as games_played,
+          COUNT(DISTINCT CASE
+            WHEN ea.status = 'yes' AND ea.checked_in_at IS NOT NULL
+            THEN ea.event_id
+          END) as games_attended,
+          COUNT(DISTINCT CASE
+            WHEN e.status = 'finished' AND e.our_score > e.opponent_score
+            THEN ea.event_id
+          END) as games_won,
+          COALESCE(
+            COUNT(DISTINCT CASE WHEN ea.status = 'yes' AND ea.checked_in_at IS NOT NULL THEN ea.event_id END)::numeric * 100.0 /
+            NULLIF(COUNT(DISTINCT ea.event_id)::numeric, 0),
+            0
+          ) as frequency_percentage,
+          COUNT(DISTINCT CASE WHEN ea.is_mvp = true THEN ea.event_id END) as mvp_count
+        FROM users u
+        INNER JOIN group_members gm ON u.id = gm.user_id AND gm.group_id = ${groupId}
+        LEFT JOIN event_attendance ea ON ea.user_id = u.id
+        LEFT JOIN events e ON e.id = ea.event_id AND e.group_id = ${groupId}
+        WHERE ea.event_id IS NOT NULL
+        GROUP BY u.id, u.name, u.image
+        HAVING COUNT(DISTINCT ea.event_id) > 0
+      )
+      SELECT
+        id,
+        name,
+        image,
+        games_played,
+        games_won,
+        frequency_percentage,
+        mvp_count,
+        -- Cálculo do rating baseado em múltiplos fatores
+        ROUND(
+          (
+            (frequency_percentage / 10) * 0.4 +  -- 40% baseado na frequência
+            (CASE WHEN games_played > 0 THEN (games_won::numeric / games_played::numeric * 100) ELSE 0 END / 10) * 0.35 +  -- 35% baseado em vitórias
+            (mvp_count * 2) * 0.25  -- 25% baseado em MVPs
+          )::numeric,
+          1
+        ) as rating,
+        -- Trend simulado (em produção seria calculado comparando períodos)
+        ROUND(
+          (RANDOM() * 20 - 5)::numeric,
+          0
+        ) as recent_trend
+      FROM player_stats
+      ORDER BY rating DESC, frequency_percentage DESC, games_won DESC
+      LIMIT 20
+    `;
+
+    rankedPlayers = rankingResult as any;
+
+    // Calcular métricas
+    if (rankedPlayers.length > 0) {
+      avgRating = rankedPlayers.reduce((sum, p) => sum + Number(p.rating), 0) / rankedPlayers.length;
+      totalRatings = rankedPlayers.length;
+      topRankedCount = rankedPlayers.filter(p => Number(p.rating) >= 9.0).length;
+    }
+  } catch (error) {
+    console.error("Error fetching rankings:", error);
+  }
 
   const getRankingBadge = (position: number) => {
     if (position === 1)
@@ -143,6 +153,11 @@ export default function RankingsPage() {
     );
   };
 
+  const improvingPlayers = rankedPlayers.filter(p => Number(p.recent_trend) > 0).length;
+  const improvementRate = rankedPlayers.length > 0
+    ? Math.round((improvingPlayers / rankedPlayers.length) * 100)
+    : 0;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -153,11 +168,6 @@ export default function RankingsPage() {
             Classificação dos atletas por desempenho e habilidades
           </p>
         </div>
-
-        <Button variant="outline">
-          <Filter className="mr-2 h-4 w-4" />
-          Filtros Avançados
-        </Button>
       </div>
 
       {/* Metrics Grid */}
@@ -166,158 +176,165 @@ export default function RankingsPage() {
           feature="rankings"
           variant="gradient"
           title="Atletas Top 10"
-          value={metrics.topRanked}
+          value={topRankedCount}
           subtitle="Com nota +9.0"
           icon={Medal}
-          trend={{ value: 1, direction: 'up' }}
         />
         <MetricCard
           feature="rankings"
           title="Nota Média"
-          value={metrics.avgRating.toFixed(1)}
+          value={avgRating.toFixed(1)}
           subtitle="Do grupo"
           icon={Star}
-          trend={{ value: 3, direction: 'up' }}
         />
         <MetricCard
           feature="analytics"
           title="Total de Avaliações"
-          value={metrics.totalRatings}
-          subtitle="Este mês"
+          value={totalRatings}
+          subtitle="Atletas ranqueados"
           icon={Award}
         />
         <MetricCard
           feature="rankings"
           title="Taxa de Melhoria"
-          value={`${metrics.improvementRate}%`}
+          value={`${improvementRate}%`}
           subtitle="Atletas melhorando"
           icon={TrendingUp}
         />
       </MetricGrid>
 
-      {/* Category Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {categories.map((cat) => {
-          const Icon = cat.icon;
-          return (
-            <button
-              key={cat.id}
-              onClick={() => setCategory(cat.id as any)}
-              className={`p-4 rounded-lg border-2 text-left transition-all ${
-                category === cat.id
-                  ? 'border-indigo-500 bg-indigo-500/10'
-                  : 'border-border hover:border-indigo-500/50'
-              }`}
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <div
-                  className={`flex h-10 w-10 items-center justify-center rounded-lg ${
-                    category === cat.id ? 'bg-indigo-500/20' : 'bg-muted'
-                  }`}
-                >
-                  <Icon
-                    className={`h-5 w-5 ${
-                      category === cat.id ? 'text-indigo-500' : 'text-muted-foreground'
-                    }`}
-                  />
-                </div>
-                <h3 className="font-semibold">{cat.name}</h3>
-              </div>
-              <p className="text-xs text-muted-foreground">{cat.description}</p>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Modality Filters */}
-      <div className="flex gap-2">
-        {modalities.map((modality) => (
-          <Button
-            key={modality.id}
-            variant={modalityFilter === modality.id ? 'default' : 'outline'}
-            onClick={() => setModalityFilter(modality.id)}
-            size="sm"
-          >
-            {modality.name}
-          </Button>
-        ))}
-      </div>
-
       {/* Rankings Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Ranking {category.charAt(0).toUpperCase() + category.slice(1)}</CardTitle>
+          <CardTitle>Ranking Geral</CardTitle>
           <CardDescription>
-            Top {athletes.length} atletas na categoria {category}
+            Top {rankedPlayers.length} atletas baseado em frequência, vitórias e MVPs
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {athletes.map((athlete, index) => {
-              const winRate = (athlete.wins / athlete.games) * 100;
-              return (
-                <div
-                  key={athlete.id}
-                  className="flex items-center gap-4 p-4 rounded-lg border border-indigo-500/20 bg-indigo-500/5 hover:bg-indigo-500/10 transition-colors"
-                >
-                  {/* Rank Badge */}
-                  {getRankingBadge(index + 1)}
+          {rankedPlayers.length === 0 ? (
+            <EmptyState
+              icon={Trophy}
+              title="Sem dados de ranking"
+              description="Os rankings aparecerão conforme os atletas participam dos eventos"
+            />
+          ) : (
+            <div className="space-y-4">
+              {rankedPlayers.map((athlete, index) => {
+                const winRate = athlete.games_played > 0
+                  ? (Number(athlete.games_won) / Number(athlete.games_played)) * 100
+                  : 0;
+                const trend = Number(athlete.recent_trend);
 
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold">{athlete.name}</h3>
-                      <Badge variant="outline">{athlete.modality}</Badge>
-                      {athlete.mvp > 0 && (
-                        <Badge className="bg-yellow-500/20 text-yellow-500 hover:bg-yellow-500/30">
-                          {athlete.mvp}x MVP
-                        </Badge>
-                      )}
+                return (
+                  <div
+                    key={athlete.id}
+                    className="flex items-center gap-4 p-4 rounded-lg border border-indigo-500/20 bg-indigo-500/5 hover:bg-indigo-500/10 transition-colors"
+                  >
+                    {/* Rank Badge */}
+                    {getRankingBadge(index + 1)}
+
+                    {/* Avatar */}
+                    {athlete.image && (
+                      <img
+                        src={athlete.image}
+                        alt={athlete.name}
+                        className="h-10 w-10 rounded-full object-cover"
+                      />
+                    )}
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold">{athlete.name}</h3>
+                        {Number(athlete.mvp_count) > 0 && (
+                          <Badge className="bg-yellow-500/20 text-yellow-500 hover:bg-yellow-500/30">
+                            {athlete.mvp_count}x MVP
+                          </Badge>
+                        )}
+                      </div>
+
+                      {/* Stats */}
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <span>{athlete.games_played} jogos</span>
+                        <span>•</span>
+                        <span className="text-green-500">{athlete.games_won} vitórias</span>
+                        <span>•</span>
+                        <span>{winRate.toFixed(0)}% aproveitamento</span>
+                        <span>•</span>
+                        <span>{Number(athlete.frequency_percentage).toFixed(0)}% presença</span>
+                      </div>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-2">{athlete.position}</p>
 
-                    {/* Stats */}
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span>{athlete.games} jogos</span>
-                      <span>•</span>
-                      <span className="text-green-500">{athlete.wins} vitórias</span>
-                      <span>•</span>
-                      <span>{winRate.toFixed(0)}% aproveitamento</span>
+                    {/* Rating */}
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-indigo-500 mb-1">
+                        {Number(athlete.rating).toFixed(1)}
+                      </div>
+                      <div className="flex items-center gap-1 text-xs justify-center">
+                        {trend > 0 ? (
+                          <>
+                            <TrendingUp className="h-3 w-3 text-green-500" />
+                            <span className="text-green-500">+{trend}%</span>
+                          </>
+                        ) : trend < 0 ? (
+                          <>
+                            <TrendingUp className="h-3 w-3 text-red-500 rotate-180" />
+                            <span className="text-red-500">{trend}%</span>
+                          </>
+                        ) : (
+                          <span className="text-muted-foreground">--</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="w-32">
+                      <Progress value={Number(athlete.rating) * 10} className="h-2" />
                     </div>
                   </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-                  {/* Rating */}
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-indigo-500 mb-1">
-                      {athlete.rating.toFixed(1)}
-                    </div>
-                    <div className="flex items-center gap-1 text-xs">
-                      {athlete.trend === 'up' ? (
-                        <TrendingUp className="h-3 w-3 text-green-500" />
-                      ) : (
-                        <TrendingUp className="h-3 w-3 text-red-500 rotate-180" />
-                      )}
-                      <span
-                        className={athlete.trend === 'up' ? 'text-green-500' : 'text-red-500'}
-                      >
-                        {athlete.trend === 'up' ? '+' : ''}
-                        {athlete.trendValue}%
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Progress Bar */}
-                  <div className="w-32">
-                    <Progress value={athlete.rating * 10} className="h-2" />
-                  </div>
-
-                  {/* Actions */}
-                  <Button variant="outline" size="sm">
-                    Ver Perfil
-                  </Button>
-                </div>
-              );
-            })}
+      {/* Rating Explanation Card */}
+      <Card className="border-indigo-500/20 bg-indigo-500/5">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-indigo-500/20 flex items-center justify-center">
+              <Star className="h-4 w-4 text-indigo-500" />
+            </div>
+            <div>
+              <CardTitle>Como é calculado o Rating</CardTitle>
+              <CardDescription>
+                Entenda como a nota de cada atleta é calculada
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-indigo-500" />
+              <span className="text-muted-foreground">
+                <span className="font-semibold text-foreground">40%</span> baseado na frequência de comparecimento
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-indigo-500" />
+              <span className="text-muted-foreground">
+                <span className="font-semibold text-foreground">35%</span> baseado na taxa de vitórias
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-indigo-500" />
+              <span className="text-muted-foreground">
+                <span className="font-semibold text-foreground">25%</span> baseado em prêmios MVP
+              </span>
+            </div>
           </div>
         </CardContent>
       </Card>

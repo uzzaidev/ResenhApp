@@ -9,6 +9,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { toast } from "sonner";
 
 interface Group {
   id: string;
@@ -28,6 +29,9 @@ interface GroupContextType {
   setCurrentGroup: (group: Group | null) => void;
   loadGroups: () => Promise<void>;
   switchGroup: (groupId: string) => Promise<void>;
+  // Alias para compatibilidade com código existente
+  userGroups: Group[];
+  fetchUserGroups: () => Promise<void>;
 }
 
 const GroupContext = createContext<GroupContextType | undefined>(undefined);
@@ -54,19 +58,36 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
       }
 
       const data = await response.json();
-      setGroups(data.groups || []);
+      const loadedGroups = data.groups || [];
+      setGroups(loadedGroups);
+
+      // Tentar carregar grupo salvo do localStorage
+      const savedGroupId = typeof window !== 'undefined' 
+        ? localStorage.getItem("currentGroupId") 
+        : null;
+
+      if (savedGroupId && loadedGroups.length > 0) {
+        const savedGroup = loadedGroups.find((g: Group) => g.id === savedGroupId);
+        if (savedGroup) {
+          setCurrentGroupState(savedGroup);
+          return;
+        }
+      }
 
       // Se não há grupo atual e há grupos disponíveis, seleciona o primeiro
-      if (!currentGroup && data.groups && data.groups.length > 0) {
-        const firstGroup = data.groups[0];
+      if (!currentGroup && loadedGroups.length > 0) {
+        const firstGroup = loadedGroups[0];
         setCurrentGroupState(firstGroup);
         
         // Persiste no localStorage
-        localStorage.setItem("currentGroupId", firstGroup.id);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem("currentGroupId", firstGroup.id);
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro desconhecido");
       console.error("Error loading groups:", err);
+      toast.error("Erro ao carregar grupos");
     } finally {
       setIsLoading(false);
     }
@@ -91,28 +112,39 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
   const switchGroup = useCallback(async (groupId: string) => {
     const group = groups.find((g) => g.id === groupId);
     if (group) {
-      setCurrentGroup(group);
-      
-      // Se estiver em uma página específica de grupo, redireciona para dashboard
-      if (pathname?.includes("/groups/")) {
-        router.push("/dashboard");
+      try {
+        // Atualizar no servidor (cookie)
+        const response = await fetch("/api/groups/switch", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ groupId }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Erro ao alternar grupo");
+        }
+
+        // Atualizar estado local
+        setCurrentGroup(group);
+        toast.success(`Grupo alterado para: ${group.name}`);
+        
+        // Se estiver em uma página específica de grupo, redireciona para dashboard
+        if (pathname?.includes("/groups/")) {
+          router.push("/dashboard");
+        } else {
+          // Refresh para atualizar Server Components
+          router.refresh();
+        }
+      } catch (error) {
+        console.error("Error switching group:", error);
+        toast.error("Erro ao alternar grupo");
       }
     }
   }, [groups, pathname, router, setCurrentGroup]);
 
-  /**
-   * Carrega grupo salvo do localStorage na inicialização
-   */
-  useEffect(() => {
-    const savedGroupId = localStorage.getItem("currentGroupId");
-    
-    if (savedGroupId && groups.length > 0) {
-      const savedGroup = groups.find((g) => g.id === savedGroupId);
-      if (savedGroup && savedGroup.id !== currentGroup?.id) {
-        setCurrentGroupState(savedGroup);
-      }
-    }
-  }, [groups, currentGroup]);
+  // Alias para compatibilidade
+  const fetchUserGroups = loadGroups;
+  const userGroups = groups;
 
   /**
    * Carrega grupos na montagem do componente
@@ -129,6 +161,9 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
     setCurrentGroup,
     loadGroups,
     switchGroup,
+    // Aliases para compatibilidade
+    userGroups,
+    fetchUserGroups,
   };
 
   return <GroupContext.Provider value={value}>{children}</GroupContext.Provider>;

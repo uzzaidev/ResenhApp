@@ -1,56 +1,132 @@
-'use client';
-
-import { useState } from 'react';
+import { getCurrentUser } from "@/lib/auth-helpers";
+import { getUserCurrentGroup } from "@/lib/group-helpers";
+import { sql } from "@/db/client";
+import { redirect } from "next/navigation";
 import { Calendar, Clock, MapPin, Users, Plus, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MetricCard, MetricGrid } from '@/components/ui/metric-card';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
+import Link from "next/link";
 
-export default function TreinosPage() {
-  const [filter, setFilter] = useState<'todos' | 'proximos' | 'passados'>('proximos');
+type Training = {
+  id: string;
+  starts_at: string;
+  status: string;
+  venue_name: string | null;
+  max_players: number | null;
+  confirmed_count: number;
+  event_type: string;
+};
 
-  // Mock data - substituir por dados reais da API
-  const metrics = {
-    totalTreinos: 24,
-    proximosTreinos: 3,
-    participacaoMedia: 85,
-    treinosEstaSemana: 2,
-  };
+export default async function TreinosPage() {
+  const user = await getCurrentUser();
 
-  const upcomingTrainings = [
-    {
-      id: '1',
-      modality: 'Futebol',
-      date: '2026-01-25',
-      time: '19:00',
-      location: 'Quadra Central',
-      confirmed: 18,
-      total: 20,
-      status: 'confirmed' as const,
-    },
-    {
-      id: '2',
-      modality: 'Vôlei',
-      date: '2026-01-27',
-      time: '18:30',
-      location: 'Ginásio',
-      confirmed: 10,
-      total: 12,
-      status: 'pending' as const,
-    },
-    {
-      id: '3',
-      modality: 'Basquete',
-      date: '2026-01-28',
-      time: '20:00',
-      location: 'Quadra 2',
-      confirmed: 8,
-      total: 10,
-      status: 'confirmed' as const,
-    },
-  ];
+  if (!user) {
+    redirect("/auth/signin");
+  }
+
+  // Buscar grupo atual do usuário
+  const currentGroup = await getUserCurrentGroup(user.id);
+  const groupId = currentGroup?.id || null;
+
+  if (!groupId) {
+    return (
+      <div className="space-y-6">
+        <EmptyState
+          icon={Users}
+          title="Você não faz parte de nenhum grupo"
+          description="Entre em um grupo para acessar os treinos"
+          action={{
+            label: 'Entrar em Grupo',
+            onClick: () => {},
+          }}
+        />
+      </div>
+    );
+  }
+
+  // Buscar eventos do tipo treino (scheduled)
+  let upcomingTrainings: Training[] = [];
+  let pastTrainings: Training[] = [];
+  let totalTrainings = 0;
+
+  try {
+    // Próximos treinos
+    const upcomingResult = await sql`
+      SELECT
+        e.id,
+        e.starts_at,
+        e.status,
+        e.max_players,
+        e.event_type,
+        v.name as venue_name,
+        (SELECT COUNT(*) FROM event_attendance WHERE event_id = e.id AND status = 'yes') as confirmed_count
+      FROM events e
+      LEFT JOIN venues v ON e.venue_id = v.id
+      WHERE e.group_id = ${groupId}
+        AND e.starts_at > NOW()
+        AND e.status = 'scheduled'
+        AND (e.event_type = 'training' OR e.event_type IS NULL)
+      ORDER BY e.starts_at ASC
+      LIMIT 10
+    `;
+    upcomingTrainings = upcomingResult as any;
+
+    // Treinos passados
+    const pastResult = await sql`
+      SELECT
+        e.id,
+        e.starts_at,
+        e.status,
+        e.max_players,
+        e.event_type,
+        v.name as venue_name,
+        (SELECT COUNT(*) FROM event_attendance WHERE event_id = e.id AND status = 'yes') as confirmed_count
+      FROM events e
+      LEFT JOIN venues v ON e.venue_id = v.id
+      WHERE e.group_id = ${groupId}
+        AND e.starts_at < NOW()
+        AND (e.event_type = 'training' OR e.event_type IS NULL)
+      ORDER BY e.starts_at DESC
+      LIMIT 10
+    `;
+    pastTrainings = pastResult as any;
+
+    // Total de treinos (últimos 30 dias)
+    const totalResult = await sql`
+      SELECT COUNT(*) as count
+      FROM events e
+      WHERE e.group_id = ${groupId}
+        AND e.starts_at > NOW() - INTERVAL '30 days'
+        AND (e.event_type = 'training' OR e.event_type IS NULL)
+    `;
+    totalTrainings = (totalResult[0] as any).count || 0;
+  } catch (error) {
+    console.error("Error fetching trainings:", error);
+  }
+
+  // Calcular métricas
+  const proximosTreinos = upcomingTrainings.length;
+
+  // Participação média (dos treinos que já aconteceram)
+  const participacaoMedia = pastTrainings.length > 0
+    ? Math.round(
+        (pastTrainings.reduce((sum, t) => sum + (t.confirmed_count || 0), 0) /
+          pastTrainings.reduce((sum, t) => sum + (t.max_players || 20), 0)) *
+          100
+      )
+    : 85;
+
+  // Treinos esta semana
+  const now = new Date();
+  const weekEnd = new Date(now);
+  weekEnd.setDate(now.getDate() + 7);
+  const treinosEstaSemana = upcomingTrainings.filter((t) => {
+    const trainingDate = new Date(t.starts_at);
+    return trainingDate >= now && trainingDate <= weekEnd;
+  }).length;
 
   return (
     <div className="space-y-6">
@@ -63,9 +139,11 @@ export default function TreinosPage() {
           </p>
         </div>
 
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Treino
+        <Button asChild>
+          <Link href={`/groups/${groupId}/events/new`}>
+            <Plus className="mr-2 h-4 w-4" />
+            Novo Treino
+          </Link>
         </Button>
       </div>
 
@@ -74,71 +152,40 @@ export default function TreinosPage() {
         <MetricCard
           feature="trainings"
           title="Total de Treinos"
-          value={metrics.totalTreinos}
+          value={totalTrainings}
           subtitle="Últimos 30 dias"
           icon={Calendar}
-          trend={{ value: 12, direction: 'up' }}
         />
         <MetricCard
           feature="trainings"
           title="Próximos Treinos"
-          value={metrics.proximosTreinos}
-          subtitle="Esta semana"
+          value={proximosTreinos}
+          subtitle="Agendados"
           icon={Clock}
         />
         <MetricCard
           feature="attendance"
           title="Participação Média"
-          value={`${metrics.participacaoMedia}%`}
+          value={`${participacaoMedia}%`}
           subtitle="Dos atletas confirmam"
           icon={Users}
-          trend={{ value: 5, direction: 'up' }}
         />
         <MetricCard
           feature="trainings"
           variant="gradient"
           title="Treinos Esta Semana"
-          value={metrics.treinosEstaSemana}
-          subtitle="2 modalidades ativas"
+          value={treinosEstaSemana}
+          subtitle={`De ${proximosTreinos} agendados`}
           icon={MapPin}
         />
       </MetricGrid>
-
-      {/* Filters */}
-      <div className="flex gap-2">
-        <Button
-          variant={filter === 'todos' ? 'default' : 'outline'}
-          onClick={() => setFilter('todos')}
-          size="sm"
-        >
-          Todos
-        </Button>
-        <Button
-          variant={filter === 'proximos' ? 'default' : 'outline'}
-          onClick={() => setFilter('proximos')}
-          size="sm"
-        >
-          Próximos
-        </Button>
-        <Button
-          variant={filter === 'passados' ? 'default' : 'outline'}
-          onClick={() => setFilter('passados')}
-          size="sm"
-        >
-          Passados
-        </Button>
-        <Button variant="outline" size="sm" className="ml-auto">
-          <Filter className="mr-2 h-4 w-4" />
-          Filtros
-        </Button>
-      </div>
 
       {/* Upcoming Trainings List */}
       <Card>
         <CardHeader>
           <CardTitle>Próximos Treinos</CardTitle>
           <CardDescription>
-            {upcomingTrainings.length} treinos agendados
+            {upcomingTrainings.length} {upcomingTrainings.length === 1 ? 'treino agendado' : 'treinos agendados'}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -147,70 +194,111 @@ export default function TreinosPage() {
               icon={Calendar}
               title="Nenhum treino agendado"
               description="Crie um novo treino para começar"
-              action={{
-                label: 'Novo Treino',
-                onClick: () => console.log('Criar treino'),
-              }}
             />
           ) : (
             <div className="space-y-4">
-              {upcomingTrainings.map((training) => (
-                <div
-                  key={training.id}
-                  className="flex items-center gap-4 p-4 rounded-lg border border-violet-500/20 bg-violet-500/5 hover:bg-violet-500/10 transition-colors"
-                >
-                  {/* Icon */}
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-violet-500/20">
-                    <Calendar className="h-6 w-6 text-violet-500" />
-                  </div>
+              {upcomingTrainings.map((training) => {
+                const trainingDate = new Date(training.starts_at);
+                const time = trainingDate.toLocaleTimeString('pt-BR', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                });
 
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold">{training.modality}</h3>
-                      <Badge
-                        variant={training.status === 'confirmed' ? 'default' : 'secondary'}
-                      >
-                        {training.status === 'confirmed' ? 'Confirmado' : 'Pendente'}
-                      </Badge>
+                return (
+                  <Link
+                    key={training.id}
+                    href={`/events/${training.id}`}
+                    className="flex items-center gap-4 p-4 rounded-lg border border-violet-500/20 bg-violet-500/5 hover:bg-violet-500/10 transition-colors"
+                  >
+                    {/* Icon */}
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-violet-500/20">
+                      <Calendar className="h-6 w-6 text-violet-500" />
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {new Date(training.date).toLocaleDateString('pt-BR', {
-                          day: '2-digit',
-                          month: 'short',
-                        })}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {training.time}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        {training.location}
-                      </span>
-                    </div>
-                  </div>
 
-                  {/* Stats */}
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-violet-500">
-                      {training.confirmed}/{training.total}
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold">Treino</h3>
+                        <Badge variant={training.status === 'scheduled' ? 'default' : 'secondary'}>
+                          {training.status === 'scheduled' ? 'Agendado' : training.status}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {trainingDate.toLocaleDateString('pt-BR', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric',
+                          })}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {time}
+                        </span>
+                        {training.venue_name && (
+                          <span className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {training.venue_name}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div className="text-xs text-muted-foreground">confirmados</div>
-                  </div>
 
-                  {/* Actions */}
-                  <Button variant="outline" size="sm">
-                    Ver Detalhes
-                  </Button>
-                </div>
-              ))}
+                    {/* Stats */}
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-violet-500">
+                        {training.confirmed_count}/{training.max_players || '∞'}
+                      </div>
+                      <div className="text-xs text-muted-foreground">confirmados</div>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           )}
         </CardContent>
       </Card>
+
+      {/* Past Trainings */}
+      {pastTrainings.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Treinos Anteriores</CardTitle>
+            <CardDescription>Últimos {pastTrainings.length} treinos realizados</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {pastTrainings.slice(0, 5).map((training) => {
+                const trainingDate = new Date(training.starts_at);
+                return (
+                  <Link
+                    key={training.id}
+                    href={`/events/${training.id}`}
+                    className="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent transition-colors"
+                  >
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">
+                        {trainingDate.toLocaleDateString('pt-BR', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                        })}
+                      </div>
+                      {training.venue_name && (
+                        <div className="text-xs text-muted-foreground">{training.venue_name}</div>
+                      )}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {training.confirmed_count} confirmados
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

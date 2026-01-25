@@ -1,6 +1,7 @@
-'use client';
-
-import { useState } from 'react';
+import { getCurrentUser } from "@/lib/auth-helpers";
+import { getUserCurrentGroup } from "@/lib/group-helpers";
+import { sql } from "@/db/client";
+import { redirect } from "next/navigation";
 import {
   DollarSign,
   TrendingUp,
@@ -10,6 +11,7 @@ import {
   AlertCircle,
   Plus,
   Download,
+  Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MetricCard, MetricGrid } from '@/components/ui/metric-card';
@@ -22,91 +24,159 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
+import Link from 'next/link';
 
-export default function FinanceiroPage() {
-  const [filter, setFilter] = useState<'todos' | 'pendentes' | 'pagos'>('pendentes');
+type Charge = {
+  id: string;
+  user_id: string;
+  user_name: string;
+  amount: number;
+  description: string | null;
+  due_date: string;
+  paid_at: string | null;
+  event_id: string | null;
+  event_name: string | null;
+  event_date: string | null;
+};
 
-  // Mock data
-  const metrics = {
-    receitaTotal: 'R$ 4.850,00',
-    receitaMes: 'R$ 1.200,00',
-    pendentes: 'R$ 380,00',
-    taxaPagamento: 92,
-  };
+export default async function FinanceiroPage() {
+  const user = await getCurrentUser();
 
-  const payments = [
-    {
-      id: '1',
-      athleteName: 'João Silva',
-      description: 'Mensalidade Janeiro 2026',
-      amount: 'R$ 100,00',
-      dueDate: '2026-01-25',
-      status: 'pending' as const,
-      trainingRelated: true,
-      trainingName: 'Treino Futebol - 22/01',
-    },
-    {
-      id: '2',
-      athleteName: 'Maria Santos',
-      description: 'Taxa de Jogo Oficial',
-      amount: 'R$ 50,00',
-      dueDate: '2026-01-20',
-      status: 'overdue' as const,
-      trainingRelated: false,
-    },
-    {
-      id: '3',
-      athleteName: 'Pedro Costa',
-      description: 'Mensalidade Janeiro 2026',
-      amount: 'R$ 100,00',
-      dueDate: '2026-01-15',
-      status: 'paid' as const,
-      paidDate: '2026-01-14',
-      trainingRelated: true,
-      trainingName: 'Treino Vôlei - 15/01',
-    },
-    {
-      id: '4',
-      athleteName: 'Ana Paula',
-      description: 'Uniforme Oficial',
-      amount: 'R$ 80,00',
-      dueDate: '2026-01-30',
-      status: 'pending' as const,
-      trainingRelated: false,
-    },
-  ];
+  if (!user) {
+    redirect("/auth/signin");
+  }
 
-  const filteredPayments = payments.filter((payment) => {
-    if (filter === 'pendentes') return payment.status === 'pending' || payment.status === 'overdue';
-    if (filter === 'pagos') return payment.status === 'paid';
-    return true;
-  });
+  // Buscar grupo atual do usuário
+  const currentGroup = await getUserCurrentGroup(user.id);
+  const groupId = currentGroup?.id || null;
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return <Badge variant="default" className="bg-green-500">Pago</Badge>;
-      case 'pending':
-        return <Badge variant="secondary">Pendente</Badge>;
-      case 'overdue':
-        return <Badge variant="destructive">Atrasado</Badge>;
-      default:
-        return <Badge>{status}</Badge>;
+  if (!groupId) {
+    return (
+      <div className="space-y-6">
+        <EmptyState
+          icon={Users}
+          title="Você não faz parte de nenhum grupo"
+          description="Entre em um grupo para acessar o financeiro"
+        />
+      </div>
+    );
+  }
+
+  // Buscar cobranças do grupo
+  let charges: Charge[] = [];
+  let totalRevenue = 0;
+  let monthRevenue = 0;
+  let pendingAmount = 0;
+  let paidCount = 0;
+  let totalCount = 0;
+
+  try {
+    // Buscar todas as cobranças do grupo
+    const chargesResult = await sql`
+      SELECT
+        c.id,
+        c.user_id,
+        u.name as user_name,
+        c.amount,
+        c.description,
+        c.due_date,
+        c.paid_at,
+        c.event_id,
+        e.starts_at as event_date
+      FROM charges c
+      INNER JOIN users u ON c.user_id = u.id
+      LEFT JOIN events e ON c.event_id = e.id
+      WHERE c.group_id = ${groupId}
+      ORDER BY c.due_date DESC, c.created_at DESC
+      LIMIT 50
+    `;
+
+    charges = (chargesResult as any[]).map((charge) => ({
+      ...charge,
+      event_name: charge.event_id ? `Treino - ${new Date(charge.event_date).toLocaleDateString('pt-BR')}` : null,
+    }));
+
+    // Calcular métricas
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const twelveMonthsAgo = new Date(now);
+    twelveMonthsAgo.setMonth(now.getMonth() - 12);
+
+    charges.forEach((charge) => {
+      totalCount++;
+      const chargeAmount = Number(charge.amount) || 0;
+
+      if (charge.paid_at) {
+        paidCount++;
+        const paidDate = new Date(charge.paid_at);
+
+        // Receita total (últimos 12 meses)
+        if (paidDate >= twelveMonthsAgo) {
+          totalRevenue += chargeAmount;
+        }
+
+        // Receita do mês
+        if (paidDate >= firstDayOfMonth) {
+          monthRevenue += chargeAmount;
+        }
+      } else {
+        // Soma dos pendentes
+        pendingAmount += chargeAmount;
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching charges:", error);
+  }
+
+  const paymentRate = totalCount > 0 ? Math.round((paidCount / totalCount) * 100) : 0;
+
+  const getStatusBadge = (charge: Charge) => {
+    if (charge.paid_at) {
+      return <Badge className="bg-green-500/20 text-green-500 hover:bg-green-500/30">Pago</Badge>;
     }
+
+    const dueDate = new Date(charge.due_date);
+    const now = new Date();
+
+    if (dueDate < now) {
+      return <Badge variant="destructive">Atrasado</Badge>;
+    }
+
+    return <Badge variant="secondary">Pendente</Badge>;
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case 'pending':
-        return <Clock className="h-5 w-5 text-yellow-500" />;
-      case 'overdue':
-        return <AlertCircle className="h-5 w-5 text-red-500" />;
-      default:
-        return null;
+  const getStatusIcon = (charge: Charge) => {
+    if (charge.paid_at) {
+      return <CheckCircle className="h-5 w-5 text-green-500" />;
     }
+
+    const dueDate = new Date(charge.due_date);
+    const now = new Date();
+
+    if (dueDate < now) {
+      return <AlertCircle className="h-5 w-5 text-red-500" />;
+    }
+
+    return <Clock className="h-5 w-5 text-yellow-500" />;
   };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value);
+  };
+
+  // Calcular trend de receita (comparar mês atual com mês anterior)
+  const lastMonthStart = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1);
+  const lastMonthEnd = new Date(new Date().getFullYear(), new Date().getMonth(), 0);
+  const lastMonthRevenue = charges
+    .filter(c => c.paid_at && new Date(c.paid_at) >= lastMonthStart && new Date(c.paid_at) <= lastMonthEnd)
+    .reduce((sum, c) => sum + Number(c.amount), 0);
+
+  const revenueTrend = lastMonthRevenue > 0
+    ? Math.round(((monthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100)
+    : 0;
 
   return (
     <div className="space-y-6">
@@ -124,9 +194,11 @@ export default function FinanceiroPage() {
             <Download className="mr-2 h-4 w-4" />
             Exportar
           </Button>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Nova Cobrança
+          <Button asChild>
+            <Link href={`/groups/${groupId}/charges/new`}>
+              <Plus className="mr-2 h-4 w-4" />
+              Nova Cobrança
+            </Link>
           </Button>
         </div>
       </div>
@@ -137,116 +209,97 @@ export default function FinanceiroPage() {
           feature="financial"
           variant="gradient"
           title="Receita Total"
-          value={metrics.receitaTotal}
+          value={formatCurrency(totalRevenue)}
           subtitle="Últimos 12 meses"
           icon={DollarSign}
-          trend={{ value: 15, direction: 'up' }}
         />
         <MetricCard
           feature="financial"
           title="Receita Este Mês"
-          value={metrics.receitaMes}
-          subtitle="Janeiro 2026"
+          value={formatCurrency(monthRevenue)}
+          subtitle={new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
           icon={TrendingUp}
-          trend={{ value: 8, direction: 'up' }}
+          trend={revenueTrend !== 0 ? {
+            value: Math.abs(revenueTrend),
+            direction: revenueTrend > 0 ? 'up' : 'down'
+          } : undefined}
         />
         <MetricCard
           feature="financial"
           title="Pagamentos Pendentes"
-          value={metrics.pendentes}
-          subtitle="3 atletas devem"
+          value={formatCurrency(pendingAmount)}
+          subtitle={`${totalCount - paidCount} cobrança(s)`}
           icon={Clock}
         />
         <MetricCard
           feature="analytics"
           title="Taxa de Pagamento"
-          value={`${metrics.taxaPagamento}%`}
+          value={`${paymentRate}%`}
           subtitle="Pagam em dia"
           icon={CheckCircle}
-          trend={{ value: 3, direction: 'up' }}
         />
       </MetricGrid>
-
-      {/* Filters */}
-      <div className="flex gap-2">
-        <Button
-          variant={filter === 'todos' ? 'default' : 'outline'}
-          onClick={() => setFilter('todos')}
-          size="sm"
-        >
-          Todos ({payments.length})
-        </Button>
-        <Button
-          variant={filter === 'pendentes' ? 'default' : 'outline'}
-          onClick={() => setFilter('pendentes')}
-          size="sm"
-        >
-          Pendentes ({payments.filter(p => p.status !== 'paid').length})
-        </Button>
-        <Button
-          variant={filter === 'pagos' ? 'default' : 'outline'}
-          onClick={() => setFilter('pagos')}
-          size="sm"
-        >
-          Pagos ({payments.filter(p => p.status === 'paid').length})
-        </Button>
-      </div>
 
       {/* Payments List */}
       <Card>
         <CardHeader>
           <CardTitle>Pagamentos</CardTitle>
           <CardDescription>
-            {filteredPayments.length} {filteredPayments.length === 1 ? 'pagamento' : 'pagamentos'}
+            {charges.length} {charges.length === 1 ? 'cobrança' : 'cobranças'} registrada(s)
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {filteredPayments.length === 0 ? (
+          {charges.length === 0 ? (
             <EmptyState
               icon={DollarSign}
-              title="Nenhum pagamento encontrado"
-              description="Não há pagamentos com esse filtro"
+              title="Nenhuma cobrança encontrada"
+              description="Crie uma nova cobrança para começar"
             />
           ) : (
             <div className="space-y-3">
-              {filteredPayments.map((payment) => (
+              {charges.map((charge) => (
                 <div
-                  key={payment.id}
+                  key={charge.id}
                   className="flex items-center gap-4 p-4 rounded-lg border border-yellow-500/20 bg-yellow-500/5 hover:bg-yellow-500/10 transition-colors"
                 >
                   {/* Status Icon */}
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-background">
-                    {getStatusIcon(payment.status)}
+                    {getStatusIcon(charge)}
                   </div>
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold">{payment.athleteName}</h3>
-                      {getStatusBadge(payment.status)}
-                      {payment.trainingRelated && (
-                        <Badge variant="outline" className="text-xs">
+                      <h3 className="font-semibold">{charge.user_name}</h3>
+                      {getStatusBadge(charge)}
+                      {charge.event_id && (
+                        <Badge variant="outline" className="text-xs border-violet-500/30 text-violet-500">
                           Treino
                         </Badge>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground">{payment.description}</p>
-                    {payment.trainingRelated && payment.trainingName && (
-                      <p className="text-xs text-violet-500 mt-1">
-                        🏃 Vinculado ao: {payment.trainingName}
-                      </p>
+                    <p className="text-sm text-muted-foreground">
+                      {charge.description || 'Sem descrição'}
+                    </p>
+                    {charge.event_id && charge.event_name && (
+                      <Link
+                        href={`/events/${charge.event_id}`}
+                        className="text-xs text-violet-500 mt-1 hover:underline inline-flex items-center gap-1"
+                      >
+                        🏃 Vinculado ao: {charge.event_name}
+                      </Link>
                     )}
                     <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
                       <span>
                         Vencimento:{' '}
-                        {new Date(payment.dueDate).toLocaleDateString('pt-BR')}
+                        {new Date(charge.due_date).toLocaleDateString('pt-BR')}
                       </span>
-                      {payment.paidDate && (
+                      {charge.paid_at && (
                         <>
                           <span>•</span>
                           <span className="text-green-500">
                             Pago em:{' '}
-                            {new Date(payment.paidDate).toLocaleDateString('pt-BR')}
+                            {new Date(charge.paid_at).toLocaleDateString('pt-BR')}
                           </span>
                         </>
                       )}
@@ -255,18 +308,20 @@ export default function FinanceiroPage() {
 
                   {/* Amount */}
                   <div className="text-right">
-                    <div className="text-xl font-bold text-yellow-500">{payment.amount}</div>
+                    <div className="text-xl font-bold text-yellow-500">
+                      {formatCurrency(Number(charge.amount))}
+                    </div>
                   </div>
 
                   {/* Actions */}
-                  {payment.status !== 'paid' && (
+                  {!charge.paid_at && (
                     <Button variant="outline" size="sm">
                       Marcar como Pago
                     </Button>
                   )}
-                  {payment.status === 'paid' && (
+                  {charge.paid_at && (
                     <Button variant="ghost" size="sm">
-                      Ver Recibo
+                      Ver Detalhes
                     </Button>
                   )}
                 </div>
@@ -296,9 +351,14 @@ export default function FinanceiroPage() {
             Agora você pode vincular pagamentos diretamente aos treinos. Quando um atleta confirma
             presença, o pagamento é automaticamente gerado e vinculado ao treino específico.
           </p>
-          <Button variant="outline" size="sm">
-            Ver Todos os Pagamentos por Treino
-          </Button>
+          <div className="flex items-center gap-2">
+            <div className="text-sm">
+              <span className="font-semibold text-violet-500">
+                {charges.filter(c => c.event_id).length}
+              </span>
+              <span className="text-muted-foreground"> cobrança(s) vinculada(s) a treinos</span>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

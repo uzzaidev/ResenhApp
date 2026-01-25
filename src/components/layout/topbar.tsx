@@ -17,11 +17,14 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Sidebar } from './sidebar';
 import { NotificationsDropdown } from '@/components/notifications/notifications-dropdown';
 import { SearchCommand } from '@/components/ui/search-command';
+import { GroupSwitcher } from './group-switcher';
 import { usePathname } from 'next/navigation';
+import { useGroup } from '@/contexts/group-context';
 
 export function Topbar() {
   const pathname = usePathname();
   const [searchOpen, setSearchOpen] = useState(false);
+  const { currentGroup } = useGroup();
 
   // Get page title based on pathname
   const getPageInfo = () => {
@@ -111,12 +114,24 @@ export function Topbar() {
           {/* Page Title */}
           <div className="hidden md:block">
             <h1 className="text-xl md:text-2xl font-bold font-heading">{title}</h1>
-            <p className="text-xs md:text-sm text-gray-400 mt-0.5">{subtitle}</p>
+            <p className="text-xs md:text-sm text-gray-400 mt-0.5">
+              {currentGroup ? `${subtitle} - ${currentGroup.name}` : subtitle}
+            </p>
+          </div>
+          
+          {/* Group Switcher (Mobile) */}
+          <div className="md:hidden">
+            <GroupSwitcher />
           </div>
         </div>
 
         {/* Right: Actions */}
         <div className="flex items-center gap-2 md:gap-4">
+          {/* Group Switcher (Desktop) */}
+          <div className="hidden md:block">
+            <GroupSwitcher />
+          </div>
+          
           {/* Search Bar (Desktop) */}
           <div className="hidden lg:flex items-center">
             <div className="relative">

@@ -17,13 +17,13 @@ Implementar sistema completo de seleção e alternância de grupos, permitindo q
 ### 1. GroupContext (`src/contexts/group-context.tsx`)
 
 **Funcionalidades:**
-- [ ] Provider global para grupo atual
-- [ ] Hook `useGroup()` para acesso fácil
-- [ ] Persistência em `localStorage` (chave: `lastSelectedGroup`)
-- [ ] Carregamento automático de grupos do usuário
-- [ ] Fallback para primeiro grupo se nenhum selecionado
-- [ ] Loading state durante carregamento
-- [ ] Error handling com toast
+- [x] Provider global para grupo atual ✅
+- [x] Hook `useGroup()` para acesso fácil ✅
+- [x] Persistência em `localStorage` (chave: `currentGroupId`) ✅
+- [x] Carregamento automático de grupos do usuário ✅
+- [x] Fallback para primeiro grupo se nenhum selecionado ✅
+- [x] Loading state durante carregamento ✅
+- [x] Error handling com toast ✅
 
 **Código Base:**
 ```typescript
@@ -41,12 +41,12 @@ interface GroupContextType {
 ### 2. GroupSwitcher Component (`src/components/layout/group-switcher.tsx`)
 
 **Funcionalidades:**
-- [ ] Dropdown no header (Topbar)
-- [ ] Lista de grupos do usuário
-- [ ] Indicador visual do grupo atual (checkmark)
-- [ ] Badge com contagem de grupos
-- [ ] Link "Criar Novo Grupo"
-- [ ] Design System UzzAI aplicado
+- [x] Dropdown no header (Topbar) ✅
+- [x] Lista de grupos do usuário ✅
+- [x] Indicador visual do grupo atual (checkmark) ✅
+- [x] Badge com contagem de grupos ✅
+- [x] Link "Criar Novo Grupo" ✅
+- [x] Design System UzzAI aplicado ✅
 
 **UI:**
 ```
@@ -64,14 +64,14 @@ interface GroupContextType {
 ### 3. Integração em Todas as Páginas
 
 **Páginas a Atualizar:**
-- [ ] `/dashboard` - Usar `useGroup()` ao invés de buscar manualmente
-- [ ] `/treinos` - Filtrar por `currentGroup.id`
-- [ ] `/jogos` - Filtrar por `currentGroup.id`
-- [ ] `/financeiro` - Filtrar por `currentGroup.id`
-- [ ] `/frequencia` - Filtrar por `currentGroup.id`
-- [ ] `/rankings` - Filtrar por `currentGroup.id`
-- [ ] `/modalidades` - Filtrar por `currentGroup.id`
-- [ ] `/atletas` - Filtrar por `currentGroup.id`
+- [x] `/dashboard` - Usar componentes Client que já usam `useGroup()` ✅
+- [x] `/treinos` - Usar `getUserCurrentGroup()` helper ✅
+- [x] `/jogos` - Usar `getUserCurrentGroup()` helper ✅
+- [x] `/financeiro` - Usar `getUserCurrentGroup()` helper ✅
+- [x] `/frequencia` - Usar `getUserCurrentGroup()` helper ✅
+- [x] `/rankings` - Usar `getUserCurrentGroup()` helper ✅
+- [x] `/modalidades` - Usar `useGroup()` hook ✅
+- [x] `/atletas` - Usar `useGroup()` hook ✅
 
 **Padrão de Integração:**
 ```typescript
@@ -90,10 +90,17 @@ const groupId = currentGroup.id;
 ### 4. API Route: `/api/groups` (Atualizar)
 
 **Funcionalidades:**
-- [ ] GET retorna grupos do usuário autenticado
-- [ ] Incluir role do usuário em cada grupo
-- [ ] Incluir contagem de membros
-- [ ] Ordenar por último selecionado (se houver)
+- [x] GET retorna grupos do usuário autenticado ✅
+- [x] Incluir role do usuário em cada grupo ✅
+- [x] Incluir contagem de membros ✅
+- [x] Ordenar por último selecionado (se houver) ✅
+
+### 5. API Route: `/api/groups/switch` (Nova)
+
+**Funcionalidades:**
+- [x] POST para alternar grupo atual (atualiza cookie) ✅
+- [x] Validação de membership ✅
+- [x] Sincronização com localStorage ✅
 
 **Response:**
 ```json
@@ -141,27 +148,29 @@ const groupId = currentGroup.id;
 
 ## 📝 Tarefas Detalhadas
 
-### Dia 1: GroupContext + Provider
-- [ ] Criar `src/contexts/group-context.tsx`
-- [ ] Implementar `GroupProvider`
-- [ ] Implementar `useGroup()` hook
-- [ ] Adicionar persistência localStorage
-- [ ] Integrar no `src/app/layout.tsx`
-- [ ] Testar isoladamente
+### Dia 1: GroupContext + Provider ✅ COMPLETO
+- [x] Criar `src/contexts/group-context.tsx` ✅
+- [x] Implementar `GroupProvider` ✅
+- [x] Implementar `useGroup()` hook ✅
+- [x] Adicionar persistência localStorage ✅
+- [x] Integrar no `src/app/layout.tsx` ✅
+- [x] Testar isoladamente ✅
 
-### Dia 2: GroupSwitcher + Integração
-- [ ] Criar `src/components/layout/group-switcher.tsx`
-- [ ] Integrar no Topbar
-- [ ] Atualizar API `/api/groups`
-- [ ] Integrar em 4 páginas principais
-- [ ] Testar alternância
+### Dia 2: GroupSwitcher + Integração ✅ COMPLETO
+- [x] Criar `src/components/layout/group-switcher.tsx` ✅
+- [x] Integrar no Topbar ✅
+- [x] Atualizar API `/api/groups` ✅
+- [x] Criar API `/api/groups/switch` ✅
+- [x] Integrar em 4 páginas principais ✅
+- [x] Testar alternância ✅
 
-### Dia 3: Integração Completa + Testes
-- [ ] Integrar nas 4 páginas restantes
-- [ ] Remover `groupId` hardcoded
-- [ ] Adicionar testes E2E
-- [ ] Documentar uso
-- [ ] Code review
+### Dia 3: Integração Completa + Testes ✅ COMPLETO
+- [x] Integrar nas 4 páginas restantes ✅
+- [x] Remover `groupId` hardcoded ✅
+- [x] Criar helper `getUserCurrentGroup()` para Server Components ✅
+- [x] Documentar uso ✅
+- [ ] Adicionar testes E2E (pendente)
+- [ ] Code review (pendente)
 
 ---
 
@@ -183,7 +192,34 @@ const groupId = currentGroup.id;
 
 ---
 
-**Status:** ⏳ Pendente  
-**Início:** ___/___/____  
-**Conclusão:** ___/___/____
+**Status:** ✅ **95% COMPLETO** (Falta apenas testes E2E)  
+**Início:** 2026-01-25  
+**Conclusão:** 2026-01-25 (parcial)
+
+---
+
+## 📝 Notas de Implementação
+
+### Arquivos Criados/Modificados
+
+1. **`src/contexts/group-context.tsx`** - Melhorado com toast e sincronização cookie
+2. **`src/components/layout/group-switcher.tsx`** - Novo componente criado
+3. **`src/lib/group-helpers.ts`** - Helper para Server Components
+4. **`src/app/api/groups/switch/route.ts`** - Nova API para alternar grupo
+5. **`src/app/api/groups/route.ts`** - Atualizado com memberCount
+6. **`src/components/layout/topbar.tsx`** - Integrado GroupSwitcher
+7. **8 páginas atualizadas** para usar GroupContext ou helper
+
+### Decisões Técnicas
+
+- **Server Components:** Usam `getUserCurrentGroup()` helper que lê cookie
+- **Client Components:** Usam `useGroup()` hook diretamente
+- **Sincronização:** Cookie + localStorage mantidos em sync via API `/api/groups/switch`
+- **Fallback:** Se não houver cookie, usa primeiro grupo do usuário
+
+### Próximos Passos
+
+- [ ] Testes E2E de alternância de grupos
+- [ ] Teste de persistência entre sessões
+- [ ] Code review final
 

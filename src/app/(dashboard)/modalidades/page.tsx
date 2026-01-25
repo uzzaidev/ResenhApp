@@ -8,6 +8,7 @@ import { ModalityCard } from '@/components/modalities/modality-card';
 import { ModalityModal } from '@/components/modalities/modality-modal';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { useGroup } from '@/contexts/group-context';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,21 +32,25 @@ interface Modality {
 
 export default function ModalidadesPage() {
   const router = useRouter();
+  const { currentGroup, isLoading: isLoadingGroup } = useGroup();
   const [modalities, setModalities] = useState<Modality[]>([]);
   const [loading, setLoading] = useState(true);
-  const [groupId, setGroupId] = useState<string>('temp-group-id'); // Would come from context
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingModality, setEditingModality] = useState<Modality | null>(null);
   const [deletingModalityId, setDeletingModalityId] = useState<string | null>(null);
 
   useEffect(() => {
-    loadModalities();
-  }, [groupId]);
+    if (currentGroup?.id) {
+      loadModalities();
+    }
+  }, [currentGroup?.id]);
 
   async function loadModalities() {
+    if (!currentGroup?.id) return;
+    
     setLoading(true);
     try {
-      const response = await fetch(`/api/modalities?group_id=${groupId}`);
+      const response = await fetch(`/api/modalities?group_id=${currentGroup.id}`);
       if (!response.ok) throw new Error('Erro ao carregar modalidades');
 
       const data = await response.json();
@@ -179,19 +184,21 @@ export default function ModalidadesPage() {
       )}
 
       {/* Create Modal */}
-      <ModalityModal
-        open={showCreateModal}
-        onOpenChange={setShowCreateModal}
-        groupId={groupId}
-        onSuccess={loadModalities}
-      />
+      {currentGroup?.id && (
+        <ModalityModal
+          open={showCreateModal}
+          onOpenChange={setShowCreateModal}
+          groupId={currentGroup.id}
+          onSuccess={loadModalities}
+        />
+      )}
 
       {/* Edit Modal */}
-      {editingModality && (
+      {editingModality && currentGroup?.id && (
         <ModalityModal
           open={true}
           onOpenChange={handleCloseEditModal}
-          groupId={groupId}
+          groupId={currentGroup.id}
           modality={editingModality}
           onSuccess={() => {
             handleCloseEditModal();

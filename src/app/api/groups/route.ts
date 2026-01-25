@@ -18,14 +18,28 @@ export async function GET() {
         g.privacy,
         g.photo_url,
         g.created_at,
-        gm.role AS user_role
+        g.group_type,
+        g.parent_group_id,
+        gm.role AS user_role,
+        (SELECT COUNT(*) FROM group_members WHERE group_id = g.id)::INTEGER AS member_count
       FROM groups g
       INNER JOIN group_members gm ON g.id = gm.group_id
       WHERE gm.user_id = ${user.id}
       ORDER BY g.created_at DESC
     `;
 
-    return NextResponse.json({ groups });
+    // Mapear para formato esperado pelo frontend
+    const mappedGroups = groups.map((g: any) => ({
+      id: g.id,
+      name: g.name,
+      description: g.description,
+      groupType: g.group_type,
+      parentGroupId: g.parent_group_id,
+      role: g.user_role,
+      memberCount: Number(g.member_count) || 0,
+    }));
+
+    return NextResponse.json({ groups: mappedGroups });
   } catch (error) {
     if (error instanceof Error && error.message === "Não autenticado") {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
