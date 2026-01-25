@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/components/providers/auth-provider";
+import { GroupProvider } from "@/contexts/group-context";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
 
@@ -43,7 +44,11 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body className="font-sans min-h-screen overflow-x-hidden" suppressHydrationWarning>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <GroupProvider>
+            {children}
+          </GroupProvider>
+        </AuthProvider>
         <Toaster />
         <SonnerToaster />
       </body>

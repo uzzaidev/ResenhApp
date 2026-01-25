@@ -18,33 +18,19 @@ import {
   ChevronRight,
   Plus,
   Sparkles,
+  Medal,
+  CheckCircle,
+  Dumbbell,
   type LucideIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-// Collapsible será implementado quando @radix-ui/react-collapsible estiver instalado
-// import {
-//   Collapsible,
-//   CollapsibleContent,
-//   CollapsibleTrigger,
-// } from "@/components/ui/collapsible";
 
 /**
- * Sidebar Navigation - Design System UzzAI
- * 
- * Navegação hierárquica com suporte a:
- * - Dois tipos de grupos (athletic vs pelada)
- * - Seções organizadas (Principal, Gestão, Análise, Ferramentas)
- * - Badges e contadores
- * - Navegação responsiva
- * 
- * @example
- * <Sidebar
- *   groupId="123"
- *   groupType="athletic"
- *   userRole="admin"
- *   pendingPayments={3}
- * />
+ * Sidebar Navigation V2 - Design System UzzAI
+ *
+ * Navegação hierárquica inspirada em ATLETICAS-SISTEMA-COMPLETO-V1.html
+ * Seções: Principal, Gestão, Análise, Ferramentas
  */
 
 interface NavItem {
@@ -52,9 +38,8 @@ interface NavItem {
   href: string;
   icon: LucideIcon;
   badge?: string | number;
-  badgeVariant?: "default" | "destructive" | "outline" | "secondary";
+  badgeVariant?: "default" | "destructive" | "outline" | "secondary" | "new";
   isPremium?: boolean;
-  description?: string;
 }
 
 interface NavSection {
@@ -65,157 +50,99 @@ interface NavSection {
 }
 
 export interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** ID do grupo atual */
   groupId?: string;
-  /** Tipo do grupo (athletic = atléticas, pelada = peladas) */
-  groupType?: "athletic" | "pelada";
-  /** Role do usuário no grupo */
-  userRole?: "admin" | "member";
-  /** Contador de pagamentos pendentes */
   pendingPayments?: number;
-  /** Contador de notificações */
-  notifications?: number;
 }
 
 export function Sidebar({
   className,
-  groupId,
-  groupType = "pelada",
-  userRole = "member",
-  pendingPayments = 0,
-  notifications = 0,
+  groupId = 'temp-group-id', // Temporário até ter context
+  pendingPayments = 3,
   ...props
 }: SidebarProps) {
   const pathname = usePathname();
 
-  // Definir seções baseado no tipo de grupo
-  const sections: NavSection[] = React.useMemo(() => {
-    const isAthletic = groupType === "athletic";
-    const isAdmin = userRole === "admin";
-
-    const baseSections: NavSection[] = [
-      {
-        title: "Principal",
-        items: [
-          {
-            title: "Dashboard",
-            href: groupId ? `/groups/${groupId}` : "/dashboard",
-            icon: Home,
-            description: "Visão geral",
-          },
-          {
-            title: "Grupos",
-            href: "/dashboard",
-            icon: Users,
-            description: "Meus grupos",
-          },
-        ],
-      },
-      {
-        title: "Gestão",
-        items: [
-          {
-            title: "Eventos",
-            href: groupId ? `/groups/${groupId}/events` : "/dashboard",
-            icon: Calendar,
-            badge: notifications > 0 ? notifications : undefined,
-            badgeVariant: "destructive",
-            description: "Peladas e jogos",
-          },
-          {
-            title: "Financeiro",
-            href: groupId ? `/groups/${groupId}/payments` : "/dashboard",
-            icon: DollarSign,
-            badge: pendingPayments > 0 ? pendingPayments : undefined,
-            badgeVariant: "destructive",
-            description: "Pagamentos",
-          },
-          ...(isAdmin
-            ? [
-                {
-                  title: "Configurações",
-                  href: groupId ? `/groups/${groupId}/settings` : "/dashboard",
-                  icon: Settings,
-                  description: "Gerenciar grupo",
-                } as NavItem,
-              ]
-            : []),
-        ],
-      },
-    ];
-
-    // Adicionar seções específicas para atléticas
-    if (isAthletic) {
-      baseSections.push({
-        title: "Análise",
-        collapsible: true,
-        defaultOpen: true,
-        items: [
-          {
-            title: "Rankings",
-            href: groupId ? `/groups/${groupId}/rankings` : "/dashboard",
-            icon: Trophy,
-            description: "Artilheiros e MVPs",
-          },
-          {
-            title: "Estatísticas",
-            href: groupId ? `/groups/${groupId}/stats` : "/dashboard",
-            icon: BarChart3,
-            description: "Análise detalhada",
-          },
-          {
-            title: "Modalidades",
-            href: groupId ? `/groups/${groupId}/modalities` : "/dashboard",
-            icon: Target,
-            isPremium: true,
-            description: "Múltiplas modalidades",
-          },
-        ],
-      });
-    }
-
-    // Adicionar ferramentas premium
-    baseSections.push({
+  // Seções fixas baseadas na referência HTML
+  const sections: NavSection[] = [
+    {
+      title: "Principal",
+      items: [
+        {
+          title: "Dashboard",
+          href: "/dashboard",
+          icon: BarChart3,
+        },
+        {
+          title: "Modalidades",
+          href: "/modalidades",
+          icon: Dumbbell,
+          badge: "5",
+          badgeVariant: "new",
+        },
+        {
+          title: "Atletas",
+          href: "/atletas",
+          icon: Users,
+        },
+      ],
+    },
+    {
+      title: "Gestão",
+      items: [
+        {
+          title: "Treinos",
+          href: "/treinos",
+          icon: Calendar,
+        },
+        {
+          title: "Jogos Oficiais",
+          href: "/jogos",
+          icon: Trophy,
+        },
+        {
+          title: "Financeiro",
+          href: "/financeiro",
+          icon: DollarSign,
+          badge: pendingPayments > 0 ? pendingPayments : undefined,
+          badgeVariant: "destructive",
+        },
+      ],
+    },
+    {
+      title: "Análise",
+      items: [
+        {
+          title: "Frequência",
+          href: "/frequencia",
+          icon: CheckCircle,
+        },
+        {
+          title: "Rankings",
+          href: "/rankings",
+          icon: Medal,
+        },
+      ],
+    },
+    {
       title: "Ferramentas",
       collapsible: true,
       defaultOpen: false,
       items: [
         {
-          title: "Treinos Recorrentes",
-          href: groupId ? `/groups/${groupId}/recurring` : "/dashboard",
-          icon: Zap,
-          isPremium: true,
-          badge: "5 créditos",
-          badgeVariant: "secondary",
-          description: "Automatizar treinos",
+          title: "Tabelinha Tática",
+          href: "/tabelinha",
+          icon: Target,
+          badge: "NOVO",
+          badgeVariant: "new",
         },
         {
-          title: "Convocações",
-          href: groupId ? `/groups/${groupId}/convocations` : "/dashboard",
-          icon: Target,
-          isPremium: true,
-          badge: "3 créditos",
-          badgeVariant: "secondary",
-          description: "Jogos oficiais",
+          title: "Configurações",
+          href: "/settings",
+          icon: Settings,
         },
-        ...(isAthletic
-          ? [
-              {
-                title: "Analytics",
-                href: groupId ? `/groups/${groupId}/analytics` : "/dashboard",
-                icon: BarChart3,
-                isPremium: true,
-                badge: "10 créditos/mês",
-                badgeVariant: "secondary",
-                description: "Dashboards avançados",
-              } as NavItem,
-            ]
-          : []),
       ],
-    });
-
-    return baseSections;
-  }, [groupId, groupType, userRole, pendingPayments, notifications]);
+    },
+  ];
 
   return (
     <div
@@ -350,7 +277,6 @@ function NavItem({ item, pathname }: { item: NavItem; pathname: string }) {
           ? "bg-uzzai-mint/10 text-uzzai-mint font-medium"
           : "text-muted-foreground hover:text-foreground"
       )}
-      title={item.description}
     >
       <item.icon className="h-4 w-4 flex-shrink-0" />
       <span className="flex-1 truncate">{item.title}</span>

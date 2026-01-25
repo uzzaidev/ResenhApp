@@ -78,54 +78,48 @@ export function DesignSystemShowcase() {
           <MetricCard
             title="Confirmados"
             value="18/20"
-            trend="up"
-            trendValue="+15%"
+            trend={{ value: 15, direction: 'up' }}
             variant="mint"
-            icon={<Users className="h-4 w-4" />}
+            icon={Users}
             description="2 vagas restantes"
           />
           <MetricCard
             title="Arrecadado"
             value="R$ 90"
-            trend="up"
             trendValue="+R$ 15"
             variant="gold"
-            icon={<DollarSign className="h-4 w-4" />}
+            icon={DollarSign}
             description="18 pagamentos"
           />
           <MetricCard
             title="Próximo Jogo"
             value="5h"
-            trend="neutral"
             variant="blue"
-            icon={<Calendar className="h-4 w-4" />}
+            icon={Calendar}
             description="Quinta, 18h"
           />
           <MetricCard
             title="Artilheiro"
             value="12 gols"
-            trend="up"
-            trendValue="+3"
+            trend={{ value: 3, direction: 'up' }}
             variant="gold"
-            icon={<Trophy className="h-4 w-4" />}
+            icon={Trophy}
             description="Lucas Silva"
           />
           <MetricCard
             title="Taxa de Presença"
             value="85%"
-            trend="down"
-            trendValue="-5%"
+            trend={{ value: 5, direction: 'down' }}
             variant="silver"
-            icon={<Activity className="h-4 w-4" />}
+            icon={Activity}
             description="Últimos 30 dias"
           />
           <MetricCard
             title="Win Rate"
             value="75%"
-            trend="up"
-            trendValue="+10%"
+            trend={{ value: 10, direction: 'up' }}
             variant="mint"
-            icon={<TrendingUp className="h-4 w-4" />}
+            icon={TrendingUp}
             description="12 vitórias"
           />
         </div>
@@ -296,25 +290,22 @@ export function DesignSystemShowcase() {
               <MetricCard
                 title="Confirmados"
                 value="18/20"
-                trend="up"
-                trendValue="+3"
+                trend={{ value: 3, direction: 'up' }}
                 variant="mint"
-                icon={<Users className="h-4 w-4" />}
+                icon={Users}
               />
               <MetricCard
                 title="Arrecadado"
                 value="R$ 90"
-                trend="up"
                 trendValue="+R$ 15"
                 variant="gold"
-                icon={<DollarSign className="h-4 w-4" />}
+                icon={DollarSign}
               />
               <MetricCard
                 title="Restam"
                 value="5h"
-                trend="neutral"
                 variant="blue"
-                icon={<Calendar className="h-4 w-4" />}
+                icon={Calendar}
               />
             </div>
 
