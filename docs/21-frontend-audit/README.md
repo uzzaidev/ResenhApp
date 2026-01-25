@@ -10,6 +10,7 @@
 |---------|-----------|--------|
 | **[ANALISE-VISUAL-COMPLETA.md](./ANALISE-VISUAL-COMPLETA.md)** | Análise detalhada completa | ✅ Completo |
 | **[CHECKLIST-MELHORIAS-VISUAIS.md](./CHECKLIST-MELHORIAS-VISUAIS.md)** | Checklist de melhorias | ✅ Completo |
+| **[ARQUITETURA-COMPLETA-MAPEAMENTO.md](./ARQUITETURA-COMPLETA-MAPEAMENTO.md)** | 🆕 Mapeamento completo de arquitetura (DB, Backend, Frontend) | ✅ Completo |
 | **README.md** | Este arquivo (navegação) | 📖 Atual |
 
 ---
@@ -69,14 +70,20 @@ Componentes Faltantes: 7 (28%)
 
 ### Para Desenvolvedores
 
-1. **Leia a análise completa:**
-   - [ANALISE-VISUAL-COMPLETA.md](./ANALISE-VISUAL-COMPLETA.md)
+1. **Entenda a arquitetura completa:**
+   - [ARQUITETURA-COMPLETA-MAPEAMENTO.md](./ARQUITETURA-COMPLETA-MAPEAMENTO.md) 🆕
+   - Mapeamento detalhado de DB, Backend e Frontend
+   - Fluxos de dados e integrações
 
-2. **Use o checklist:**
+2. **Leia a análise visual:**
+   - [ANALISE-VISUAL-COMPLETA.md](./ANALISE-VISUAL-COMPLETA.md)
+   - Comparação com referência HTML
+
+3. **Use o checklist:**
    - [CHECKLIST-MELHORIAS-VISUAIS.md](./CHECKLIST-MELHORIAS-VISUAIS.md)
    - Marque tarefas conforme avança
 
-3. **Compare com referência:**
+4. **Compare com referência:**
    - Abra `ATLETICAS-SISTEMA-COMPLETO-V1.html`
    - Use como guia visual
 
@@ -91,10 +98,11 @@ Componentes Faltantes: 7 (28%)
 ## 📋 Próximos Passos
 
 1. ✅ Revisar análise completa
-2. ✅ Priorizar melhorias críticas
-3. ⬜ Criar layout unificado
-4. ⬜ Melhorar dashboard principal
-5. ⬜ Implementar páginas faltantes
+2. ✅ Mapear arquitetura completa
+3. ✅ Priorizar melhorias críticas
+4. ⬜ Criar layout unificado
+5. ⬜ Melhorar dashboard principal
+6. ⬜ Implementar páginas faltantes
 
 ---
 
