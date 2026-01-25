@@ -21,6 +21,9 @@ export default async function ChargeDetailsPage({ params }: ChargeDetailsPagePro
     redirect("/auth/signin");
   }
 
+  // Convert chargeId to bigint
+  const chargeIdNum = BigInt(chargeId);
+
   // Fetch charge details
   const chargeQuery = await sql`
     SELECT 
@@ -44,7 +47,7 @@ export default async function ChargeDetailsPage({ params }: ChargeDetailsPagePro
     LEFT JOIN events e ON c.event_id = e.id
     LEFT JOIN receiver_profiles rp ON c.receiver_profile_id = rp.id
     LEFT JOIN profiles p ON c.created_by = p.id
-    WHERE c.id = ${BigInt(chargeId)}
+    WHERE c.id = ${chargeIdNum}
     LIMIT 1
   `;
 
@@ -76,7 +79,7 @@ export default async function ChargeDetailsPage({ params }: ChargeDetailsPagePro
   const chargeSplitQuery = await sql`
     SELECT id, status, amount
     FROM charge_splits
-    WHERE charge_id = ${BigInt(chargeId)} AND user_id = ${user.id}
+    WHERE charge_id = ${chargeIdNum} AND user_id = ${user.id}
     LIMIT 1
   `;
   const chargeSplit = chargeSplitQuery[0] as any;
