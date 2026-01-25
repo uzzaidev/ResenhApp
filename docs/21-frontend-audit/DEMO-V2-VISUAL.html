@@ -1,0 +1,1650 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peladeiros V2 - Demo Visual</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;600;700;800&family=Exo+2:wght@600&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* UzzAI Colors V2 */
+            --uzzai-mint: #1ABC9C;
+            --uzzai-black: #1C1C1C;
+            --uzzai-silver: #B0B0B0;
+            --uzzai-blue: #2E86AB;
+            --uzzai-gold: #FFD700;
+
+            /* Feature Colors V2 */
+            --feature-modalities: linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%);
+            --feature-trainings: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+            --feature-financial: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+            --feature-rankings: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
+            --feature-attendance: linear-gradient(135deg, #6366F1 0%, #3B82F6 100%);
+            --feature-games: linear-gradient(135deg, #EF4444 0%, #F97316 100%);
+
+            /* Status Colors */
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --info: #3B82F6;
+
+            /* Fonts */
+            --font-inter: 'Inter', sans-serif;
+            --font-poppins: 'Poppins', sans-serif;
+            --font-exo2: 'Exo 2', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-inter);
+            background: #F9FAFB;
+            color: #111827;
+            overflow-x: hidden;
+        }
+
+        /* ========================================
+           LAYOUT BASE V2
+           ======================================== */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ========================================
+           SIDEBAR V2
+           ======================================== */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #1a1f26 0%, #0f1419 100%);
+            border-right: 1px solid rgba(26, 188, 156, 0.1);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .logo-uzz {
+            font-family: var(--font-poppins);
+            color: var(--uzzai-mint);
+        }
+
+        .logo-ai {
+            font-family: var(--font-exo2);
+            color: var(--uzzai-blue);
+        }
+
+        .logo-subtitle {
+            font-size: 11px;
+            color: var(--uzzai-silver);
+            margin-left: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 16px 12px;
+        }
+
+        .nav-section-header {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--uzzai-silver);
+            letter-spacing: 0.5px;
+            padding: 12px 12px 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            margin: 2px 0;
+            border-radius: 8px;
+            color: #9ca3af;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: rgba(26, 188, 156, 0.1);
+            color: var(--uzzai-mint);
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: rgba(26, 188, 156, 0.15);
+            color: var(--uzzai-mint);
+            border-left: 3px solid var(--uzzai-mint);
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .nav-badge.new {
+            background: linear-gradient(90deg, var(--uzzai-mint), var(--uzzai-gold));
+            color: var(--uzzai-black);
+        }
+
+        .nav-badge.count {
+            background: var(--danger);
+            color: white;
+        }
+
+        .nav-badge.credits {
+            background: rgba(255, 215, 0, 0.2);
+            color: var(--uzzai-gold);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        /* ========================================
+           TOPBAR V2
+           ======================================== */
+        .topbar {
+            height: 72px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .topbar-title {
+            font-size: 18px;
+            font-weight: 700;
+            font-family: var(--font-poppins);
+            color: #111827;
+        }
+
+        .topbar-subtitle {
+            font-size: 12px;
+            color: #6B7280;
+            margin-top: 2px;
+        }
+
+        .topbar-center {
+            flex: 1;
+            max-width: 600px;
+            margin: 0 32px;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: #F3F4F6;
+            border: 1px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 10px 16px;
+            transition: all 0.2s;
+        }
+
+        .search-bar:focus-within {
+            background: white;
+            border-color: var(--uzzai-mint);
+            box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.1);
+        }
+
+        .search-bar input {
+            background: transparent;
+            border: none;
+            color: #111827;
+            outline: none;
+            width: 100%;
+            font-size: 14px;
+            margin-left: 8px;
+        }
+
+        .search-bar input::placeholder {
+            color: #9CA3AF;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .topbar-icon {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: #F3F4F6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .topbar-icon:hover {
+            background: rgba(26, 188, 156, 0.1);
+            color: var(--uzzai-mint);
+        }
+
+        .topbar-icon .badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--danger);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .credits-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--uzzai-gold);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+
+        .user-profile:hover {
+            background: #F3F4F6;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--uzzai-mint), var(--uzzai-blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: white;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .user-role {
+            font-size: 12px;
+            color: #6B7280;
+        }
+
+        /* ========================================
+           MAIN CONTENT V2
+           ======================================== */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content {
+            flex: 1;
+            padding: 32px;
+            overflow-y: auto;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* ========================================
+           HERO SECTION V2
+           ======================================== */
+        .hero-section {
+            position: relative;
+            overflow: hidden;
+            border-radius: 24px;
+            background: linear-gradient(135deg, #0EA5E9 0%, #06B6D4 100%);
+            padding: 48px;
+            margin-bottom: 32px;
+            color: white;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+        }
+
+        .hero-title {
+            font-size: 48px;
+            font-weight: 800;
+            font-family: var(--font-poppins);
+            margin-bottom: 12px;
+            line-height: 1.1;
+        }
+
+        .hero-subtitle {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 24px;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 32px;
+            font-size: 14px;
+        }
+
+        .hero-stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hero-stat-label {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 4px;
+        }
+
+        .hero-stat-value {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        /* ========================================
+           METRIC CARDS V2
+           ======================================== */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .metric-card {
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0.05;
+            transition: opacity 0.3s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-card:hover::before {
+            opacity: 0.1;
+        }
+
+        .metric-card.blue::before {
+            background: linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%);
+        }
+
+        .metric-card.green::before {
+            background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+        }
+
+        .metric-card.purple::before {
+            background: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
+        }
+
+        .metric-card.yellow::before {
+            background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+        }
+
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .metric-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+
+        .metric-icon.blue {
+            background: linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%);
+        }
+
+        .metric-icon.green {
+            background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+        }
+
+        .metric-icon.purple {
+            background: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
+        }
+
+        .metric-icon.yellow {
+            background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+        }
+
+        .metric-trend {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .metric-trend.up {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .metric-trend.down {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .metric-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #6B7280;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 36px;
+            font-weight: 800;
+            font-family: var(--font-poppins);
+            margin-bottom: 4px;
+            line-height: 1;
+        }
+
+        .metric-subtitle {
+            font-size: 13px;
+            color: #6B7280;
+            margin-top: 8px;
+        }
+
+        .metric-sparkline {
+            margin-top: 16px;
+            height: 40px;
+            opacity: 0.6;
+        }
+
+        /* ========================================
+           MODALIDADES GRID V2
+           ======================================== */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            font-family: var(--font-poppins);
+        }
+
+        .section-description {
+            font-size: 14px;
+            color: #6B7280;
+            margin-top: 4px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--uzzai-mint), var(--uzzai-blue));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(26, 188, 156, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #111827;
+            border: 1px solid #E5E7EB;
+        }
+
+        .btn-secondary:hover {
+            background: #F9FAFB;
+            border-color: var(--uzzai-mint);
+        }
+
+        .modalidades-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .modalidade-card {
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 16px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modalidade-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--feature-modalities);
+        }
+
+        .modalidade-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+            border-color: var(--uzzai-mint);
+        }
+
+        .modalidade-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .modalidade-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+
+        .modalidade-icon.futsal {
+            background: linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%);
+        }
+
+        .modalidade-icon.volei {
+            background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+        }
+
+        .modalidade-icon.basquete {
+            background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+        }
+
+        .modalidade-name {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .modalidade-athletes {
+            font-size: 13px;
+            color: #6B7280;
+        }
+
+        .modalidade-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #E5E7EB;
+        }
+
+        .modalidade-stat {
+            text-align: center;
+        }
+
+        .modalidade-stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .modalidade-stat-label {
+            font-size: 11px;
+            color: #6B7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .modalidade-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .modalidade-card:hover .modalidade-actions {
+            opacity: 1;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* ========================================
+           TRAINING CARDS V2
+           ======================================== */
+        .trainings-section {
+            margin-bottom: 48px;
+        }
+
+        .training-card {
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            transition: all 0.3s;
+        }
+
+        .training-card:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        .training-content {
+            display: flex;
+            gap: 24px;
+        }
+
+        .training-date {
+            flex-shrink: 0;
+            width: 80px;
+            text-align: center;
+            padding: 16px;
+            background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+            border-radius: 12px;
+            color: white;
+        }
+
+        .training-day {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .training-month {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        .training-details {
+            flex: 1;
+        }
+
+        .training-badges {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-modality {
+            background: linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%);
+            color: white;
+        }
+
+        .badge-recurring {
+            background: rgba(139, 92, 246, 0.1);
+            color: #8B5CF6;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .badge-confirmed {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .training-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .training-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: #6B7280;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .training-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .rsvp-section {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #E5E7EB;
+        }
+
+        .rsvp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .rsvp-count {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .rsvp-percentage {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        .rsvp-progress {
+            height: 8px;
+            background: #E5E7EB;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .rsvp-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #10B981 0%, #34D399 100%);
+            border-radius: 4px;
+            transition: width 0.5s;
+        }
+
+        .confirmed-avatars {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .confirmed-avatars-label {
+            font-size: 12px;
+            color: #6B7280;
+        }
+
+        .avatars-list {
+            display: flex;
+            margin-left: -8px;
+        }
+
+        .avatar-item {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid white;
+            background: linear-gradient(135deg, var(--uzzai-mint), var(--uzzai-blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 11px;
+            color: white;
+            margin-left: -8px;
+            transition: transform 0.2s;
+        }
+
+        .avatar-item:hover {
+            transform: scale(1.2);
+            z-index: 10;
+        }
+
+        .avatar-more {
+            background: rgba(26, 188, 156, 0.2);
+            color: var(--uzzai-mint);
+            border-color: white;
+        }
+
+        .training-action {
+            flex-shrink: 0;
+        }
+
+        .btn-lg {
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* ========================================
+           QUICK ACTIONS
+           ======================================== */
+        .quick-actions {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 50;
+        }
+
+        .quick-action-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--uzzai-mint), var(--uzzai-blue));
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(26, 188, 156, 0.4);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.3s;
+        }
+
+        .quick-action-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(26, 188, 156, 0.5);
+        }
+
+        .quick-action-btn.secondary {
+            background: white;
+            color: var(--uzzai-mint);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* ========================================
+           RESPONSIVE
+           ======================================== */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .topbar-center {
+                display: none;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .modalidades-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 16px;
+            }
+
+            .hero-section {
+                padding: 32px 24px;
+            }
+
+            .hero-title {
+                font-size: 32px;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modalidades-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .training-content {
+                flex-direction: column;
+            }
+
+            .training-date {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+
+        /* ========================================
+           ANIMATIONS
+           ======================================== */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- ========================================
+         SIDEBAR V2
+         ======================================== -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <span class="logo-uzz">Uzz</span><span class="logo-ai">Ai</span>
+                <span class="logo-subtitle">Peladeiros</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section-header">Principal</div>
+            <div class="nav-item active">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-futbol"></i>
+                <span>Modalidades</span>
+                <span class="nav-badge new">5</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-users"></i>
+                <span>Atletas</span>
+            </div>
+
+            <div class="nav-section-header">Gestão</div>
+            <div class="nav-item">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Treinos</span>
+                <span class="nav-badge count">2</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-trophy"></i>
+                <span>Jogos Oficiais</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-dollar-sign"></i>
+                <span>Financeiro</span>
+                <span class="nav-badge count">3</span>
+            </div>
+
+            <div class="nav-section-header">Análise</div>
+            <div class="nav-item">
+                <i class="fas fa-chart-bar"></i>
+                <span>Frequência</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-medal"></i>
+                <span>Rankings</span>
+            </div>
+
+            <div class="nav-section-header">Ferramentas</div>
+            <div class="nav-item">
+                <i class="fas fa-chalkboard"></i>
+                <span>Tabelinha Tática</span>
+                <span class="nav-badge new">NOVO</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Configurações</span>
+            </div>
+
+            <div style="margin-top: auto; padding: 16px; border-top: 1px solid rgba(255, 255, 255, 0.05);">
+                <div class="credits-badge">
+                    <i class="fas fa-sparkles"></i>
+                    <span>150 créditos</span>
+                </div>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- ========================================
+         MAIN CONTENT V2
+         ======================================== -->
+    <main class="main-content">
+        <!-- TOPBAR V2 -->
+        <div class="topbar">
+            <div class="topbar-left">
+                <div>
+                    <div class="topbar-title">Dashboard</div>
+                    <div class="topbar-subtitle">Atlética UFABC</div>
+                </div>
+            </div>
+
+            <div class="topbar-center">
+                <div class="search-bar">
+                    <i class="fas fa-search" style="color: #9CA3AF;"></i>
+                    <input type="text" placeholder="Buscar atletas, treinos, modalidades...">
+                </div>
+            </div>
+
+            <div class="topbar-right">
+                <div class="topbar-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <div class="topbar-icon">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge">3</span>
+                </div>
+                <div class="user-profile">
+                    <div class="user-avatar">PV</div>
+                    <div class="user-info">
+                        <div class="user-name">Pedro Vitor</div>
+                        <div class="user-role">Admin</div>
+                    </div>
+                    <i class="fas fa-chevron-down" style="color: #6B7280; font-size: 12px;"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+            <!-- ========================================
+                 HERO SECTION V2
+                 ======================================== -->
+            <section class="hero-section animate-fade-in">
+                <div class="hero-content">
+                    <h1 class="hero-title">
+                        ☀️ Bom dia, Pedro! 👋
+                    </h1>
+                    <p class="hero-subtitle">
+                        "O sucesso é a soma de pequenos esforços repetidos dia após dia"
+                    </p>
+                    <div class="hero-stats">
+                        <div class="hero-stat">
+                            <span class="hero-stat-label">Próximo treino</span>
+                            <span class="hero-stat-value">Hoje às 19h</span>
+                        </div>
+                        <div class="hero-stat">
+                            <span class="hero-stat-label">Créditos</span>
+                            <span class="hero-stat-value">150 disponíveis</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================
+                 MÉTRICAS PRINCIPAIS V2
+                 ======================================== -->
+            <section class="metrics-grid animate-fade-in" style="animation-delay: 0.1s;">
+                <div class="metric-card blue">
+                    <div class="metric-header">
+                        <div class="metric-icon blue">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="metric-trend up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+12%</span>
+                        </div>
+                    </div>
+                    <div class="metric-title">Atletas Ativos</div>
+                    <div class="metric-value" style="color: #3B82F6;">127</div>
+                    <div class="metric-subtitle">vs. último semestre</div>
+                    <div class="metric-sparkline">
+                        <svg viewBox="0 0 100 40" style="width: 100%; height: 100%;">
+                            <polyline points="0,30 20,25 40,20 60,15 80,10 100,5" 
+                                fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="metric-card green">
+                    <div class="metric-header">
+                        <div class="metric-icon green">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="metric-trend up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+2</span>
+                        </div>
+                    </div>
+                    <div class="metric-title">Treinos Esta Semana</div>
+                    <div class="metric-value" style="color: #10B981;">8</div>
+                    <div class="metric-subtitle">5 modalidades ativas</div>
+                    <div class="metric-sparkline">
+                        <svg viewBox="0 0 100 40" style="width: 100%; height: 100%;">
+                            <polyline points="0,25 20,20 40,18 60,15 80,12 100,10" 
+                                fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="metric-card purple">
+                    <div class="metric-header">
+                        <div class="metric-icon purple">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="metric-trend up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+5%</span>
+                        </div>
+                    </div>
+                    <div class="metric-title">Frequência Média</div>
+                    <div class="metric-value" style="color: #8B5CF6;">72%</div>
+                    <div class="metric-subtitle">este mês</div>
+                    <div class="metric-sparkline">
+                        <svg viewBox="0 0 100 40" style="width: 100%; height: 100%;">
+                            <polyline points="0,20 20,18 40,15 60,12 80,10 100,8" 
+                                fill="none" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="metric-card yellow">
+                    <div class="metric-header">
+                        <div class="metric-icon yellow">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="metric-trend up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+8%</span>
+                        </div>
+                    </div>
+                    <div class="metric-title">Caixa do Mês</div>
+                    <div class="metric-value" style="color: #F59E0B;">R$ 3.450</div>
+                    <div class="metric-subtitle">R$ 850 pendente</div>
+                    <div class="metric-sparkline">
+                        <svg viewBox="0 0 100 40" style="width: 100%; height: 100%;">
+                            <polyline points="0,25 20,22 40,18 60,15 80,12 100,10" 
+                                fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================
+                 GRID DE MODALIDADES V2
+                 ======================================== -->
+            <section class="animate-fade-in" style="animation-delay: 0.2s;">
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title">Modalidades Ativas</h2>
+                        <p class="section-description">Esportes disponíveis no momento</p>
+                    </div>
+                    <button class="btn btn-secondary">
+                        Ver todas <i class="fas fa-arrow-right" style="font-size: 12px;"></i>
+                    </button>
+                </div>
+
+                <div class="modalidades-grid">
+                    <div class="modalidade-card">
+                        <div class="modalidade-header">
+                            <div class="modalidade-icon futsal">
+                                <i class="fas fa-futbol"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div class="modalidade-name">Futsal</div>
+                                <div class="modalidade-athletes">45 atletas cadastrados</div>
+                            </div>
+                        </div>
+
+                        <div class="modalidade-stats">
+                            <div class="modalidade-stat">
+                                <div class="modalidade-stat-value" style="color: #3B82F6;">2x</div>
+                                <div class="modalidade-stat-label">Treinos/Sem</div>
+                            </div>
+                            <div class="modalidade-stat">
+                                <div class="modalidade-stat-value" style="color: #10B981;">78%</div>
+                                <div class="modalidade-stat-label">Frequência</div>
+                            </div>
+                            <div class="modalidade-stat">
+                                <div class="modalidade-stat-value" style="color: #8B5CF6;">Ativo</div>
+                                <div class="modalidade-stat-label">Status</div>
+                            </div>
+                        </div>
+
+                        <div class="modalidade-actions">
+                            <button class="btn btn-secondary btn-sm" style="flex: 1;">
+                                Ver detalhes
+                            </button>
+                            <button class="btn btn-secondary btn-sm">
+                                <i class="fas fa-calendar"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="modalidade-card">
+                        <div class="modalidade-header">
+                            <div class="modalidade-icon volei" style="background: linear-gradient(135deg, #10B981 0%, #34D399 100%);">
+                                <i class="fas fa-volleyball-ball"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div class="modalidade-name">Vôlei</div>
+                                <div class="modalidade-athletes">32 atletas cadastrados</div>
+                            </div>
+                        </div>
+
+                        <div class="modalidade-stats">
+                            <div class="modalidade-stat">
+                                <div class="modalidade-stat-value" style="color: #10B981;">2x</div>
+                                <div class="modalidade-stat-label">Treinos/Sem</div>
+                            </div>
+                            <div class="modalidade-stat">
+                                <div class="modalidade-stat-value" style="color: #10B981;">81%</div>
+                                <div class="modalidade-stat-label">Frequência</div>
+                            </div>
+                            <div class="modalidade-stat">
+                                <div class="modalidade-stat-value" style="color: #8B5CF6;">Ativo</div>
+                                <div class="modalidade-stat-label">Status</div>
+                            </div>
+                        </div>
+
+                        <div class="modalidade-actions">
+                            <button class="btn btn-secondary btn-sm" style="flex: 1;">
+                                Ver detalhes
+                            </button>
+                            <button class="btn btn-secondary btn-sm">
+                                <i class="fas fa-calendar"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="modalidade-card">
+                        <div class="modalidade-header">
+                            <div class="modalidade-icon basquete" style="background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);">
+                                <i class="fas fa-basketball-ball"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div class="modalidade-name">Basquete</div>
+                                <div class="modalidade-athletes">28 atletas cadastrados</div>
+                            </div>
+                        </div>
+
+                        <div class="modalidade-stats">
+                            <div class="modalidade-stat">
+                                <div class="modalidade-stat-value" style="color: #F59E0B;">1x</div>
+                                <div class="modalidade-stat-label">Treinos/Sem</div>
+                            </div>
+                            <div class="modalidade-stat">
+                                <div class="modalidade-stat-value" style="color: #10B981;">65%</div>
+                                <div class="modalidade-stat-label">Frequência</div>
+                            </div>
+                            <div class="modalidade-stat">
+                                <div class="modalidade-stat-value" style="color: #8B5CF6;">Ativo</div>
+                                <div class="modalidade-stat-label">Status</div>
+                            </div>
+                        </div>
+
+                        <div class="modalidade-actions">
+                            <button class="btn btn-secondary btn-sm" style="flex: 1;">
+                                Ver detalhes
+                            </button>
+                            <button class="btn btn-secondary btn-sm">
+                                <i class="fas fa-calendar"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================
+                 PRÓXIMOS TREINOS V2
+                 ======================================== -->
+            <section class="trainings-section animate-fade-in" style="animation-delay: 0.3s;">
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title">Próximos Treinos</h2>
+                        <p class="section-description">Confirme sua presença nos treinos</p>
+                    </div>
+                    <button class="btn btn-primary">
+                        Ver todos <i class="fas fa-arrow-right" style="font-size: 12px;"></i>
+                    </button>
+                </div>
+
+                <div class="training-card">
+                    <div class="training-content">
+                        <div class="training-date">
+                            <div class="training-day">15</div>
+                            <div class="training-month">JAN</div>
+                        </div>
+
+                        <div class="training-details">
+                            <div class="training-badges">
+                                <span class="badge badge-modality">
+                                    <i class="fas fa-futbol"></i> FUTSAL
+                                </span>
+                                <span class="badge badge-confirmed">
+                                    ✓ Confirmado
+                                </span>
+                            </div>
+
+                            <h3 class="training-title">Treino Tático - Preparação Interatléticas</h3>
+
+                            <div class="training-meta">
+                                <div class="training-meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Terça-feira, 20:00</span>
+                                </div>
+                                <div class="training-meta-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>Ginásio UFRGS</span>
+                                </div>
+                                <div class="training-meta-item">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <span>R$ 10,00</span>
+                                </div>
+                            </div>
+
+                            <div class="rsvp-section">
+                                <div class="rsvp-header">
+                                    <span class="rsvp-count">23/30 Confirmados</span>
+                                    <span class="rsvp-percentage">77%</span>
+                                </div>
+                                <div class="rsvp-progress">
+                                    <div class="rsvp-progress-bar" style="width: 77%;"></div>
+                                </div>
+
+                                <div class="confirmed-avatars">
+                                    <span class="confirmed-avatars-label">Confirmados:</span>
+                                    <div class="avatars-list">
+                                        <div class="avatar-item">PV</div>
+                                        <div class="avatar-item">LS</div>
+                                        <div class="avatar-item">MO</div>
+                                        <div class="avatar-item">RC</div>
+                                        <div class="avatar-item">AS</div>
+                                        <div class="avatar-item avatar-more">+19</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="training-action">
+                            <button class="btn btn-primary btn-lg">
+                                Ver Detalhes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="training-card">
+                    <div class="training-content">
+                        <div class="training-date" style="background: linear-gradient(135deg, #6366F1 0%, #3B82F6 100%);">
+                            <div class="training-day">16</div>
+                            <div class="training-month">JAN</div>
+                        </div>
+
+                        <div class="training-details">
+                            <div class="training-badges">
+                                <span class="badge" style="background: linear-gradient(135deg, #10B981 0%, #34D399 100%); color: white;">
+                                    <i class="fas fa-volleyball-ball"></i> VÔLEI
+                                </span>
+                                <span class="badge badge-recurring">
+                                    <i class="fas fa-repeat"></i> RECORRENTE
+                                </span>
+                            </div>
+
+                            <h3 class="training-title">Treino Recepção e Levantamento</h3>
+
+                            <div class="training-meta">
+                                <div class="training-meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Quarta-feira, 19:30</span>
+                                </div>
+                                <div class="training-meta-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>Quadra Esportes UFRGS</span>
+                                </div>
+                                <div class="training-meta-item">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <span>R$ 8,00</span>
+                                </div>
+                            </div>
+
+                            <div class="rsvp-section">
+                                <div class="rsvp-header">
+                                    <span class="rsvp-count">18/24 Confirmados</span>
+                                    <span class="rsvp-percentage" style="color: #F59E0B;">75%</span>
+                                </div>
+                                <div class="rsvp-progress">
+                                    <div class="rsvp-progress-bar" style="width: 75%; background: linear-gradient(90deg, #F59E0B 0%, #FBBF24 100%);"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="training-action">
+                            <button class="btn btn-secondary btn-lg">
+                                Responder
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="training-card">
+                    <div class="training-content">
+                        <div class="training-date" style="background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);">
+                            <div class="training-day">17</div>
+                            <div class="training-month">JAN</div>
+                        </div>
+
+                        <div class="training-details">
+                            <div class="training-badges">
+                                <span class="badge" style="background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%); color: white;">
+                                    <i class="fas fa-basketball-ball"></i> BASQUETE
+                                </span>
+                                <span class="badge badge-recurring">
+                                    <i class="fas fa-repeat"></i> RECORRENTE
+                                </span>
+                            </div>
+
+                            <h3 class="training-title">Fundamentos + Jogo Coletivo</h3>
+
+                            <div class="training-meta">
+                                <div class="training-meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Quinta-feira, 20:30</span>
+                                </div>
+                                <div class="training-meta-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>Quadra Coberta</span>
+                                </div>
+                                <div class="training-meta-item">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <span>R$ 12,00</span>
+                                </div>
+                            </div>
+
+                            <div class="rsvp-section">
+                                <div class="rsvp-header">
+                                    <span class="rsvp-count">15/20 Confirmados</span>
+                                    <span class="rsvp-percentage">75%</span>
+                                </div>
+                                <div class="rsvp-progress">
+                                    <div class="rsvp-progress-bar" style="width: 75%;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="training-action">
+                            <button class="btn btn-primary btn-lg">
+                                Confirmar Presença
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+
+<!-- ========================================
+     QUICK ACTIONS (FAB)
+     ======================================== -->
+<div class="quick-actions">
+    <button class="quick-action-btn secondary" title="Cobrar Pagamentos">
+        <i class="fas fa-dollar-sign"></i>
+    </button>
+    <button class="quick-action-btn secondary" title="Nova Convocação">
+        <i class="fas fa-bullhorn"></i>
+    </button>
+    <button class="quick-action-btn" title="Novo Treino">
+        <i class="fas fa-plus"></i>
+    </button>
+</div>
+
+<script>
+    // Simular interatividade básica
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    // Simular hover nos cards
+    document.querySelectorAll('.metric-card, .modalidade-card, .training-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-4px)';
+        });
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+</script>
+
+</body>
+</html>
+
