@@ -156,3 +156,4 @@ SELECT * FROM create_event_qrcode(
 **Última atualização:** 2026-02-27  
 **Status:** ✅ Pronto para aplicação
 
+

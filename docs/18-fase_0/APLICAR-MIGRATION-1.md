@@ -126,3 +126,4 @@ Após validar a Migration 1, continue com:
 **Status:** ⏳ Aguardando aplicação  
 **Última atualização:** 2026-02-27
 
+

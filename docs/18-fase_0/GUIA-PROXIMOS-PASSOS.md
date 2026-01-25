@@ -925,3 +925,4 @@ Atualizar a documentação oficial com as novas migrations aplicadas.
 **Última atualização:** 2026-02-27  
 **Status:** ⏸️ Aguardando execução
 
+

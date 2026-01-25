@@ -65,3 +65,4 @@ WITH CHECK (true);
 COMMENT ON TABLE users IS 'Legacy users table for NextAuth compatibility. Works alongside Supabase auth.users and profiles.';
 COMMENT ON COLUMN users.password_hash IS 'Bcrypt hashed password for NextAuth credentials provider';
 
+

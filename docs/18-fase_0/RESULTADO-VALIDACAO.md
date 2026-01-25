@@ -132,3 +132,4 @@ Agora que todas as migrations foram aplicadas e validadas, podemos continuar com
 **Última atualização:** 2026-02-27  
 **Próximo:** Documentação e Design System
 
+

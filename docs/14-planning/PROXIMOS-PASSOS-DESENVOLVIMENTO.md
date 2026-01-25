@@ -478,3 +478,4 @@ src/app/globals.css              # Estilos globais
 **Última atualização:** 2026-01-27  
 **Próxima revisão:** Após cada sprint
 
+

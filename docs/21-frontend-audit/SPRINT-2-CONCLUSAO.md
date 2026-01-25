@@ -285,3 +285,4 @@ const { currentGroup, groups, setCurrentGroup, switchGroup } = useGroup();
 ✅ **Status:** Completo com sucesso  
 🚀 **Próximo:** Sprint 3
 
+

@@ -63,3 +63,4 @@ Implementar campo visual interativo para criação e planejamento de táticas.
 **Última atualização:** 2026-02-27  
 **Status:** ⏸️ Planejado
 
+

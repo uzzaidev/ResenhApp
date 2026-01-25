@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, DollarSign, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Checkbox } from "@/components/ui/checkbox";
 
 type EventFormProps = {
   groupId: string;
@@ -50,7 +56,43 @@ export function EventForm({ groupId, mode, eventId, initialData }: EventFormProp
     maxPlayers: initialData?.maxPlayers || 10,
     maxGoalkeepers: initialData?.maxGoalkeepers || 2,
     waitlistEnabled: initialData?.waitlistEnabled ?? true,
+    // SPRINT 2: Payment fields
+    hasCharge: false,
+    price: "",
+    receiverProfileId: "",
+    autoChargeOnRsvp: true,
   });
+
+  const [isChargeSectionOpen, setIsChargeSectionOpen] = useState(false);
+  const [receiverProfiles, setReceiverProfiles] = useState<Array<{
+    id: string;
+    name: string;
+    pixKey: string;
+    pixType: string;
+  }>>([]);
+  const [isLoadingProfiles, setIsLoadingProfiles] = useState(false);
+
+  // Carregar receiver profiles do grupo
+  useEffect(() => {
+    async function loadReceiverProfiles() {
+      if (!formData.hasCharge) return;
+
+      setIsLoadingProfiles(true);
+      try {
+        const response = await fetch(`/api/groups/${groupId}/receiver-profiles`);
+        if (response.ok) {
+          const data = await response.json();
+          setReceiverProfiles(data.receiverProfiles || []);
+        }
+      } catch (error) {
+        console.error("Error loading receiver profiles:", error);
+      } finally {
+        setIsLoadingProfiles(false);
+      }
+    }
+
+    loadReceiverProfiles();
+  }, [groupId, formData.hasCharge]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,12 +110,19 @@ export function EventForm({ groupId, mode, eventId, initialData }: EventFormProp
               maxPlayers: formData.maxPlayers,
               maxGoalkeepers: formData.maxGoalkeepers,
               waitlistEnabled: formData.waitlistEnabled,
+              // SPRINT 2: Payment fields
+              price: formData.hasCharge && formData.price ? parseFloat(formData.price) : null,
+              receiverProfileId: formData.hasCharge && formData.receiverProfileId ? formData.receiverProfileId : null,
+              autoChargeOnRsvp: formData.hasCharge ? formData.autoChargeOnRsvp : null,
             }
           : {
               startsAt: new Date(formData.startsAt).toISOString(),
               maxPlayers: formData.maxPlayers,
               maxGoalkeepers: formData.maxGoalkeepers,
               waitlistEnabled: formData.waitlistEnabled,
+              price: formData.hasCharge && formData.price ? parseFloat(formData.price) : null,
+              receiverProfileId: formData.hasCharge && formData.receiverProfileId ? formData.receiverProfileId : null,
+              autoChargeOnRsvp: formData.hasCharge ? formData.autoChargeOnRsvp : null,
             };
 
       const response = await fetch(url, {
@@ -189,6 +238,140 @@ export function EventForm({ groupId, mode, eventId, initialData }: EventFormProp
             <Label htmlFor="waitlistEnabled" className="cursor-pointer">
               Habilitar lista de espera
             </Label>
+          </div>
+
+          {/* SPRINT 2: Payment Section */}
+          <div className="pt-4 border-t">
+            <Collapsible open={isChargeSectionOpen} onOpenChange={setIsChargeSectionOpen}>
+              <CollapsibleTrigger asChild>
+                <div className="flex items-center justify-between cursor-pointer">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="hasCharge"
+                      checked={formData.hasCharge}
+                      onCheckedChange={(checked) => {
+                        const isChecked = checked === true;
+                        setFormData({
+                          ...formData,
+                          hasCharge: isChecked,
+                          price: isChecked ? formData.price : "",
+                          receiverProfileId: isChecked ? formData.receiverProfileId : "",
+                        });
+                        if (isChecked) setIsChargeSectionOpen(true);
+                      }}
+                      disabled={isLoading}
+                    />
+                    <Label htmlFor="hasCharge" className="cursor-pointer flex items-center gap-2">
+                      <DollarSign className="h-4 w-4" />
+                      Este treino tem cobrança
+                    </Label>
+                  </div>
+                  {formData.hasCharge && (
+                    isChargeSectionOpen ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )
+                  )}
+                </div>
+              </CollapsibleTrigger>
+
+              {formData.hasCharge && (
+                <CollapsibleContent className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="price">Preço por atleta (R$) *</Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="20.00"
+                      value={formData.price}
+                      onChange={(e) =>
+                        setFormData({ ...formData, price: e.target.value })
+                      }
+                      required={formData.hasCharge}
+                      disabled={isLoading}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Valor que cada atleta pagará ao confirmar presença
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="receiverProfileId">Quem recebe</Label>
+                    {isLoadingProfiles ? (
+                      <div className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-muted-foreground">
+                        Carregando perfis...
+                      </div>
+                    ) : (
+                      <select
+                        id="receiverProfileId"
+                        value={formData.receiverProfileId}
+                        onChange={(e) =>
+                          setFormData({ ...formData, receiverProfileId: e.target.value })
+                        }
+                        disabled={isLoading || isLoadingProfiles}
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      >
+                        <option value="">Selecione quem recebe...</option>
+                        {receiverProfiles.length === 0 ? (
+                          <option value="" disabled>
+                            Nenhum perfil configurado. Configure em Configurações do Grupo.
+                          </option>
+                        ) : (
+                          receiverProfiles.map((profile) => (
+                            <option key={profile.id} value={profile.id}>
+                              {profile.name} ({profile.pixType}: {profile.pixKey})
+                            </option>
+                          ))
+                        )}
+                      </select>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      Perfil que receberá os pagamentos via Pix
+                    </p>
+                    {receiverProfiles.length === 0 && formData.hasCharge && (
+                      <p className="text-xs text-amber-600">
+                        ⚠️ Configure um receiver profile nas configurações do grupo primeiro
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <input
+                      id="autoChargeOnRsvp"
+                      type="checkbox"
+                      checked={formData.autoChargeOnRsvp}
+                      onChange={(e) =>
+                        setFormData({ ...formData, autoChargeOnRsvp: e.target.checked })
+                      }
+                      disabled={isLoading}
+                      className="h-4 w-4 rounded border-gray-300"
+                    />
+                    <Label htmlFor="autoChargeOnRsvp" className="cursor-pointer">
+                      Gerar cobrança automaticamente ao confirmar presença
+                    </Label>
+                  </div>
+
+                  {formData.price && parseFloat(formData.price) > 0 && (
+                    <div className="p-3 bg-muted rounded-md">
+                      <p className="text-sm font-medium">Preview:</p>
+                      <p className="text-xs text-muted-foreground">
+                        Ao confirmar presença, será gerada uma cobrança de{" "}
+                        <span className="font-semibold">
+                          {new Intl.NumberFormat("pt-BR", {
+                            style: "currency",
+                            currency: "BRL",
+                          }).format(parseFloat(formData.price))}
+                        </span>{" "}
+                        por atleta
+                      </p>
+                    </div>
+                  )}
+                </CollapsibleContent>
+              )}
+            </Collapsible>
           </div>
         </CardContent>
         <CardFooter className="flex gap-3">

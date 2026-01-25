@@ -339,3 +339,4 @@ ORDER BY tablename;
 -- suas migrations foram aplicadas com sucesso! ✅
 -- =====================================================
 
+

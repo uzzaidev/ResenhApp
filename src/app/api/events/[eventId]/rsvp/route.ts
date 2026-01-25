@@ -3,6 +3,7 @@ import { requireAuth } from "@/lib/auth-helpers";
 import { sql } from "@/db/client";
 import { rsvpSchema } from "@/lib/validations";
 import logger from "@/lib/logger";
+import { generatePixForCharge } from "@/lib/pix-helpers";
 
 type Params = Promise<{ eventId: string }>;
 
@@ -155,12 +156,174 @@ export async function POST(
       }
     }
 
+    // =====================================================
+    // SPRINT 2: Auto-Generate Charge on RSVP
+    // =====================================================
+    let charge = null;
+
+    // If RSVP=yes AND event has price AND auto_charge is enabled
+    if (finalStatus === 'yes') {
+      // Get event pricing details (use event we already fetched)
+      const eventPricing = {
+        price: event.price,
+        receiver_profile_id: event.receiver_profile_id,
+        auto_charge_on_rsvp: event.auto_charge_on_rsvp,
+        starts_at: event.starts_at,
+      };
+
+      // Check if we should create a charge
+      if (
+        eventPricing?.price &&
+        parseFloat(eventPricing.price) > 0 &&
+        eventPricing.auto_charge_on_rsvp !== false
+      ) {
+        // Check if charge split already exists for this user and event (avoid duplicates)
+        // Use event.id (BIGINT) from the event we already fetched
+        const existingChargeSplitQuery = await sql`
+          SELECT cs.id, cs.charge_id
+          FROM charge_splits cs
+          INNER JOIN charges c ON cs.charge_id = c.id
+          WHERE c.event_id = ${event.id}
+            AND cs.user_id = ${user.id}
+            AND cs.status = 'pending'
+          LIMIT 1
+        `;
+
+        if (!existingChargeSplitQuery || existingChargeSplitQuery.length === 0) {
+          try {
+            // Calculate due date (1 day before event)
+            const dueDate = eventPricing.starts_at 
+              ? new Date(new Date(eventPricing.starts_at).getTime() - 24 * 60 * 60 * 1000)
+              : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // Default: 7 days from now
+
+            // Check if a charge already exists for this event (multiple users can share same charge)
+            let chargeId: bigint | null = null;
+            
+            const existingChargeQuery = await sql`
+              SELECT id FROM charges
+              WHERE event_id = ${event.id}
+              LIMIT 1
+            `;
+
+            if (existingChargeQuery && existingChargeQuery.length > 0) {
+              // Use existing charge
+              chargeId = (existingChargeQuery[0] as any).id;
+            } else {
+              // Create new charge for this event
+              const chargeQuery = await sql`
+                INSERT INTO charges (
+                  group_id,
+                  event_id,
+                  description,
+                  amount,
+                  quantity,
+                  due_date,
+                  receiver_profile_id,
+                  status,
+                  created_by
+                )
+                VALUES (
+                  ${event.group_id},
+                  ${event.id},
+                  ${`Cobrança referente ao treino`},
+                  ${parseFloat(eventPricing.price)},
+                  1,
+                  ${dueDate.toISOString().split('T')[0]},
+                  ${eventPricing.receiver_profile_id || null},
+                  'pending',
+                  ${user.id}
+                )
+                RETURNING id
+              `;
+              chargeId = (chargeQuery[0] as any).id;
+            }
+
+            // Create charge split for this user
+            const chargeSplitQuery = await sql`
+              INSERT INTO charge_splits (
+                charge_id,
+                user_id,
+                amount,
+                status
+              )
+              VALUES (
+                ${chargeId},
+                ${user.id},
+                ${parseFloat(eventPricing.price)},
+                'pending'
+              )
+              RETURNING *
+            `;
+
+            // Get full charge details for response
+            const chargeDetailsQuery = await sql`
+              SELECT * FROM charges WHERE id = ${chargeId}
+            `;
+            charge = chargeDetailsQuery[0];
+
+            // SPRINT 3: Auto-generate Pix QR Code
+            try {
+              const pixResult = await generatePixForCharge(chargeId);
+              if (pixResult.success) {
+                logger.info(
+                  { chargeId: chargeId.toString() },
+                  "Pix QR Code auto-generated for charge"
+                );
+              } else {
+                logger.warn(
+                  { chargeId: chargeId.toString(), error: pixResult.error },
+                  "Failed to auto-generate Pix QR Code"
+                );
+              }
+            } catch (pixError) {
+              // Log but don't fail - Pix can be generated later
+              logger.warn(
+                { error: pixError, chargeId: chargeId.toString() },
+                "Error auto-generating Pix QR Code"
+              );
+            }
+
+            // Create notification (if notifications table exists)
+            try {
+              await sql`
+                INSERT INTO notifications (user_id, type, title, message, action_url)
+                VALUES (
+                  ${user.id},
+                  'charge_created',
+                  'Nova cobrança',
+                  ${`Você tem uma cobrança de R$ ${eventPricing.price} referente ao treino`},
+                  ${`/financeiro/charges/${charge.id}`}
+                )
+              `;
+            } catch (notifError) {
+              // Notifications table might not exist yet, log but don't fail
+              logger.warn({ error: notifError }, "Failed to create notification");
+            }
+
+            logger.info(
+              { eventId, userId: user.id, chargeId: charge.id, amount: eventPricing.price },
+              "Charge auto-generated on RSVP"
+            );
+          } catch (chargeError) {
+            // Log error but don't fail the RSVP
+            logger.error(
+              { error: chargeError, eventId, userId: user.id },
+              "Failed to auto-generate charge on RSVP"
+            );
+          }
+        }
+      }
+    }
+
     logger.info(
-      { eventId, userId: user.id, status: finalStatus },
+      { eventId, userId: user.id, status: finalStatus, chargeCreated: !!charge },
       "RSVP updated"
     );
 
-    return NextResponse.json({ attendance });
+    return NextResponse.json({ 
+      attendance,
+      charge: charge || null 
+    });
   } catch (error) {
     if (error instanceof Error && error.message === "Não autenticado") {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });

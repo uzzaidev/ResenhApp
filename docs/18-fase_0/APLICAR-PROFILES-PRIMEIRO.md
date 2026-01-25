@@ -86,3 +86,4 @@ Se você não usa Supabase Auth e tem apenas a tabela `users`, preciso corrigir 
 **Última atualização:** 2026-02-27  
 **Status:** ⏳ Aguardando aplicação da migration de profiles
 
+

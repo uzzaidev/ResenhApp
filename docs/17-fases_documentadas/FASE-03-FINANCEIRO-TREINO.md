@@ -60,3 +60,4 @@ Implementar sistema completo de pagamentos por treino com cobranças e históric
 **Última atualização:** 2026-02-27  
 **Status:** ⏸️ Planejado
 
+

@@ -97,3 +97,4 @@ Documentação sobre o rebranding:
 
 **Última atualização:** 2026-01-27
 
+

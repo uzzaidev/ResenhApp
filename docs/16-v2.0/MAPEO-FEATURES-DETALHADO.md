@@ -526,3 +526,4 @@ DELETE /api/tactics/[id]
 **Última atualização:** 2026-02-27  
 **Status:** ✅ Mapeamento Completo
 
+

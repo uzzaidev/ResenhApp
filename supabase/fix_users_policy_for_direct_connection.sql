@@ -25,3 +25,4 @@ FROM pg_policies
 WHERE tablename = 'users' AND schemaname = 'public'
 AND cmd = 'INSERT';
 
+

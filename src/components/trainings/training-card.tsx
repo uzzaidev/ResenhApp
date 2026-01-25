@@ -23,6 +23,7 @@ import {
   Repeat,
   CheckCircle2,
   Calendar,
+  AlertCircle,
 } from "lucide-react";
 import { RsvpProgress } from "./rsvp-progress";
 import { ConfirmedAvatars } from "./confirmed-avatars";
@@ -49,6 +50,7 @@ interface Training {
   confirmedCount: number;
   maxPlayers: number;
   userStatus?: "yes" | "no" | "waitlist" | null;
+  hasPendingCharge?: boolean; // SPRINT 2: Indica se há cobrança pendente
   confirmedAttendees: Array<{
     id: string;
     name: string;
@@ -118,6 +120,13 @@ export function TrainingCard({
               {training.userStatus === "waitlist" && (
                 <Badge variant="secondary">⏳ Lista de Espera</Badge>
               )}
+              {/* SPRINT 2: Badge de cobrança pendente */}
+              {training.hasPendingCharge && (
+                <Badge variant="destructive" className="bg-amber-500 hover:bg-amber-600">
+                  <AlertCircle className="mr-1 h-3 w-3" />
+                  Cobrança Pendente
+                </Badge>
+              )}
             </div>
 
             <h3 className="text-xl font-bold mb-2">{training.name}</h3>
@@ -186,4 +195,5 @@ export function TrainingCard({
     </Card>
   );
 }
+
 

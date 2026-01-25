@@ -89,13 +89,35 @@ export function EventRsvpForm({ eventId, currentAttendance, eventStatus }: Event
         throw new Error(error.error || "Erro ao confirmar presença");
       }
 
-      toast({
-        title: status === "yes" ? "Presença confirmada!" : "Presença cancelada",
-        description:
-          status === "yes"
-            ? "Sua confirmação foi registrada com sucesso"
-            : "Sua confirmação foi removida",
-      });
+      const data = await response.json();
+
+      // SPRINT 2: Show charge information if charge was created
+      if (status === "yes" && data.charge) {
+        const amount = parseFloat(data.charge.amount || data.charge.total_amount || 0);
+        const formattedAmount = new Intl.NumberFormat("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        }).format(amount);
+
+        toast({
+          title: "Presença confirmada!",
+          description: `Cobrança de ${formattedAmount} gerada automaticamente.`,
+          action: data.charge.id
+            ? {
+                label: "Ver cobrança",
+                onClick: () => router.push(`/financeiro/charges/${data.charge.id}`),
+              }
+            : undefined,
+        });
+      } else {
+        toast({
+          title: status === "yes" ? "Presença confirmada!" : "Presença cancelada",
+          description:
+            status === "yes"
+              ? "Sua confirmação foi registrada com sucesso"
+              : "Sua confirmação foi removida",
+        });
+      }
 
       router.refresh();
     } catch (error) {

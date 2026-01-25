@@ -95,3 +95,4 @@ async function validateMigrations() {
 // Executar validação
 validateMigrations();
 
+

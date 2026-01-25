@@ -15,6 +15,10 @@ export const createEventSchema = z.object({
   maxPlayers: z.number().int().min(4).max(30).default(10),
   maxGoalkeepers: z.number().int().min(0).max(4).default(2),
   waitlistEnabled: z.boolean().default(true),
+  // SPRINT 2: Payment fields
+  price: z.number().min(0).optional().nullable(),
+  receiverProfileId: z.string().uuid().optional().nullable(),
+  autoChargeOnRsvp: z.boolean().optional().nullable(),
 });
 
 export const rsvpSchema = z.object({

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Users } from 'lucide-react';
 import { toast } from 'sonner';
+import { useGroup } from '@/contexts/group-context';
 import { AthletesTable } from '@/components/athletes/athletes-table';
 import { AthleteFilters, type AthleteFilterValues } from '@/components/athletes/athlete-filters';
 import { AddModalityModal } from '@/components/athletes/add-modality-modal';

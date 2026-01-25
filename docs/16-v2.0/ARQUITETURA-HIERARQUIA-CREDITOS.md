@@ -537,3 +537,4 @@ export async function POST(request: Request) {
 **Última atualização:** 2026-02-27  
 **Status:** ✅ Mapeamento Completo
 
+

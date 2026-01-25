@@ -75,3 +75,4 @@ Implementar sistema completo de frequência com QR Code check-in e rankings.
 **Última atualização:** 2026-02-27  
 **Status:** ⏸️ Planejado
 
+

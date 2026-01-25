@@ -258,3 +258,4 @@ WHERE constraint_type = 'FOREIGN KEY' AND table_schema = 'public';
 **Última atualização:** 2026-01-27  
 **Status:** ✅ Pronto para verificação
 
+

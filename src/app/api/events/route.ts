@@ -96,7 +96,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { groupId, startsAt, venueId, maxPlayers, maxGoalkeepers, waitlistEnabled } = validation.data;
+    const { 
+      groupId, 
+      startsAt, 
+      venueId, 
+      maxPlayers, 
+      maxGoalkeepers, 
+      waitlistEnabled,
+      // SPRINT 2: Payment fields
+      price,
+      receiverProfileId,
+      autoChargeOnRsvp,
+    } = validation.data;
 
     // Check if user is admin of the group
     const membershipResult = await sql`
@@ -112,6 +123,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // SPRINT 2: Validate receiver profile if price is set
+    if (price && price > 0 && receiverProfileId) {
+      const receiverProfileCheck = await sql`
+        SELECT id FROM receiver_profiles
+        WHERE id = ${receiverProfileId}
+        LIMIT 1
+      `;
+      
+      if (!receiverProfileCheck || receiverProfileCheck.length === 0) {
+        return NextResponse.json(
+          { error: "Perfil de recebedor inválido" },
+          { status: 400 }
+        );
+      }
+    }
+
     const eventResult = await sql`
       INSERT INTO events (
         group_id,
@@ -120,7 +147,11 @@ export async function POST(request: NextRequest) {
         max_players,
         max_goalkeepers,
         waitlist_enabled,
-        created_by
+        created_by,
+        -- SPRINT 2: Payment fields
+        price,
+        receiver_profile_id,
+        auto_charge_on_rsvp
       )
       VALUES (
         ${groupId},
@@ -129,7 +160,10 @@ export async function POST(request: NextRequest) {
         ${maxPlayers},
         ${maxGoalkeepers},
         ${waitlistEnabled},
-        ${user.id}
+        ${user.id},
+        ${price && price > 0 ? price : null},
+        ${receiverProfileId || null},
+        ${price && price > 0 ? (autoChargeOnRsvp !== false) : null}
       )
       RETURNING *
     `;

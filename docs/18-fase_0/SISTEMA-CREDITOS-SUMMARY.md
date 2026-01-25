@@ -424,3 +424,4 @@ Demonstra integração completa:
 **Responsável:** Equipe ResenhApp  
 **Próximo:** Hierarquia e Permissões (Fase 5)
 
+

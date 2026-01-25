@@ -131,3 +131,4 @@ Após aplicar todas as migrations:
 **Última atualização:** 2026-02-27  
 **Status:** ✅ Pronto para aplicação
 
+

@@ -58,3 +58,4 @@ Implementar sistema completo de jogos oficiais com convocações, respostas e co
 **Última atualização:** 2026-02-27  
 **Status:** ⏸️ Planejado
 
+

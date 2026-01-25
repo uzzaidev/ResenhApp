@@ -93,3 +93,4 @@ SELECT
   'O script usa IF NOT EXISTS e DROP IF EXISTS' AS motivo,
   'Não mexe com auth.users ou profiles' AS observacao;
 
+

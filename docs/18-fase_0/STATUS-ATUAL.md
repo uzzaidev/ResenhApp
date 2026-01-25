@@ -86,3 +86,4 @@
 **Status:** 🟡 Em Andamento  
 **Próxima ação:** Aplicar Migration 1 no Supabase
 
+

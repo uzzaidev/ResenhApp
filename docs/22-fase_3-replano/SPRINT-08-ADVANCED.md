@@ -111,3 +111,4 @@ Implementar features avançadas que elevam o sistema a um nível de inovação, 
 **Status:** 📋 Backlog  
 **Próxima Feature:** A definir
 
+
