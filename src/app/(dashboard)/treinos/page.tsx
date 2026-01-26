@@ -193,8 +193,19 @@ export default async function TreinosPage() {
             <EmptyState
               icon={Calendar}
               title="Nenhum treino agendado"
-              description="Crie um novo treino para começar"
-            />
+              description="Crie um novo treino para começar a organizar os treinamentos do seu grupo"
+              action={{
+                label: "Criar Treino",
+                href: `/groups/${groupId}/events/new`,
+              }}
+            >
+              <Link
+                href="/treinos"
+                className="text-sm text-primary hover:underline"
+              >
+                📚 Ver treinos anteriores
+              </Link>
+            </EmptyState>
           ) : (
             <div className="space-y-4">
               {upcomingTrainings.map((training) => {

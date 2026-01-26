@@ -152,23 +152,15 @@ export default function ModalidadesPage() {
 
       {/* Modalities Grid */}
       {modalities.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-              <Plus className="h-6 w-6 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-medium mb-2">
-              Nenhuma modalidade criada ainda
-            </h3>
-            <p className="text-muted-foreground mb-4">
-              Crie sua primeira modalidade esportiva para começar
-            </p>
-            <Button onClick={() => setShowCreateModal(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Criar Primeira Modalidade
-            </Button>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={Trophy}
+          title="Nenhuma modalidade criada ainda"
+          description="Crie sua primeira modalidade esportiva para começar a organizar os atletas e treinos"
+          action={{
+            label: "Criar Primeira Modalidade",
+            onClick: () => setShowCreateModal(true),
+          }}
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {modalities.map((modality) => (
