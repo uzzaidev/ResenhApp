@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Loader2 } from 'lucide-react';
+import { Plus, Loader2, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ModalityCard } from '@/components/modalities/modality-card';
 import { ModalityModal } from '@/components/modalities/modality-modal';
+import { EmptyState } from '@/components/ui/empty-state';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useGroup } from '@/contexts/group-context';
