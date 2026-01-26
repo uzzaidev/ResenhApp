@@ -279,6 +279,36 @@ charges.forEach((charge) => {
 
 ---
 
-**Status:** 🔴 **3 páginas quebradas identificadas**  
-**Próxima ação:** Criar página de créditos e corrigir erros nas páginas de rankings e financeiro
+**Status:** ✅ **TODAS AS PÁGINAS CORRIGIDAS**  
+**Data de correção:** 2026-01-25
+
+## ✅ Correções Aplicadas
+
+### 1. ✅ `/groups/[groupId]/credits` - CRIADA
+- **Arquivo criado:** `src/app/groups/[groupId]/credits/page.tsx`
+- **Componente criado:** `src/components/credits/credits-page-client.tsx`
+- **Funcionalidades:**
+  - Integração com API existente
+  - Exibe saldo de créditos
+  - Permite compra de créditos (apenas admins)
+  - Histórico de transações (placeholder)
+  - Informações sobre o sistema de créditos
+
+### 2. ✅ `/rankings` - CORRIGIDA
+- **Correções aplicadas:**
+  - Validação de `groupId` antes de queries
+  - `COALESCE` em todos os campos numéricos
+  - Validação de array antes de mapear
+  - Removido `RANDOM()` (substituído por 0)
+  - Validação de tipos segura no mapeamento
+  - Divisão por zero protegida
+
+### 3. ✅ `/financeiro` - CORRIGIDA
+- **Correções aplicadas:**
+  - `LEFT JOIN` em vez de `INNER JOIN` para users
+  - Validação de `groupId` antes de queries
+  - Validação de datas antes de formatar
+  - Validação de `amount` antes de calcular
+  - Mapeamento seguro com tipos validados
+  - Tratamento de valores `null` e `NaN`
 
