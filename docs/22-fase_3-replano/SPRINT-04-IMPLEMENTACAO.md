@@ -1,7 +1,7 @@
 # Sprint 4: Loading States + Error Handling - Implementação
 
 **Data:** 2026-01-25  
-**Status:** 🟡 Em Progresso (60% completo)
+**Status:** 🟡 Em Progresso (75% completo)
 
 ---
 
@@ -121,8 +121,10 @@ try {
 ## ⏳ Pendente
 
 ### 1. Atualizar Mais Botões
-- [ ] Marcar como Pago
-- [ ] Criar Treino
+- [x] Marcar como Pago ✅
+- [x] Cancelar Cobrança ✅
+- [x] Excluir Cobrança ✅
+- [x] Criar Treino ✅
 - [ ] Criar Modalidade
 - [ ] Adicionar Atleta
 - [ ] Comprar Créditos
@@ -154,6 +156,9 @@ try {
 ### Arquivos Modificados
 - ✅ `src/app/layout.tsx` - Adicionado ErrorBoundary
 - ✅ `src/components/events/event-rsvp-form.tsx` - Usa novos componentes
+- ✅ `src/components/payments/payments-content.tsx` - Error handler + loading states
+- ✅ `src/components/payments/charges-data-table.tsx` - Loading states nos dropdowns
+- ✅ `src/components/events/event-form.tsx` - ButtonWithLoading + error handler
 
 ---
 
@@ -192,6 +197,18 @@ try {
 
 ---
 
-**Progresso:** 60% completo  
-**Próxima atualização:** Após atualizar mais botões e validações
+**Progresso:** 75% completo  
+**Última atualização:** 2026-01-25
+
+**Concluído:**
+- ✅ Error Handler completo
+- ✅ ButtonWithLoading implementado
+- ✅ Error Boundary integrado
+- ✅ 4 botões principais atualizados (RSVP, Marcar Pago, Cancelar, Criar Treino)
+
+**Pendente:**
+- ⏳ Criar Modalidade
+- ⏳ Adicionar Atleta
+- ⏳ Validação de formulários com feedback inline
+- ⏳ Testes
 
