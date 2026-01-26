@@ -7,6 +7,7 @@ import { Plus, DollarSign, Check } from "lucide-react";
 import { CreateChargeModal } from "./create-charge-modal";
 import { ChargesDataTable, type Charge } from "./charges-data-table";
 import { useErrorHandler } from "@/hooks/use-error-handler";
+import { markChargeAsPaidWithUndo, cancelChargeWithUndo } from "@/lib/undo";
 import { toast } from "sonner";
 
 type PaymentsContentProps = {
@@ -45,22 +46,17 @@ export function PaymentsContent({ groupId, isAdmin }: PaymentsContentProps) {
     setLoadingCharges(prev => ({ ...prev, [chargeId]: 'marking' }));
     
     try {
-      const response = await fetch(`/api/groups/${groupId}/charges/${chargeId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "paid" }),
-      });
+      // Buscar status atual da cobrança para poder desfazer
+      const charge = charges.find(c => c.id === chargeId);
+      const currentStatus = charge?.status || "pending";
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Erro ao atualizar cobrança");
-      }
+      // Usar undo helper
+      await markChargeAsPaidWithUndo(chargeId, groupId, currentStatus);
 
-      toast.success("Cobrança marcada como paga", {
-        description: "O status foi atualizado com sucesso.",
-      });
-
-      fetchCharges();
+      // Atualizar lista após um pequeno delay para dar tempo do toast aparecer
+      setTimeout(() => {
+        fetchCharges();
+      }, 100);
     } catch (error) {
       handleError(error, { chargeId, onRetry: () => handleMarkAsPaid(chargeId) });
     } finally {
@@ -76,22 +72,17 @@ export function PaymentsContent({ groupId, isAdmin }: PaymentsContentProps) {
     setLoadingCharges(prev => ({ ...prev, [chargeId]: 'canceling' }));
     
     try {
-      const response = await fetch(`/api/groups/${groupId}/charges/${chargeId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "canceled" }),
-      });
+      // Buscar status atual da cobrança para poder desfazer
+      const charge = charges.find(c => c.id === chargeId);
+      const currentStatus = charge?.status || "pending";
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Erro ao cancelar cobrança");
-      }
+      // Usar undo helper
+      await cancelChargeWithUndo(chargeId, groupId, currentStatus);
 
-      toast.success("Cobrança cancelada", {
-        description: "A cobrança foi cancelada com sucesso.",
-      });
-
-      fetchCharges();
+      // Atualizar lista após um pequeno delay
+      setTimeout(() => {
+        fetchCharges();
+      }, 100);
     } catch (error) {
       handleError(error, { chargeId, onRetry: () => handleCancelCharge(chargeId) });
     } finally {

@@ -56,10 +56,17 @@ export async function PATCH(
 
     const { status } = validation.data;
 
-    // Update charge status
+    // Update charge status and paid_at based on status
+    // Se status for "paid", definir paid_at. Se for outro status, limpar paid_at
     const updatedChargeQuery = await sql`
       UPDATE charges
-      SET status = ${status}, updated_at = NOW()
+      SET 
+        status = ${status}, 
+        paid_at = CASE 
+          WHEN ${status} = 'paid' THEN NOW()
+          ELSE NULL
+        END,
+        updated_at = NOW()
       WHERE id = ${chargeId}
       RETURNING *
     `;
