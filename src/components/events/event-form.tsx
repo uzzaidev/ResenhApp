@@ -14,7 +14,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, DollarSign, ChevronDown, ChevronUp } from "lucide-react";
+import { ButtonWithLoading, ButtonStatus } from "@/components/ui/button-with-loading";
+import { useErrorHandler } from "@/hooks/use-error-handler";
+import { DollarSign, ChevronDown, ChevronUp } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -37,7 +39,8 @@ type EventFormProps = {
 export function EventForm({ groupId, mode, eventId, initialData }: EventFormProps) {
   const router = useRouter();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const { handleError } = useErrorHandler();
+  const [submitStatus, setSubmitStatus] = useState<ButtonStatus>('idle');
 
   // Format datetime for input (needs to be in local time for datetime-local input)
   const formatDateTimeLocal = (isoString?: string) => {
@@ -96,7 +99,7 @@ export function EventForm({ groupId, mode, eventId, initialData }: EventFormProp
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setSubmitStatus('loading');
 
     try {
       const url = mode === "create" ? "/api/events" : `/api/events/${eventId}`;
@@ -139,25 +142,33 @@ export function EventForm({ groupId, mode, eventId, initialData }: EventFormProp
         throw new Error(data.error || `Erro ao ${mode === "create" ? "criar" : "atualizar"} evento`);
       }
 
+      setSubmitStatus('success');
+
       toast({
         title: mode === "create" ? "Evento criado!" : "Evento atualizado!",
         description: `O evento foi ${mode === "create" ? "criado" : "atualizado"} com sucesso.`,
       });
 
-      // Redirect to the event or group page
-      if (mode === "create") {
-        router.push(`/groups/${groupId}/events/${data.event.id}`);
-      } else {
-        router.push(`/groups/${groupId}/events/${eventId}`);
-      }
+      // Redirect to the event or group page após 1 segundo
+      setTimeout(() => {
+        if (mode === "create") {
+          router.push(`/groups/${groupId}/events/${data.event.id}`);
+        } else {
+          router.push(`/groups/${groupId}/events/${eventId}`);
+        }
+      }, 1000);
     } catch (error) {
-      toast({
-        title: `Erro ao ${mode === "create" ? "criar" : "atualizar"} evento`,
-        description: error instanceof Error ? error.message : "Tente novamente",
-        variant: "destructive",
+      setSubmitStatus('error');
+      
+      handleError(error, {
+        eventId,
+        onRetry: () => handleSubmit(e as any),
       });
-    } finally {
-      setIsLoading(false);
+
+      // Reset status após 3 segundos
+      setTimeout(() => {
+        setSubmitStatus('idle');
+      }, 3000);
     }
   };
 
@@ -183,7 +194,7 @@ export function EventForm({ groupId, mode, eventId, initialData }: EventFormProp
                 setFormData({ ...formData, startsAt: e.target.value })
               }
               required
-              disabled={isLoading}
+              disabled={submitStatus === 'loading'}
             />
           </div>
 
@@ -200,7 +211,7 @@ export function EventForm({ groupId, mode, eventId, initialData }: EventFormProp
                   setFormData({ ...formData, maxPlayers: parseInt(e.target.value, 10) })
                 }
                 required
-                disabled={isLoading}
+                disabled={submitStatus === 'loading'}
               />
             </div>
 
@@ -219,7 +230,7 @@ export function EventForm({ groupId, mode, eventId, initialData }: EventFormProp
                   })
                 }
                 required
-                disabled={isLoading}
+                disabled={submitStatus === 'loading'}
               />
             </div>
           </div>
@@ -232,7 +243,7 @@ export function EventForm({ groupId, mode, eventId, initialData }: EventFormProp
               onChange={(e) =>
                 setFormData({ ...formData, waitlistEnabled: e.target.checked })
               }
-              disabled={isLoading}
+              disabled={submitStatus === 'loading'}
               className="h-4 w-4 rounded border-gray-300"
             />
             <Label htmlFor="waitlistEnabled" className="cursor-pointer">
@@ -259,7 +270,7 @@ export function EventForm({ groupId, mode, eventId, initialData }: EventFormProp
                         });
                         if (isChecked) setIsChargeSectionOpen(true);
                       }}
-                      disabled={isLoading}
+                      disabled={submitStatus === 'loading'}
                     />
                     <Label htmlFor="hasCharge" className="cursor-pointer flex items-center gap-2">
                       <DollarSign className="h-4 w-4" />
@@ -291,7 +302,7 @@ export function EventForm({ groupId, mode, eventId, initialData }: EventFormProp
                         setFormData({ ...formData, price: e.target.value })
                       }
                       required={formData.hasCharge}
-                      disabled={isLoading}
+                      disabled={submitStatus === 'loading'}
                     />
                     <p className="text-xs text-muted-foreground">
                       Valor que cada atleta pagará ao confirmar presença
@@ -311,7 +322,7 @@ export function EventForm({ groupId, mode, eventId, initialData }: EventFormProp
                         onChange={(e) =>
                           setFormData({ ...formData, receiverProfileId: e.target.value })
                         }
-                        disabled={isLoading || isLoadingProfiles}
+                        disabled={submitStatus === 'loading' || isLoadingProfiles}
                         className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                       >
                         <option value="">Selecione quem recebe...</option>
@@ -346,7 +357,7 @@ export function EventForm({ groupId, mode, eventId, initialData }: EventFormProp
                       onChange={(e) =>
                         setFormData({ ...formData, autoChargeOnRsvp: e.target.checked })
                       }
-                      disabled={isLoading}
+                      disabled={submitStatus === 'loading'}
                       className="h-4 w-4 rounded border-gray-300"
                     />
                     <Label htmlFor="autoChargeOnRsvp" className="cursor-pointer">
@@ -379,14 +390,18 @@ export function EventForm({ groupId, mode, eventId, initialData }: EventFormProp
             type="button"
             variant="outline"
             onClick={() => router.back()}
-            disabled={isLoading}
+            disabled={submitStatus === 'loading'}
           >
             Cancelar
           </Button>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {mode === "create" ? "Criar Evento" : "Salvar Alterações"}
-          </Button>
+          <ButtonWithLoading
+            type="submit"
+            status={submitStatus}
+            idleText={mode === "create" ? "Criar Evento" : "Salvar Alterações"}
+            loadingText={mode === "create" ? "Criando..." : "Salvando..."}
+            successText={mode === "create" ? "Criado!" : "Salvo!"}
+            errorText="Tentar Novamente"
+          />
         </CardFooter>
       </form>
     </Card>

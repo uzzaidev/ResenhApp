@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, MoreHorizontal, Check, X, Trash2 } from "lucide-react";
+import { ArrowUpDown, ChevronDown, MoreHorizontal, Check, X, Trash2, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -84,6 +84,7 @@ interface ChargesDataTableProps {
   onMarkAsPaid: (id: string) => void;
   onCancel: (id: string) => void;
   onDelete: (id: string) => void;
+  loadingCharges?: Record<string, 'marking' | 'canceling' | 'deleting'>;
 }
 
 export function ChargesDataTable({
@@ -92,6 +93,7 @@ export function ChargesDataTable({
   onMarkAsPaid,
   onCancel,
   onDelete,
+  loadingCharges = {},
 }: ChargesDataTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -237,21 +239,40 @@ export function ChargesDataTable({
               <DropdownMenuSeparator />
               {charge.status === "pending" && (
                 <>
-                  <DropdownMenuItem onClick={() => onMarkAsPaid(charge.id)}>
-                    <Check className="mr-2 h-4 w-4" />
+                  <DropdownMenuItem 
+                    onClick={() => onMarkAsPaid(charge.id)}
+                    disabled={loadingCharges[charge.id] !== undefined}
+                  >
+                    {loadingCharges[charge.id] === 'marking' ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Check className="mr-2 h-4 w-4" />
+                    )}
                     Marcar como Pago
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => onCancel(charge.id)}>
-                    <X className="mr-2 h-4 w-4" />
+                  <DropdownMenuItem 
+                    onClick={() => onCancel(charge.id)}
+                    disabled={loadingCharges[charge.id] !== undefined}
+                  >
+                    {loadingCharges[charge.id] === 'canceling' ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <X className="mr-2 h-4 w-4" />
+                    )}
                     Cancelar
                   </DropdownMenuItem>
                 </>
               )}
               <DropdownMenuItem
                 onClick={() => onDelete(charge.id)}
+                disabled={loadingCharges[charge.id] !== undefined}
                 className="text-destructive"
               >
-                <Trash2 className="mr-2 h-4 w-4" />
+                {loadingCharges[charge.id] === 'deleting' ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash2 className="mr-2 h-4 w-4" />
+                )}
                 Excluir
               </DropdownMenuItem>
             </DropdownMenuContent>
