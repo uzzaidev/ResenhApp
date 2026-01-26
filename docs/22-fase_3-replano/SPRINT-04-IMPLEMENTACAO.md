@@ -1,7 +1,7 @@
 # Sprint 4: Loading States + Error Handling - Implementação
 
 **Data:** 2026-01-25  
-**Status:** 🟡 Em Progresso (75% completo)
+**Status:** 🟢 Quase Completo (90% completo)
 
 ---
 
@@ -125,14 +125,14 @@ try {
 - [x] Cancelar Cobrança ✅
 - [x] Excluir Cobrança ✅
 - [x] Criar Treino ✅
-- [ ] Criar Modalidade
+- [x] Criar Modalidade ✅
 - [ ] Adicionar Atleta
 - [ ] Comprar Créditos
 - [ ] Alternar Grupo
 
 ### 2. Validação de Formulários
-- [ ] Criar Treino - feedback inline
-- [ ] Criar Modalidade - feedback inline
+- [x] Criar Treino - feedback inline ✅
+- [x] Criar Modalidade - feedback inline ✅
 - [ ] Adicionar Atleta - feedback inline
 - [ ] Comprar Créditos - feedback inline
 - [ ] Criar ReceiverProfile - feedback inline
@@ -158,7 +158,11 @@ try {
 - ✅ `src/components/events/event-rsvp-form.tsx` - Usa novos componentes
 - ✅ `src/components/payments/payments-content.tsx` - Error handler + loading states
 - ✅ `src/components/payments/charges-data-table.tsx` - Loading states nos dropdowns
-- ✅ `src/components/events/event-form.tsx` - ButtonWithLoading + error handler
+- ✅ `src/components/events/event-form.tsx` - ButtonWithLoading + error handler + validação Zod
+- ✅ `src/components/modalities/modality-form.tsx` - ButtonWithLoading + error handler + validação Zod
+
+### Novos Arquivos
+- ✅ `src/components/ui/form-field.tsx` - Componente para feedback inline de validação
 
 ---
 
@@ -197,18 +201,19 @@ try {
 
 ---
 
-**Progresso:** 75% completo  
+**Progresso:** 90% completo  
 **Última atualização:** 2026-01-25
 
 **Concluído:**
 - ✅ Error Handler completo
 - ✅ ButtonWithLoading implementado
 - ✅ Error Boundary integrado
-- ✅ 4 botões principais atualizados (RSVP, Marcar Pago, Cancelar, Criar Treino)
+- ✅ FormField criado para feedback inline
+- ✅ 5 botões principais atualizados (RSVP, Marcar Pago, Cancelar, Criar Treino, Criar Modalidade)
+- ✅ 2 formulários com validação Zod + feedback inline (EventForm, ModalityForm)
 
 **Pendente:**
-- ⏳ Criar Modalidade
-- ⏳ Adicionar Atleta
-- ⏳ Validação de formulários com feedback inline
-- ⏳ Testes
+- ⏳ Adicionar Atleta (botão + validação)
+- ⏳ Comprar Créditos (botão + validação)
+- ⏳ Testes unitários e E2E
 
