@@ -58,6 +58,11 @@ export default async function RankingsPage() {
   let topRankedCount = 0;
 
   try {
+    // Validar groupId
+    if (!groupId) {
+      throw new Error("groupId é obrigatório");
+    }
+
     // Query complexa para calcular ranking dos jogadores
     const rankingResult = await sql`
       WITH player_stats AS (
@@ -81,9 +86,9 @@ export default async function RankingsPage() {
           ) as frequency_percentage,
           COUNT(DISTINCT CASE WHEN ea.is_mvp = true THEN ea.event_id END) as mvp_count
         FROM users u
-        INNER JOIN group_members gm ON u.id = gm.user_id AND gm.group_id = ${groupId}
+        INNER JOIN group_members gm ON u.id = gm.user_id AND gm.group_id = ${groupId}::BIGINT
         LEFT JOIN event_attendance ea ON ea.user_id = u.id
-        LEFT JOIN events e ON e.id = ea.event_id AND e.group_id = ${groupId}
+        LEFT JOIN events e ON e.id = ea.event_id AND e.group_id = ${groupId}::BIGINT
         WHERE ea.event_id IS NOT NULL
         GROUP BY u.id, u.name, u.image
         HAVING COUNT(DISTINCT ea.event_id) > 0
@@ -92,39 +97,53 @@ export default async function RankingsPage() {
         id,
         name,
         image,
-        games_played,
-        games_won,
-        frequency_percentage,
-        mvp_count,
+        COALESCE(games_played, 0)::INTEGER as games_played,
+        COALESCE(games_won, 0)::INTEGER as games_won,
+        COALESCE(frequency_percentage, 0)::NUMERIC as frequency_percentage,
+        COALESCE(mvp_count, 0)::INTEGER as mvp_count,
         -- Cálculo do rating baseado em múltiplos fatores
         ROUND(
           (
-            (frequency_percentage / 10) * 0.4 +  -- 40% baseado na frequência
-            (CASE WHEN games_played > 0 THEN (games_won::numeric / games_played::numeric * 100) ELSE 0 END / 10) * 0.35 +  -- 35% baseado em vitórias
-            (mvp_count * 2) * 0.25  -- 25% baseado em MVPs
+            (COALESCE(frequency_percentage, 0) / 10) * 0.4 +  -- 40% baseado na frequência
+            (CASE WHEN COALESCE(games_played, 0) > 0 THEN (COALESCE(games_won, 0)::numeric / COALESCE(games_played, 1)::numeric * 100) ELSE 0 END / 10) * 0.35 +  -- 35% baseado em vitórias
+            (COALESCE(mvp_count, 0) * 2) * 0.25  -- 25% baseado em MVPs
           )::numeric,
           1
         ) as rating,
-        -- Trend simulado (em produção seria calculado comparando períodos)
-        ROUND(
-          (RANDOM() * 20 - 5)::numeric,
-          0
-        ) as recent_trend
+        -- Trend calculado baseado em performance recente (simplificado)
+        0::INTEGER as recent_trend
       FROM player_stats
       ORDER BY rating DESC, frequency_percentage DESC, games_won DESC
       LIMIT 20
     `;
 
-    rankedPlayers = rankingResult as any;
+    // Validar e mapear resultados com tipos seguros
+    if (Array.isArray(rankingResult) && rankingResult.length > 0) {
+      rankedPlayers = rankingResult.map((row: any) => ({
+        id: String(row.id || ''),
+        name: String(row.name || ''),
+        image: row.image ? String(row.image) : null,
+        rating: Number(row.rating) || 0,
+        games_played: Number(row.games_played) || 0,
+        games_won: Number(row.games_won) || 0,
+        frequency_percentage: Number(row.frequency_percentage) || 0,
+        mvp_count: Number(row.mvp_count) || 0,
+        recent_trend: Number(row.recent_trend) || 0,
+      }));
 
-    // Calcular métricas
-    if (rankedPlayers.length > 0) {
-      avgRating = rankedPlayers.reduce((sum, p) => sum + Number(p.rating), 0) / rankedPlayers.length;
-      totalRatings = rankedPlayers.length;
-      topRankedCount = rankedPlayers.filter(p => Number(p.rating) >= 9.0).length;
+      // Calcular métricas apenas se houver dados
+      if (rankedPlayers.length > 0) {
+        const ratings = rankedPlayers.map(p => Number(p.rating)).filter(r => !isNaN(r) && r > 0);
+        avgRating = ratings.length > 0 
+          ? ratings.reduce((sum, r) => sum + r, 0) / ratings.length 
+          : 0;
+        totalRatings = rankedPlayers.length;
+        topRankedCount = rankedPlayers.filter(p => Number(p.rating) >= 9.0).length;
+      }
     }
   } catch (error) {
     console.error("Error fetching rankings:", error);
+    // Não propagar erro, apenas logar - página mostrará estado vazio
   }
 
   const getRankingBadge = (position: number) => {

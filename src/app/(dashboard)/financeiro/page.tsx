@@ -71,32 +71,55 @@ export default async function FinanceiroPage() {
   let totalCount = 0;
 
   try {
+    // Validar groupId
+    if (!groupId) {
+      throw new Error("groupId é obrigatório");
+    }
+
     // Buscar todas as cobranças do grupo
     const chargesResult = await sql`
       SELECT
         c.id,
         c.user_id,
-        u.name as user_name,
-        c.amount,
+        COALESCE(u.name, 'Usuário removido') as user_name,
+        COALESCE(c.amount, 0)::NUMERIC as amount,
         c.description,
         c.due_date,
         c.paid_at,
         c.event_id,
         e.starts_at as event_date
       FROM charges c
-      INNER JOIN users u ON c.user_id = u.id
+      LEFT JOIN users u ON c.user_id = u.id
       LEFT JOIN events e ON c.event_id = e.id
-      WHERE c.group_id = ${groupId}
-      ORDER BY c.due_date DESC, c.created_at DESC
+      WHERE c.group_id = ${groupId}::BIGINT
+      ORDER BY COALESCE(c.due_date, c.created_at) DESC, c.created_at DESC
       LIMIT 50
     `;
 
-    charges = (chargesResult as any[]).map((charge) => ({
-      ...charge,
-      event_name: charge.event_id ? `Treino - ${new Date(charge.event_date).toLocaleDateString('pt-BR')}` : null,
-    }));
+    // Validar e mapear resultados com tipos seguros
+    if (Array.isArray(chargesResult) && chargesResult.length > 0) {
+      charges = chargesResult.map((charge: any) => {
+        const eventDate = charge.event_date ? new Date(charge.event_date) : null;
+        const isValidDate = eventDate && !isNaN(eventDate.getTime());
+        
+        return {
+          id: String(charge.id || ''),
+          user_id: String(charge.user_id || ''),
+          user_name: String(charge.user_name || 'Usuário desconhecido'),
+          amount: Number(charge.amount) || 0,
+          description: charge.description ? String(charge.description) : null,
+          due_date: charge.due_date ? String(charge.due_date) : new Date().toISOString(),
+          paid_at: charge.paid_at ? String(charge.paid_at) : null,
+          event_id: charge.event_id ? String(charge.event_id) : null,
+          event_name: charge.event_id && isValidDate 
+            ? `Treino - ${eventDate.toLocaleDateString('pt-BR')}` 
+            : null,
+          event_date: isValidDate ? eventDate.toISOString() : null,
+        };
+      });
+    }
 
-    // Calcular métricas
+    // Calcular métricas com validação
     const now = new Date();
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const twelveMonthsAgo = new Date(now);
@@ -104,11 +127,23 @@ export default async function FinanceiroPage() {
 
     charges.forEach((charge) => {
       totalCount++;
-      const chargeAmount = Number(charge.amount) || 0;
+      const chargeAmount = Number(charge.amount);
+      
+      // Validar se amount é um número válido
+      if (isNaN(chargeAmount) || chargeAmount < 0) {
+        console.warn(`Invalid charge amount for charge ${charge.id}: ${charge.amount}`);
+        return;
+      }
 
       if (charge.paid_at) {
         paidCount++;
         const paidDate = new Date(charge.paid_at);
+        
+        // Validar se paid_at é uma data válida
+        if (isNaN(paidDate.getTime())) {
+          console.warn(`Invalid paid_at date for charge ${charge.id}: ${charge.paid_at}`);
+          return;
+        }
 
         // Receita total (últimos 12 meses)
         if (paidDate >= twelveMonthsAgo) {
@@ -126,6 +161,7 @@ export default async function FinanceiroPage() {
     });
   } catch (error) {
     console.error("Error fetching charges:", error);
+    // Não propagar erro, apenas logar - página mostrará estado vazio
   }
 
   const paymentRate = totalCount > 0 ? Math.round((paidCount / totalCount) * 100) : 0;
