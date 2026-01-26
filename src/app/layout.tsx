@@ -3,6 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { GroupProvider } from "@/contexts/group-context";
 import { DirectModeProvider } from "@/contexts/direct-mode-context";
+import { ErrorBoundary } from "@/components/error-boundary";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
 
@@ -45,13 +46,15 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body className="font-sans min-h-screen overflow-x-hidden" suppressHydrationWarning>
-        <AuthProvider>
-          <GroupProvider>
-            <DirectModeProvider>
-              {children}
-            </DirectModeProvider>
-          </GroupProvider>
-        </AuthProvider>
+        <ErrorBoundary>
+          <AuthProvider>
+            <GroupProvider>
+              <DirectModeProvider>
+                {children}
+              </DirectModeProvider>
+            </GroupProvider>
+          </AuthProvider>
+        </ErrorBoundary>
         <Toaster />
         <SonnerToaster />
       </body>

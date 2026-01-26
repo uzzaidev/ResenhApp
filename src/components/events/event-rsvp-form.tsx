@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { ButtonWithLoading, ButtonStatus } from "@/components/ui/button-with-loading";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
-import { Check, X, Loader2, Goal, Shield, Zap, TrendingUp } from "lucide-react";
+import { useErrorHandler } from "@/hooks/use-error-handler";
+import { Check, X, Goal, Shield, Zap, TrendingUp } from "lucide-react";
 
 type Position = "gk" | "defender" | "midfielder" | "forward";
 
@@ -30,7 +32,8 @@ const POSITIONS = [
 export function EventRsvpForm({ eventId, currentAttendance, eventStatus }: EventRsvpFormProps) {
   const router = useRouter();
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { handleError } = useErrorHandler();
+  const [rsvpStatus, setRsvpStatus] = useState<ButtonStatus>('idle');
   const [preferredPosition, setPreferredPosition] = useState<Position | null>(
     (currentAttendance?.preferred_position as Position) || null
   );
@@ -69,7 +72,7 @@ export function EventRsvpForm({ eventId, currentAttendance, eventStatus }: Event
       return;
     }
 
-    setIsSubmitting(true);
+    setRsvpStatus('loading');
 
     try {
       const response = await fetch(`/api/events/${eventId}/rsvp`, {
@@ -122,15 +125,26 @@ export function EventRsvpForm({ eventId, currentAttendance, eventStatus }: Event
         });
       }
 
+      setRsvpStatus('success');
       router.refresh();
+
+      // Reset status após 2 segundos
+      setTimeout(() => {
+        setRsvpStatus('idle');
+      }, 2000);
     } catch (error) {
-      toast({
-        title: "Erro",
-        description: error instanceof Error ? error.message : "Erro ao processar solicitação",
-        variant: "destructive",
+      setRsvpStatus('error');
+      
+      // Usar error handler com retry
+      handleError(error, {
+        eventId,
+        onRetry: () => handleRsvp(status),
       });
-    } finally {
-      setIsSubmitting(false);
+
+      // Reset status após 3 segundos
+      setTimeout(() => {
+        setRsvpStatus('idle');
+      }, 3000);
     }
   };
 
@@ -148,7 +162,7 @@ export function EventRsvpForm({ eventId, currentAttendance, eventStatus }: Event
               <button
                 key={pos.value}
                 type="button"
-                disabled={isEventFinished || isSubmitting}
+                disabled={isEventFinished || rsvpStatus === 'loading'}
                 onClick={() => handlePrimaryPositionSelect(pos.value)}
                 className={`p-4 rounded-lg border-2 transition-all text-center ${
                   preferredPosition === pos.value
@@ -181,7 +195,7 @@ export function EventRsvpForm({ eventId, currentAttendance, eventStatus }: Event
                 <button
                   key={pos.value}
                   type="button"
-                  disabled={isEventFinished || isSubmitting}
+                  disabled={isEventFinished || rsvpStatus === 'loading'}
                   onClick={() =>
                     setSecondaryPosition(secondaryPosition === pos.value ? null : pos.value)
                   }
@@ -219,33 +233,33 @@ export function EventRsvpForm({ eventId, currentAttendance, eventStatus }: Event
 
       {/* Botões de ação */}
       <div className="flex flex-col sm:flex-row gap-3 pt-4">
-        <Button
+        <ButtonWithLoading
           onClick={() => handleRsvp("yes")}
-          disabled={isEventFinished || isSubmitting || !preferredPosition}
+          disabled={isEventFinished || !preferredPosition}
+          status={rsvpStatus}
+          idleText="Confirmar Presença"
+          loadingText="Confirmando..."
+          successText="Confirmado!"
+          errorText="Tentar Novamente"
           className="flex-1"
           size="lg"
         >
-          {isSubmitting ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <Check className="h-4 w-4 mr-2" />
-          )}
-          Confirmar Presença
-        </Button>
-        <Button
+          <Check className="h-4 w-4 mr-2" />
+        </ButtonWithLoading>
+        <ButtonWithLoading
           onClick={() => handleRsvp("no")}
-          disabled={isEventFinished || isSubmitting}
+          disabled={isEventFinished}
+          status={rsvpStatus}
+          idleText="Não Vou"
+          loadingText="Cancelando..."
+          successText="Cancelado"
+          errorText="Tentar Novamente"
           variant="outline"
           className="flex-1 sm:flex-none"
           size="lg"
         >
-          {isSubmitting ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <X className="h-4 w-4 mr-2" />
-          )}
-          Não Vou
-        </Button>
+          <X className="h-4 w-4 mr-2" />
+        </ButtonWithLoading>
       </div>
 
       {isEventFinished && (
