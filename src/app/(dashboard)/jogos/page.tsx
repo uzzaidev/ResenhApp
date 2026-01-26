@@ -198,7 +198,15 @@ export default async function JogosPage() {
               <EmptyState
                 icon={Trophy}
                 title="Nenhum jogo agendado"
-                description="Adicione um novo jogo oficial"
+                description="Crie um novo jogo oficial para competir e acompanhar resultados"
+                action={
+                  groupId
+                    ? {
+                        label: "Criar Jogo",
+                        href: `/groups/${groupId}/events/new?type=game`,
+                      }
+                    : undefined
+                }
               />
             ) : (
               <div className="space-y-4">
@@ -273,7 +281,9 @@ export default async function JogosPage() {
               <EmptyState
                 icon={Trophy}
                 title="Sem resultados ainda"
-                description="Os resultados dos jogos aparecerão aqui"
+                description="Os resultados dos jogos aparecerão aqui após as partidas serem finalizadas"
+                variant="default"
+                size="sm"
               />
             ) : (
               <div className="space-y-3">

@@ -46,9 +46,38 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
 
   // Debounce query (300ms)
   const debouncedQuery = useDebounce(query, 300);
+
+  // Carregar histórico de buscas do localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('search_history');
+      if (saved) {
+        try {
+          const history = JSON.parse(saved);
+          setSearchHistory(Array.isArray(history) ? history.slice(0, 5) : []);
+        } catch {
+          // Ignorar erro de parse
+        }
+      }
+    }
+  }, []);
+
+  // Salvar no histórico quando buscar
+  const saveToHistory = useCallback((searchQuery: string) => {
+    if (!searchQuery || searchQuery.length < 2) return;
+
+    setSearchHistory((prev) => {
+      const updated = [searchQuery, ...prev.filter((q) => q !== searchQuery)].slice(0, 5);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('search_history', JSON.stringify(updated));
+      }
+      return updated;
+    });
+  }, []);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -94,6 +123,9 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
         games: [],
         modalities: [],
       });
+      
+      // Salvar no histórico
+      saveToHistory(searchQuery);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro desconhecido');
       setResults({
@@ -109,9 +141,9 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
 
   // Buscar quando query mudar (com debounce)
   useEffect(() => {
-    if (open && debouncedQuery) {
+    if (open && debouncedQuery && debouncedQuery.length >= 2) {
       searchResults(debouncedQuery);
-    } else if (!debouncedQuery) {
+    } else if (!debouncedQuery || debouncedQuery.length < 2) {
       setResults({
         athletes: [],
         trainings: [],
@@ -172,9 +204,32 @@ export function SearchCommand({ open, onOpenChange }: SearchCommandProps) {
         )}
 
         {!isLoading && !error && query.length < 2 && (
-          <CommandEmpty>
-            Digite pelo menos 2 caracteres para buscar
-          </CommandEmpty>
+          <>
+            {searchHistory.length > 0 && (
+              <CommandGroup heading="🔍 Histórico de Buscas">
+                {searchHistory.map((historyQuery) => (
+                  <CommandItem
+                    key={historyQuery}
+                    onSelect={() => {
+                      setQuery(historyQuery);
+                      searchResults(historyQuery);
+                    }}
+                    className="flex items-center gap-3 cursor-pointer"
+                  >
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex-1">
+                      <div className="font-medium">{historyQuery}</div>
+                    </div>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+            {searchHistory.length === 0 && (
+              <CommandEmpty>
+                Digite pelo menos 2 caracteres para buscar
+              </CommandEmpty>
+            )}
+          </>
         )}
 
         {!isLoading && !error && results.athletes.length > 0 && (

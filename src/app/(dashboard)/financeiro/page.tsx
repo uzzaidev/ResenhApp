@@ -289,8 +289,25 @@ export default async function FinanceiroPage() {
             <EmptyState
               icon={DollarSign}
               title="Nenhuma cobrança encontrada"
-              description="Crie uma nova cobrança para começar"
-            />
+              description="Crie uma nova cobrança manual ou configure treinos com preço para gerar cobranças automáticas"
+              action={
+                groupId
+                  ? {
+                      label: "Nova Cobrança",
+                      href: `/groups/${groupId}/charges/new`,
+                    }
+                  : undefined
+              }
+            >
+              {groupId && (
+                <Link
+                  href="/treinos"
+                  className="text-sm text-primary hover:underline"
+                >
+                  💡 Configurar treinos com preço automático
+                </Link>
+              )}
+            </EmptyState>
           ) : (
             <div className="space-y-3">
               {charges.map((charge) => (

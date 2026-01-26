@@ -19,8 +19,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { MoreVertical, Eye, UserPlus, Star } from 'lucide-react';
+import { MoreVertical, Eye, UserPlus, Star, Users } from 'lucide-react';
 import { ModalityBadge } from './modality-badge';
+import { EmptyState } from '@/components/ui/empty-state';
 
 interface Athlete {
   id: string;
@@ -54,9 +55,16 @@ export function AthletesTable({
 }: AthletesTableProps) {
   if (athletes.length === 0) {
     return (
-      <div className="border rounded-lg p-12 text-center">
-        <p className="text-muted-foreground">Nenhum atleta encontrado</p>
-      </div>
+      <EmptyState
+        icon={Users}
+        title="Nenhum atleta encontrado"
+        description={
+          onAddModality
+            ? "Adicione atletas ao grupo ou importe de uma lista"
+            : "Nenhum atleta corresponde aos filtros aplicados"
+        }
+        size="sm"
+      />
     );
   }
 
