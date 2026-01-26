@@ -67,7 +67,8 @@ describe('Pix Generation', () => {
       });
 
       // Verificar que o valor está no formato correto (20.50)
-      expect(payload).toContain('2050'); // Valor em centavos sem ponto
+      // O payload contém o valor formatado como "20.50" na seção 54
+      expect(payload).toContain('20.50');
     });
 
     it('deve incluir txId no payload', () => {

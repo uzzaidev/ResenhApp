@@ -3,6 +3,7 @@ import { requireAuth } from "@/lib/auth-helpers";
 import { sql } from "@/db/client";
 import { rsvpSchema } from "@/lib/validations";
 import logger from "@/lib/logger";
+import { analytics } from "@/lib/analytics";
 import { generatePixForCharge } from "@/lib/pix-helpers";
 
 type Params = Promise<{ eventId: string }>;
@@ -311,6 +312,11 @@ export async function POST(
       { eventId, userId: user.id, status: finalStatus, chargeCreated: !!charge },
       "RSVP updated"
     );
+
+    // Analytics: Rastrear RSVP confirmado
+    if (finalStatus === 'yes') {
+      analytics.rsvpConfirmed(eventId, event.group_id.toString(), !!charge);
+    }
 
     return NextResponse.json({ 
       attendance,

@@ -124,11 +124,16 @@ logger.error({ error, context }, 'Failed to generate Pix');
 - [ ] Criar helper de autenticação para testes
 - [ ] Melhorar testes E2E com dados reais
 
+### ✅ Concluído Recentemente (50%)
+- [x] Testes unitários para `pix.ts` (13 testes)
+- [x] Testes unitários para `error-handler.ts` (12 testes)
+- [x] Ajustes nos testes baseados na implementação real
+
 ### ⏳ Pendente (50%)
 - [ ] Setup Sentry
 - [ ] Setup Analytics (PostHog)
-- [ ] Testes unitários (pix.ts, error-handler.ts)
 - [ ] Performance monitoring
+- [ ] Melhorar cobertura de testes
 
 ---
 
@@ -166,7 +171,7 @@ logger.error({ error, context }, 'Failed to generate Pix');
 
 ---
 
-**Status:** 🟢 **40% Completo**
+**Status:** 🟢 **50% Completo**
 
 ## ✅ Atualizações Recentes
 

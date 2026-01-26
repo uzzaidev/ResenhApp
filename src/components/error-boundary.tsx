@@ -41,12 +41,35 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log para monitoramento (será integrado com Sentry no Sprint 7)
-    console.error('[Error Boundary]', {
-      error: error.message,
-      stack: error.stack,
-      componentStack: errorInfo.componentStack,
-    });
+    // Log para monitoramento com Sentry
+    if (typeof window !== 'undefined') {
+      // Importar Sentry apenas no client-side
+      import('@sentry/nextjs').then((Sentry) => {
+        Sentry.captureException(error, {
+          contexts: {
+            react: {
+              componentStack: errorInfo.componentStack,
+            },
+          },
+          tags: {
+            errorBoundary: true,
+          },
+        });
+      }).catch(() => {
+        // Se Sentry não estiver disponível, apenas logar
+        console.error('[Error Boundary]', {
+          error: error.message,
+          stack: error.stack,
+          componentStack: errorInfo.componentStack,
+        });
+      });
+    } else {
+      console.error('[Error Boundary]', {
+        error: error.message,
+        stack: error.stack,
+        componentStack: errorInfo.componentStack,
+      });
+    }
 
     this.setState({
       error,

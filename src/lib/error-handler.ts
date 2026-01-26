@@ -245,13 +245,44 @@ export function handleError(
     categorized.action = action;
   }
 
-  // Log para monitoramento (será integrado com Sentry no Sprint 7)
-  if (process.env.NODE_ENV === 'development') {
-    console.error('[Error Handler]', {
-      category: categorized.category,
-      error: error instanceof Error ? error.message : String(error),
-      context,
-    });
+  // Log para monitoramento com Sentry
+  if (error instanceof Error) {
+    // Importar Sentry dinamicamente (evita problemas de SSR)
+    if (typeof window !== 'undefined') {
+      import('@sentry/nextjs').then((Sentry) => {
+        Sentry.captureException(error, {
+          tags: {
+            errorCategory: categorized.category,
+          },
+          extra: {
+            context,
+            title: categorized.title,
+            description: categorized.description,
+          },
+        });
+      }).catch(() => {
+        // Se Sentry não estiver disponível, apenas logar
+        if (process.env.NODE_ENV === 'development') {
+          console.error('[Error Handler]', {
+            category: categorized.category,
+            error: error.message,
+            context,
+          });
+        }
+      });
+    } else {
+      // Server-side: usar logger
+      const logger = require('./logger').default;
+      logger.error(
+        {
+          category: categorized.category,
+          error: error.message,
+          stack: error.stack,
+          context,
+        },
+        'Error handled'
+      );
+    }
   }
 
   return categorized;
