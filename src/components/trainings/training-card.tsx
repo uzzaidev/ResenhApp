@@ -69,6 +69,7 @@ export function TrainingCard({
   expanded = false,
   className,
 }: TrainingCardProps) {
+  // Adicionar data-testid para testes E2E
   const confirmationPercentage =
     training.maxPlayers > 0
       ? (training.confirmedCount / training.maxPlayers) * 100

@@ -132,6 +132,7 @@ export function PixPaymentCard({
           <div className="flex flex-col items-center space-y-4">
             <div className="p-4 bg-white rounded-lg border-2 border-dashed border-gray-300">
               <img
+                data-testid="pix-qr-code"
                 src={qrImageUrl}
                 alt="QR Code Pix"
                 className="w-64 h-64"
@@ -161,7 +162,10 @@ export function PixPaymentCard({
           <div className="space-y-2">
             <label className="text-sm font-medium">Código Pix (Copia e Cola)</label>
             <div className="flex gap-2">
-              <div className="flex-1 p-3 bg-muted rounded-md font-mono text-xs break-all">
+              <div 
+                data-testid="pix-payload"
+                className="flex-1 p-3 bg-muted rounded-md font-mono text-xs break-all"
+              >
                 {pixPayload}
               </div>
               <Button

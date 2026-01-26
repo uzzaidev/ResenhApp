@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { login } from './helpers/auth';
 
 /**
  * Teste E2E: Fluxo de Pagamento (Pix)
@@ -15,6 +16,10 @@ import { test, expect } from '@playwright/test';
  */
 
 test.describe('Payment Flow', () => {
+  test.beforeEach(async ({ page }) => {
+    // Fazer login antes de cada teste
+    await login(page);
+  });
   test('deve visualizar QR Code Pix de uma cobrança', async ({ page }) => {
     // 1. Ir para financeiro
     await page.goto('/financeiro');

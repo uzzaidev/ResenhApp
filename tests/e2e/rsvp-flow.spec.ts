@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+import { login } from './helpers/auth';
+import { createTestTraining, cleanupTestData } from './helpers/data';
 
 /**
  * Teste E2E: Fluxo RSVP Completo
@@ -15,19 +17,11 @@ import { test, expect } from '@playwright/test';
 
 test.describe('RSVP Flow', () => {
   test.beforeEach(async ({ page }) => {
-    // TODO: Configurar autenticação de teste
-    // Por enquanto, assumimos que o usuário já está logado
-    // ou precisamos criar um helper de autenticação
+    // Fazer login antes de cada teste
+    await login(page);
   });
 
   test('deve confirmar presença e gerar charge automaticamente', async ({ page }) => {
-    // 1. Login (se necessário)
-    // await page.goto('/auth/signin');
-    // await page.fill('[name="email"]', 'test@example.com');
-    // await page.fill('[name="password"]', 'password');
-    // await page.click('button[type="submit"]');
-    // await expect(page).toHaveURL('/dashboard');
-
     // 2. Ir para treinos
     await page.goto('/treinos');
     await expect(page.locator('h1')).toContainText('Treinos');
@@ -45,7 +39,7 @@ test.describe('RSVP Flow', () => {
     await trainingCard.click();
 
     // 5. Verificar se há botão de confirmar presença
-    const confirmButton = page.locator('button:has-text("Confirmar Presença")');
+    const confirmButton = page.locator('[data-testid="confirm-presence-button"]');
     await expect(confirmButton).toBeVisible();
 
     // 6. Confirmar presença

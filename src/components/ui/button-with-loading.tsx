@@ -42,6 +42,7 @@ export function ButtonWithLoading({
   onStatusChange,
   ...props
 }: ButtonWithLoadingProps) {
+  // data-testid será passado via ...props para o Button
   // Determinar texto baseado no status
   const getText = () => {
     switch (status) {

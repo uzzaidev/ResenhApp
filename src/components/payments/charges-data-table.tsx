@@ -229,7 +229,11 @@ export function ChargesDataTable({
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
+              <Button 
+                variant="ghost" 
+                className="h-8 w-8 p-0"
+                data-testid="charge-actions"
+              >
                 <span className="sr-only">Abrir menu</span>
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
@@ -240,6 +244,7 @@ export function ChargesDataTable({
               {charge.status === "pending" && (
                 <>
                   <DropdownMenuItem 
+                    data-testid="mark-as-paid-action"
                     onClick={() => onMarkAsPaid(charge.id)}
                     disabled={loadingCharges[charge.id] !== undefined}
                   >
@@ -399,10 +404,11 @@ export function ChargesDataTable({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+              {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
+                  data-testid="charge-item"
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
