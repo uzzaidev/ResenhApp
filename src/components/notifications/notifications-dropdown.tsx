@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { Bell, Check, Calendar, DollarSign, Trophy, Users } from 'lucide-react';
+import { Bell, Calendar, DollarSign, Trophy, Users, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -10,90 +9,69 @@ import {
 } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { useNotifications, type Notification } from '@/hooks/use-notifications';
+import { useRouter } from 'next/navigation';
+import { formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
-interface Notification {
-  id: string;
-  type: 'training' | 'payment' | 'game' | 'general';
-  title: string;
-  message: string;
-  time: string;
-  read: boolean;
-}
-
-// Mock notifications - será substituído por dados reais
-const mockNotifications: Notification[] = [
-  {
-    id: '1',
-    type: 'training',
-    title: 'Novo Treino',
-    message: 'Treino de Futsal marcado para Terça-feira, 20:00',
-    time: 'há 2 horas',
-    read: false,
-  },
-  {
-    id: '2',
-    type: 'payment',
-    title: 'Pagamento Pendente',
-    message: 'Você tem R$ 10,00 pendente do treino de 15/01',
-    time: 'há 5 horas',
-    read: false,
-  },
-  {
-    id: '3',
-    type: 'game',
-    title: 'Convocação',
-    message: 'Você foi convocado para o jogo contra UFRGS',
-    time: 'há 1 dia',
-    read: false,
-  },
-  {
-    id: '4',
-    type: 'general',
-    title: 'Nova Modalidade',
-    message: 'Basquete foi adicionado às modalidades ativas',
-    time: 'há 2 dias',
-    read: true,
-  },
-];
-
-const getNotificationIcon = (type: Notification['type']) => {
-  switch (type) {
-    case 'training':
-      return Calendar;
-    case 'payment':
-      return DollarSign;
-    case 'game':
-      return Trophy;
-    default:
-      return Users;
+const getNotificationIcon = (type: string) => {
+  // Mapear tipos do banco para ícones
+  if (type.includes('event') || type.includes('training') || type.includes('rsvp')) {
+    return Calendar;
   }
+  if (type.includes('payment') || type.includes('charge')) {
+    return DollarSign;
+  }
+  if (type.includes('game') || type.includes('team') || type.includes('achievement')) {
+    return Trophy;
+  }
+  return Users;
 };
 
-const getNotificationColor = (type: Notification['type']) => {
-  switch (type) {
-    case 'training':
-      return 'text-teal-500';
-    case 'payment':
-      return 'text-yellow-500';
-    case 'game':
-      return 'text-purple-500';
-    default:
-      return 'text-blue-500';
+const getNotificationColor = (type: string) => {
+  if (type.includes('event') || type.includes('training') || type.includes('rsvp')) {
+    return 'text-teal-500';
+  }
+  if (type.includes('payment') || type.includes('charge')) {
+    return 'text-yellow-500';
+  }
+  if (type.includes('game') || type.includes('team') || type.includes('achievement')) {
+    return 'text-purple-500';
+  }
+  return 'text-blue-500';
+};
+
+const formatNotificationTime = (createdAt: string) => {
+  try {
+    return formatDistanceToNow(new Date(createdAt), {
+      addSuffix: true,
+      locale: ptBR,
+    });
+  } catch {
+    return 'há pouco tempo';
   }
 };
 
 export function NotificationsDropdown() {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const router = useRouter();
+  const {
+    notifications,
+    unreadCount,
+    isLoading,
+    markAsRead,
+    markAllAsRead,
+  } = useNotifications(30000, true); // Polling a cada 30s
 
-  const markAsRead = (id: string) => {
-    setNotifications(prev =>
-      prev.map(n => (n.id === id ? { ...n, read: true } : n))
-    );
-  };
+  const handleNotificationClick = async (notification: Notification) => {
+    // Marcar como lida
+    if (!notification.is_read) {
+      await markAsRead(notification.id);
+    }
 
-  const markAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    // Navegar para action_url se existir
+    if (notification.action_url) {
+      router.push(notification.action_url);
+    }
   };
 
   return (
@@ -126,7 +104,12 @@ export function NotificationsDropdown() {
 
         {/* Notifications List */}
         <ScrollArea className="h-[400px]">
-          {notifications.length === 0 ? (
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+              <Loader2 className="h-8 w-8 animate-spin text-gray-600 mb-3" />
+              <p className="text-sm font-medium text-gray-400">Carregando notificações...</p>
+            </div>
+          ) : notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
               <Bell className="h-12 w-12 text-gray-600 mb-3" />
               <p className="text-sm font-medium text-gray-400">Nenhuma notificação</p>
@@ -141,10 +124,10 @@ export function NotificationsDropdown() {
                 return (
                   <button
                     key={notification.id}
-                    onClick={() => markAsRead(notification.id)}
+                    onClick={() => handleNotificationClick(notification)}
                     className={cn(
                       'w-full text-left p-4 hover:bg-gray-800/50 transition-colors',
-                      !notification.read && 'bg-gray-800/30'
+                      !notification.is_read && 'bg-gray-800/30'
                     )}
                   >
                     <div className="flex gap-3">
@@ -156,14 +139,16 @@ export function NotificationsDropdown() {
                           <p className="text-sm font-semibold truncate">
                             {notification.title}
                           </p>
-                          {!notification.read && (
+                          {!notification.is_read && (
                             <div className="h-2 w-2 rounded-full bg-teal-500 flex-shrink-0 ml-2" />
                           )}
                         </div>
                         <p className="text-xs text-gray-400 line-clamp-2 mb-1">
                           {notification.message}
                         </p>
-                        <p className="text-xs text-gray-500">{notification.time}</p>
+                        <p className="text-xs text-gray-500">
+                          {formatNotificationTime(notification.created_at)}
+                        </p>
                       </div>
                     </div>
                   </button>

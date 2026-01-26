@@ -289,22 +289,8 @@ export async function POST(
               );
             }
 
-            // Create notification (if notifications table exists)
-            try {
-              await sql`
-                INSERT INTO notifications (user_id, type, title, message, action_url)
-                VALUES (
-                  ${user.id},
-                  'charge_created',
-                  'Nova cobrança',
-                  ${`Você tem uma cobrança de R$ ${eventPricing.price} referente ao treino`},
-                  ${`/financeiro/charges/${charge.id}`}
-                )
-              `;
-            } catch (notifError) {
-              // Notifications table might not exist yet, log but don't fail
-              logger.warn({ error: notifError }, "Failed to create notification");
-            }
+            // Notificação será criada automaticamente pelo trigger notify_charge_created()
+            // Não precisamos criar manualmente aqui
 
             logger.info(
               { eventId, userId: user.id, chargeId: charge.id, amount: eventPricing.price },
