@@ -166,6 +166,27 @@ logger.error({ error, context }, 'Failed to generate Pix');
 
 ---
 
-**Status:** 🟢 **30% Completo**  
-**Próxima ação:** Adicionar data-testid e criar helper de autenticação
+**Status:** 🟢 **40% Completo**
+
+## ✅ Atualizações Recentes
+
+### 1.4 Adicionar data-testid ✅
+
+**Componentes Atualizados:**
+- ✅ `TrainingCard` - `data-testid="training-card"`
+- ✅ `EventRsvpForm` - `data-testid="confirm-presence-button"`
+- ✅ `ChargesDataTable` - `data-testid="charge-item"`, `data-testid="charge-actions"`, `data-testid="mark-as-paid-action"`
+- ✅ `PixPaymentCard` - `data-testid="pix-qr-code"`, `data-testid="pix-payload"`
+
+### 1.5 Criar Helpers de Teste ✅
+
+**Helpers Criados:**
+- ✅ `tests/e2e/helpers/auth.ts` - Login, logout, verificação de autenticação
+- ✅ `tests/e2e/helpers/data.ts` - Criação e limpeza de dados de teste
+
+**Testes Atualizados:**
+- ✅ `rsvp-flow.spec.ts` - Usa helpers e data-testid
+- ✅ `payment-flow.spec.ts` - Usa helpers e data-testid
+
+**Próxima ação:** Setup Sentry e Analytics
 

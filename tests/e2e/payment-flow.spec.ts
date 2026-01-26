@@ -82,7 +82,7 @@ test.describe('Payment Flow', () => {
     }
 
     // Clicar em "Marcar como Pago"
-    const markAsPaidButton = page.locator('button:has-text("Marcar como Pago")');
+    const markAsPaidButton = page.locator('[data-testid="mark-as-paid-action"]');
     await expect(markAsPaidButton).toBeVisible();
     await markAsPaidButton.click();
 

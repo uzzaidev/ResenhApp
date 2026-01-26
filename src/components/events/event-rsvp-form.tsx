@@ -234,6 +234,7 @@ export function EventRsvpForm({ eventId, currentAttendance, eventStatus }: Event
       {/* Botões de ação */}
       <div className="flex flex-col sm:flex-row gap-3 pt-4">
         <ButtonWithLoading
+          data-testid="confirm-presence-button"
           onClick={() => handleRsvp("yes")}
           disabled={isEventFinished || !preferredPosition}
           status={rsvpStatus}
