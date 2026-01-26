@@ -15,8 +15,10 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { ButtonWithLoading, ButtonStatus } from "@/components/ui/button-with-loading";
+import { FormField } from "@/components/ui/form-field";
 import { useErrorHandler } from "@/hooks/use-error-handler";
 import { DollarSign, ChevronDown, ChevronUp } from "lucide-react";
+import { z } from "zod";
 import {
   Collapsible,
   CollapsibleContent,
@@ -36,11 +38,34 @@ type EventFormProps = {
   };
 };
 
+// Schema de validação Zod
+const eventSchema = z.object({
+  startsAt: z.string().min(1, 'Data e hora são obrigatórias'),
+  maxPlayers: z.number().min(4, 'Mínimo de 4 jogadores').max(30, 'Máximo de 30 jogadores'),
+  maxGoalkeepers: z.number().min(0, 'Mínimo de 0 goleiros').max(4, 'Máximo de 4 goleiros'),
+  waitlistEnabled: z.boolean(),
+  hasCharge: z.boolean(),
+  price: z.string().optional(),
+  receiverProfileId: z.string().uuid().optional().nullable(),
+  autoChargeOnRsvp: z.boolean().optional(),
+}).refine((data) => {
+  // Se tem cobrança, preço deve ser fornecido e maior que 0
+  if (data.hasCharge) {
+    const price = parseFloat(data.price || '0');
+    return price > 0;
+  }
+  return true;
+}, {
+  message: 'Preço deve ser maior que zero quando há cobrança',
+  path: ['price'],
+});
+
 export function EventForm({ groupId, mode, eventId, initialData }: EventFormProps) {
   const router = useRouter();
   const { toast } = useToast();
   const { handleError } = useErrorHandler();
   const [submitStatus, setSubmitStatus] = useState<ButtonStatus>('idle');
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Format datetime for input (needs to be in local time for datetime-local input)
   const formatDateTimeLocal = (isoString?: string) => {
@@ -99,9 +124,44 @@ export function EventForm({ groupId, mode, eventId, initialData }: EventFormProp
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
     setSubmitStatus('loading');
 
     try {
+      // Validação com Zod
+      const validation = eventSchema.safeParse({
+        startsAt: formData.startsAt,
+        maxPlayers: formData.maxPlayers,
+        maxGoalkeepers: formData.maxGoalkeepers,
+        waitlistEnabled: formData.waitlistEnabled,
+        hasCharge: formData.hasCharge,
+        price: formData.price,
+        receiverProfileId: formData.receiverProfileId || null,
+        autoChargeOnRsvp: formData.autoChargeOnRsvp,
+      });
+
+      if (!validation.success) {
+        const fieldErrors: Record<string, string> = {};
+        validation.error.errors.forEach((err) => {
+          if (err.path[0]) {
+            fieldErrors[err.path[0].toString()] = err.message;
+          }
+        });
+        setErrors(fieldErrors);
+        setSubmitStatus('error');
+        
+        // Mostrar primeiro erro no toast
+        const firstError = validation.error.errors[0];
+        toast({
+          title: 'Dados inválidos',
+          description: firstError.message,
+          variant: 'destructive',
+        });
+        
+        setTimeout(() => setSubmitStatus('idle'), 2000);
+        return;
+      }
+
       const url = mode === "create" ? "/api/events" : `/api/events/${eventId}`;
       const method = mode === "create" ? "POST" : "PATCH";
 
@@ -143,7 +203,7 @@ export function EventForm({ groupId, mode, eventId, initialData }: EventFormProp
       }
 
       setSubmitStatus('success');
-
+      
       toast({
         title: mode === "create" ? "Evento criado!" : "Evento atualizado!",
         description: `O evento foi ${mode === "create" ? "criado" : "atualizado"} com sucesso.`,
@@ -184,55 +244,73 @@ export function EventForm({ groupId, mode, eventId, initialData }: EventFormProp
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="startsAt">Data e Hora *</Label>
+          <FormField
+            label="Data e Hora"
+            required
+            error={errors.startsAt}
+            hint="Data e hora do início do treino"
+          >
             <Input
               id="startsAt"
               type="datetime-local"
               value={formData.startsAt}
-              onChange={(e) =>
-                setFormData({ ...formData, startsAt: e.target.value })
-              }
+              onChange={(e) => {
+                setFormData({ ...formData, startsAt: e.target.value });
+                if (errors.startsAt) setErrors({ ...errors, startsAt: '' });
+              }}
               required
               disabled={submitStatus === 'loading'}
+              className={errors.startsAt ? 'border-destructive' : ''}
             />
-          </div>
+          </FormField>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="maxPlayers">Máximo de Jogadores *</Label>
+            <FormField
+              label="Máximo de Jogadores"
+              required
+              error={errors.maxPlayers}
+              hint="Entre 4 e 30 jogadores"
+            >
               <Input
                 id="maxPlayers"
                 type="number"
                 min="4"
                 max="30"
                 value={formData.maxPlayers}
-                onChange={(e) =>
-                  setFormData({ ...formData, maxPlayers: parseInt(e.target.value, 10) })
-                }
+                onChange={(e) => {
+                  setFormData({ ...formData, maxPlayers: parseInt(e.target.value, 10) });
+                  if (errors.maxPlayers) setErrors({ ...errors, maxPlayers: '' });
+                }}
                 required
                 disabled={submitStatus === 'loading'}
+                className={errors.maxPlayers ? 'border-destructive' : ''}
               />
-            </div>
+            </FormField>
 
-            <div className="space-y-2">
-              <Label htmlFor="maxGoalkeepers">Máximo de Goleiros *</Label>
+            <FormField
+              label="Máximo de Goleiros"
+              required
+              error={errors.maxGoalkeepers}
+              hint="Entre 0 e 4 goleiros"
+            >
               <Input
                 id="maxGoalkeepers"
                 type="number"
                 min="0"
                 max="4"
                 value={formData.maxGoalkeepers}
-                onChange={(e) =>
+                onChange={(e) => {
                   setFormData({
                     ...formData,
                     maxGoalkeepers: parseInt(e.target.value, 10),
-                  })
-                }
+                  });
+                  if (errors.maxGoalkeepers) setErrors({ ...errors, maxGoalkeepers: '' });
+                }}
                 required
                 disabled={submitStatus === 'loading'}
+                className={errors.maxGoalkeepers ? 'border-destructive' : ''}
               />
-            </div>
+            </FormField>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -289,8 +367,12 @@ export function EventForm({ groupId, mode, eventId, initialData }: EventFormProp
 
               {formData.hasCharge && (
                 <CollapsibleContent className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="price">Preço por atleta (R$) *</Label>
+                  <FormField
+                    label="Preço por atleta (R$)"
+                    required={formData.hasCharge}
+                    error={errors.price}
+                    hint="Valor que cada atleta pagará ao confirmar presença"
+                  >
                     <Input
                       id="price"
                       type="number"
@@ -298,16 +380,15 @@ export function EventForm({ groupId, mode, eventId, initialData }: EventFormProp
                       step="0.01"
                       placeholder="20.00"
                       value={formData.price}
-                      onChange={(e) =>
-                        setFormData({ ...formData, price: e.target.value })
-                      }
+                      onChange={(e) => {
+                        setFormData({ ...formData, price: e.target.value });
+                        if (errors.price) setErrors({ ...errors, price: '' });
+                      }}
                       required={formData.hasCharge}
                       disabled={submitStatus === 'loading'}
+                      className={errors.price ? 'border-destructive' : ''}
                     />
-                    <p className="text-xs text-muted-foreground">
-                      Valor que cada atleta pagará ao confirmar presença
-                    </p>
-                  </div>
+                  </FormField>
 
                   <div className="space-y-2">
                     <Label htmlFor="receiverProfileId">Quem recebe</Label>
