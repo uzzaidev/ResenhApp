@@ -129,11 +129,20 @@ logger.error({ error, context }, 'Failed to generate Pix');
 - [x] Testes unitários para `error-handler.ts` (12 testes)
 - [x] Ajustes nos testes baseados na implementação real
 
-### ⏳ Pendente (50%)
-- [ ] Setup Sentry
-- [ ] Setup Analytics (PostHog)
-- [ ] Performance monitoring
+### ✅ Concluído Recentemente (70%)
+- [x] Setup Sentry (client, server, edge configs)
+- [x] Integrar Sentry no ErrorBoundary
+- [x] Integrar Sentry no error-handler
+- [x] Criar lib/analytics.ts com helpers
+- [x] Integrar analytics no RSVP route
+- [x] Ajustar testes unitários
+
+### ⏳ Pendente (30%)
+- [ ] Integrar analytics em mais rotas (charges, payments, groups)
+- [ ] Configurar PostHog (opcional, pode usar console.log por enquanto)
+- [ ] Performance monitoring (Web Vitals)
 - [ ] Melhorar cobertura de testes
+- [ ] Documentação de uso do Sentry e Analytics
 
 ---
 
@@ -171,7 +180,7 @@ logger.error({ error, context }, 'Failed to generate Pix');
 
 ---
 
-**Status:** 🟢 **50% Completo**
+**Status:** 🟢 **70% Completo**
 
 ## ✅ Atualizações Recentes
 
