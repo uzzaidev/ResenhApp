@@ -45,7 +45,7 @@ export function RecentMatchesCard({ matches, groupId }: RecentMatchesCardProps) 
           {matches.map((match) => (
             <Link
               key={match.id}
-              href={`/groups/${groupId}/events/${match.id}`}
+              href={`/eventos/${match.id}`}
               className="block p-4 border rounded-lg hover:shadow-md hover:border-primary/50 transition-all cursor-pointer"
             >
               {/* Cabeçalho do jogo */}

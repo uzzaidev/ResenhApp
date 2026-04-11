@@ -94,3 +94,7 @@ SELECT
   'Não mexe com auth.users ou profiles' AS observacao;
 
 
+
+
+
+

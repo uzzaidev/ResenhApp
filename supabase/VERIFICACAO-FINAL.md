@@ -259,3 +259,7 @@ WHERE constraint_type = 'FOREIGN KEY' AND table_schema = 'public';
 **Status:** ✅ Pronto para verificação
 
 
+
+
+
+

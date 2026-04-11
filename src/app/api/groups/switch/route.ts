@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth } from "@/lib/auth-helpers";
+import { isUnauthorizedError, requireAuth } from "@/lib/auth-helpers";
 import { sql } from "@/db/client";
 import { cookies } from "next/headers";
 import logger from "@/lib/logger";
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       groupId,
     });
   } catch (error) {
-    if (error instanceof Error && error.message === "Não autenticado") {
+    if (isUnauthorizedError(error)) {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
     logger.error({ error }, "Error switching group");
@@ -61,5 +61,10 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+
+
+
+
 
 

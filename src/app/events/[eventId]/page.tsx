@@ -1,281 +1,119 @@
-import { getCurrentUser } from "@/lib/auth-helpers";
-import { sql } from "@/db/client";
-import { redirect } from "next/navigation";
-import { DashboardHeader } from "@/components/layout/dashboard-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { formatDate } from "@/lib/utils";
-import { Calendar, MapPin, Users, ArrowLeft } from "lucide-react";
-import { EventRsvpForm } from "@/components/events/event-rsvp-form";
-import { EventTabs } from "@/components/events/event-tabs";
-import { AdminPlayerManager } from "@/components/events/admin-player-manager";
 import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
+import { Calendar, MapPin, Users } from "lucide-react";
+import { auth } from "@/lib/auth";
+import { sql } from "@/db/client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-type RouteParams = {
+type EventPublicPageProps = {
   params: Promise<{ eventId: string }>;
 };
 
-type Player = {
+type EventPreview = {
   id: string;
-  name: string;
-  image: string | null;
-  role: string;
-  preferred_position: string | null;
-  secondary_position: string | null;
-  created_at: string;
-  removed_by_self_at: string | null;
-};
-
-type WaitlistPlayer = {
-  id: string;
-  name: string;
-  image: string | null;
-  role: string;
-  created_at: string;
-};
-
-type GroupMember = {
-  user_id: string;
-  user_name: string;
-  user_image: string | null;
-  is_confirmed: boolean;
-};
-
-type Team = {
-  id: string;
-  name: string;
-  seed: number;
-  is_winner: boolean | null;
-  members: Array<{
-    userId: string;
-    userName: string;
-    userImage: string | null;
-    position: string;
-    starter: boolean;
-  }> | null;
-};
-
-type UserAttendance = {
+  starts_at: string;
   status: string;
-  preferred_position: string | null;
-  secondary_position: string | null;
-} | null;
+  max_players: number | null;
+  group_name: string;
+  venue_name: string | null;
+  confirmed_count: number;
+};
 
-export default async function EventRsvpPage({ params }: RouteParams) {
-  const user = await getCurrentUser();
+function formatDate(dateISO: string) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "full",
+    timeStyle: "short",
+  }).format(new Date(dateISO));
+}
 
-  if (!user) {
-    redirect("/auth/signin");
-  }
-
+export default async function EventPublicPage({ params }: EventPublicPageProps) {
   const { eventId } = await params;
+  const session = await auth();
 
-  // Buscar informações do evento
-  const eventResult = await sql`
+  if (session?.user?.id) {
+    redirect(`/eventos/${eventId}?returnTo=${encodeURIComponent(`/events/${eventId}`)}`);
+  }
+
+  const result = await sql<EventPreview[]>`
     SELECT
-      e.*,
+      e.id,
+      e.starts_at,
+      e.status,
+      e.max_players,
       g.name as group_name,
-      g.id as group_id,
       v.name as venue_name,
-      v.address as venue_address,
-      (SELECT COUNT(*) FROM event_attendance WHERE event_id = e.id AND status = 'yes') as confirmed_count,
-      (SELECT COUNT(*) FROM event_attendance WHERE event_id = e.id AND status = 'waitlist') as waitlist_count
+      (
+        SELECT COUNT(*)
+        FROM event_attendance ea
+        WHERE ea.event_id = e.id
+          AND ea.status = 'yes'
+      )::INTEGER as confirmed_count
     FROM events e
-    INNER JOIN groups g ON e.group_id = g.id
-    LEFT JOIN venues v ON e.venue_id = v.id
-    WHERE e.id = ${eventId}
+    INNER JOIN groups g ON g.id = e.group_id
+    LEFT JOIN venues v ON v.id = e.venue_id
+    WHERE e.id = ${eventId}::UUID
+    LIMIT 1
   `;
 
-  if (!Array.isArray(eventResult) || eventResult.length === 0) {
-    redirect("/dashboard");
+  if (!result.length) {
+    notFound();
   }
 
-  const event = eventResult[0] as any;
-
-  // Verificar se o usuário é membro do grupo
-  const membershipResult = await sql`
-    SELECT role FROM group_members
-    WHERE group_id = ${event.group_id} AND user_id = ${user.id}
-  `;
-
-  if (!Array.isArray(membershipResult) || membershipResult.length === 0) {
-    redirect("/dashboard");
-  }
-
-  const membership = membershipResult[0] as any;
-  const isAdmin = membership.role === "admin";
-
-  // Buscar times e jogadores
-  const teams = await sql`
-    SELECT
-      t.id,
-      t.name,
-      t.seed,
-      t.is_winner,
-      json_agg(
-        json_build_object(
-          'userId', u.id,
-          'userName', u.name,
-          'userImage', u.image,
-          'position', tm.position,
-          'starter', tm.starter
-        ) ORDER BY tm.position DESC, tm.starter DESC
-      ) FILTER (WHERE u.id IS NOT NULL) as members
-    FROM teams t
-    LEFT JOIN team_members tm ON t.id = tm.team_id
-    LEFT JOIN users u ON tm.user_id = u.id
-    WHERE t.event_id = ${eventId}
-    GROUP BY t.id, t.name, t.seed, t.is_winner
-    ORDER BY t.seed ASC
-  ` as unknown as Team[];
-  
-  const hasTeams = Array.isArray(teams) && teams.length > 0;
-
-  // Buscar status atual do usuário neste evento
-  const userAttendanceResult = await sql`
-    SELECT status, preferred_position, secondary_position FROM event_attendance
-    WHERE event_id = ${eventId} AND user_id = ${user.id}
-  `;
-
-  const userAttendance: UserAttendance = Array.isArray(userAttendanceResult) && userAttendanceResult.length > 0
-    ? userAttendanceResult[0] as { status: string; preferred_position: string | null; secondary_position: string | null; }
-    : null;
-
-  // Buscar lista de confirmados
-  const confirmedPlayers = await sql`
-    SELECT
-      u.id,
-      u.name,
-      u.image,
-      ea.role,
-      ea.preferred_position,
-      ea.secondary_position,
-      ea.created_at,
-      ea.removed_by_self_at
-    FROM event_attendance ea
-    INNER JOIN users u ON ea.user_id = u.id
-    WHERE ea.event_id = ${eventId} AND ea.status = 'yes'
-    ORDER BY ea.created_at ASC
-  ` as unknown as Player[];
-
-  const waitlistPlayers = await sql`
-    SELECT
-      u.id,
-      u.name,
-      u.image,
-      ea.role,
-      ea.created_at
-    FROM event_attendance ea
-    INNER JOIN users u ON ea.user_id = u.id
-    WHERE ea.event_id = ${eventId} AND ea.status = 'waitlist'
-    ORDER BY ea.created_at ASC
-  ` as unknown as WaitlistPlayer[];
-
-  // Buscar membros do grupo para o admin gerenciar confirmações
-  const groupMembers: GroupMember[] = isAdmin ? await sql`
-    SELECT
-      u.id as user_id,
-      u.name as user_name,
-      u.image as user_image,
-      CASE WHEN ea.status = 'yes' THEN true ELSE false END as is_confirmed
-    FROM group_members gm
-    INNER JOIN users u ON gm.user_id = u.id
-    LEFT JOIN event_attendance ea ON ea.user_id = u.id AND ea.event_id = ${eventId}
-    WHERE gm.group_id = ${event.group_id}
-    ORDER BY u.name ASC
-  ` as unknown as GroupMember[] : [];
+  const event = result[0];
+  const callbackUrl = `/events/${eventId}`;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-background to-green-50/30 dark:from-green-950/20 dark:via-background dark:to-green-950/10">
-      <DashboardHeader userName={user.name || user.email} />
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Botão voltar */}
-        <div className="mb-6">
-          <Link href="/dashboard">
-            <Button variant="ghost" size="sm" className="gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Voltar para o Dashboard
-            </Button>
-          </Link>
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-950 px-4 py-12 text-white">
+      <div className="mx-auto max-w-2xl space-y-6">
+        <div className="space-y-2 text-center">
+          <p className="text-sm uppercase tracking-wider text-slate-300">Convite de Evento</p>
+          <h1 className="text-3xl font-bold">{event.group_name}</h1>
+          <p className="text-slate-300">
+            Veja os detalhes do evento e entre no app para confirmar presenca.
+          </p>
         </div>
 
-        {/* Cabeçalho do evento */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-            <Calendar className="h-4 w-4" />
-            {formatDate(event.starts_at)}
-          </div>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-            <div>
-              <h1 className="text-3xl font-bold mb-1">{event.group_name}</h1>
-              {event.venue_name && (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <MapPin className="h-4 w-4" />
-                  <span>{event.venue_name}</span>
-                </div>
-              )}
+        <Card className="border-slate-700 bg-slate-900/80 text-white">
+          <CardHeader>
+            <CardTitle className="text-2xl">Evento agendado</CardTitle>
+            <CardDescription className="text-slate-300">
+              Status atual: <span className="font-medium capitalize text-white">{event.status}</span>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-3 text-sm text-slate-200">
+              <Calendar className="h-4 w-4 text-emerald-400" />
+              <span>{formatDate(event.starts_at)}</span>
             </div>
-            <Badge
-              variant={
-                event.status === "finished"
-                  ? "default"
-                  : event.status === "live"
-                  ? "destructive"
-                  : "secondary"
-              }
-              className="w-fit"
-            >
-              {event.status === "finished"
-                ? "Finalizado"
-                : event.status === "live"
-                ? "Ao vivo"
-                : "Agendado"}
-            </Badge>
-          </div>
 
-          {/* Barra de progresso discreta */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Users className="h-4 w-4" />
-              <span className="font-medium">
-                {event.confirmed_count}/{event.max_players}
+            <div className="flex items-center gap-3 text-sm text-slate-200">
+              <MapPin className="h-4 w-4 text-emerald-400" />
+              <span>{event.venue_name || "Local a definir"}</span>
+            </div>
+
+            <div className="flex items-center gap-3 text-sm text-slate-200">
+              <Users className="h-4 w-4 text-emerald-400" />
+              <span>
+                {event.confirmed_count} confirmado(s)
+                {typeof event.max_players === "number" ? ` de ${event.max_players} vagas` : ""}
               </span>
             </div>
-            <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden max-w-xs">
-              <div
-                className={`h-full transition-all ${
-                  event.confirmed_count >= event.max_players
-                    ? "bg-green-500"
-                    : event.confirmed_count >= event.max_players * 0.7
-                    ? "bg-yellow-500"
-                    : "bg-blue-500"
-                }`}
-                style={{
-                  width: `${Math.min(
-                    (event.confirmed_count / event.max_players) * 100,
-                    100
-                  )}%`,
-                }}
-              />
-            </div>
-          </div>
-        </div>
 
-        {/* Sistema de Abas */}
-        <EventTabs
-          eventId={eventId}
-          groupId={event.group_id}
-          eventStatus={event.status}
-          isAdmin={isAdmin}
-          confirmedPlayers={confirmedPlayers}
-          waitlistPlayers={waitlistPlayers}
-          teams={teams}
-          maxPlayers={event.max_players}
-          hasTeams={hasTeams}
-          userAttendance={userAttendance}
-          groupMembers={groupMembers}
-        />
+            <div className="grid gap-3 pt-2 sm:grid-cols-2">
+              <Button asChild className="w-full">
+                <Link href={`/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`}>
+                  Entrar para participar
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full border-slate-500 text-white hover:bg-slate-800">
+                <Link href={`/auth/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`}>
+                  Criar conta
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

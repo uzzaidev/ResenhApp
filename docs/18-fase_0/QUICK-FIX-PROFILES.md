@@ -55,3 +55,7 @@ Após aplicar a migration de profiles, a Migration 2 (`athlete_modalities`) deve
 **Status:** ⏳ Aguardando aplicação da migration de profiles
 
 
+
+
+
+

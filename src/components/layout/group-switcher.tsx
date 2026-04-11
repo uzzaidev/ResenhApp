@@ -40,7 +40,7 @@ export function GroupSwitcher() {
   if (groups.length === 0) {
     return (
       <Button variant="outline" size="sm" asChild>
-        <Link href="/groups/new">
+        <Link href="/grupos/new">
           <Plus className="h-4 w-4 mr-2" />
           Criar Grupo
         </Link>
@@ -94,7 +94,7 @@ export function GroupSwitcher() {
 
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/groups/new" className="flex items-center gap-2">
+          <Link href="/grupos/new" className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
             Criar Novo Grupo
           </Link>
@@ -103,5 +103,9 @@ export function GroupSwitcher() {
     </DropdownMenu>
   );
 }
+
+
+
+
 
 

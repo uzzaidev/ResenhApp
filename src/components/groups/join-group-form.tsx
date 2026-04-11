@@ -47,7 +47,7 @@ export function JoinGroupForm() {
       });
 
       // Redirect to the group page
-      router.push(`/groups/${data.group.id}`);
+      router.push(`/grupos/${data.group.id}`);
     } catch (error) {
       toast({
         title: "Erro ao entrar no grupo",

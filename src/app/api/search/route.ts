@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
         END as title,
         COALESCE(v.name, 'Local não definido') as subtitle,
         NULL as icon_url,
-        '/events/' || e.id::text as url
+        '/eventos/' || e.id::text as url
       FROM events e
       LEFT JOIN venues v ON e.venue_id = v.id
       WHERE e.group_id = ${group_id}::BIGINT
@@ -165,4 +165,3 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-

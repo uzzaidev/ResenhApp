@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,7 +26,7 @@ export function UpcomingEventsCard({ events }: UpcomingEventsCardProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Próximas Peladas</CardTitle>
+        <CardTitle>Proximos Eventos</CardTitle>
         <CardDescription>
           {events.length} evento{events.length !== 1 ? "s" : ""} agendado
           {events.length !== 1 ? "s" : ""}
@@ -35,14 +35,14 @@ export function UpcomingEventsCard({ events }: UpcomingEventsCardProps) {
       <CardContent>
         {events.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            <p>Nenhuma pelada agendada no momento.</p>
+            <p>Nenhum evento agendado no momento.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {events.map((event: Event) => (
               <Link
                 key={event.id}
-                href={`/events/${event.id}`}
+                href={`/eventos/${event.id}?returnTo=/dashboard`}
                 className="block p-4 border rounded-lg hover:bg-accent hover:shadow-md transition-all"
               >
                 <div className="space-y-2">
@@ -126,3 +126,4 @@ export function UpcomingEventsCard({ events }: UpcomingEventsCardProps) {
     </Card>
   );
 }
+

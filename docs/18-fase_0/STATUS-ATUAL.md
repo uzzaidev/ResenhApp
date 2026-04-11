@@ -87,3 +87,7 @@
 **Próxima ação:** Aplicar Migration 1 no Supabase
 
 
+
+
+
+

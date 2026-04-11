@@ -14,9 +14,10 @@ export const createChargeSchema = z.object({
 
 // Schema para atualizar status de cobrança
 export const updateChargeStatusSchema = z.object({
-  status: z.enum(["pending", "paid", "canceled"], {
+  status: z.enum(["pending", "paid", "cancelled", "canceled", "self_reported", "denied"], {
     errorMap: () => ({ message: "Status inválido" }),
   }),
+  denialReason: z.string().trim().min(3, "Motivo muito curto").max(300).optional(),
 });
 
 export type CreateChargeInput = z.infer<typeof createChargeSchema>;

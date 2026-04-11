@@ -32,7 +32,7 @@ export function GroupsCard({ groups }: GroupsCardProps) {
           <div className="text-center py-8 text-muted-foreground">
             <p className="mb-4">Você ainda não faz parte de nenhum grupo.</p>
             <Button asChild variant="outline">
-              <Link href="/groups/new">Criar seu primeiro grupo</Link>
+              <Link href="/grupos/new">Criar seu primeiro grupo</Link>
             </Button>
           </div>
         ) : (
@@ -40,7 +40,7 @@ export function GroupsCard({ groups }: GroupsCardProps) {
             {groups.map((group: Group) => (
               <Link
                 key={group.id}
-                href={`/groups/${group.id}`}
+                href={`/grupos/${group.id}`}
                 className="block p-4 border rounded-lg hover:bg-accent hover:shadow-md transition-all"
               >
                 <div className="flex items-start justify-between gap-3">

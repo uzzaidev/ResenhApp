@@ -47,6 +47,25 @@ export interface AthleteModality {
   };
 }
 
+function normalizePositions(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === "string");
+  }
+
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed)
+        ? parsed.filter((item): item is string => typeof item === "string")
+        : [];
+    } catch {
+      return [];
+    }
+  }
+
+  return [];
+}
+
 /**
  * Obter modalidades do grupo com estatísticas
  */
@@ -77,6 +96,7 @@ export async function getGroupModalities(
 
   return modalities.map((m: any) => ({
     ...m,
+    positions: normalizePositions(m.positions),
     athletesCount: Number(m.athletesCount) || 0,
   })) as ModalityWithStats[];
 }
@@ -115,6 +135,7 @@ export async function getModalityById(
   const modality = result[0] as any;
   return {
     ...modality,
+    positions: normalizePositions(modality.positions),
     athletesCount: Number(modality.athletesCount) || 0,
   } as ModalityWithStats;
 }
@@ -130,19 +151,27 @@ export async function getModalityAthletes(
       am.id,
       am.user_id as "userId",
       am.modality_id as "modalityId",
-      am.rating,
-      am.positions,
+      am.base_rating as rating,
+      CASE
+        WHEN am.preferred_position IS NOT NULL AND am.secondary_position IS NOT NULL
+          THEN ARRAY[am.preferred_position, am.secondary_position]
+        WHEN am.preferred_position IS NOT NULL
+          THEN ARRAY[am.preferred_position]
+        WHEN am.secondary_position IS NOT NULL
+          THEN ARRAY[am.secondary_position]
+        ELSE ARRAY[]::TEXT[]
+      END as positions,
       am.is_active as "isActive",
       am.created_at as "createdAt",
-      p.id as "athlete.id",
-      p.name as "athlete.name",
-      p.email as "athlete.email",
-      p.avatar_url as "athlete.avatarUrl"
+      u.id as "athlete.id",
+      COALESCE(u.name, 'Atleta') as "athlete.name",
+      u.email as "athlete.email",
+      u.image as "athlete.avatarUrl"
     FROM athlete_modalities am
-    INNER JOIN profiles p ON am.user_id = p.id
+    INNER JOIN users u ON am.user_id = u.id
     WHERE am.modality_id = ${modalityId}
       AND am.is_active = true
-    ORDER BY am.rating DESC NULLS LAST, p.name
+    ORDER BY am.base_rating DESC NULLS LAST, COALESCE(u.name, 'Atleta')
   `;
 
   return athletes.map((row: any) => ({
@@ -179,7 +208,7 @@ export async function getAvailablePositions(
     return [];
   }
 
-  return result[0].positions || [];
+  return normalizePositions(result[0].positions);
 }
 
 /**
@@ -197,8 +226,16 @@ export async function getAthleteModalities(
         am.id,
         am.user_id as "userId",
         am.modality_id as "modalityId",
-        am.rating,
-        am.positions,
+        am.base_rating as rating,
+        CASE
+          WHEN am.preferred_position IS NOT NULL AND am.secondary_position IS NOT NULL
+            THEN ARRAY[am.preferred_position, am.secondary_position]
+          WHEN am.preferred_position IS NOT NULL
+            THEN ARRAY[am.preferred_position]
+          WHEN am.secondary_position IS NOT NULL
+            THEN ARRAY[am.secondary_position]
+          ELSE ARRAY[]::TEXT[]
+        END as positions,
         am.is_active as "isActive",
         am.created_at as "createdAt",
         sm.id as "modality.id",
@@ -219,8 +256,16 @@ export async function getAthleteModalities(
         am.id,
         am.user_id as "userId",
         am.modality_id as "modalityId",
-        am.rating,
-        am.positions,
+        am.base_rating as rating,
+        CASE
+          WHEN am.preferred_position IS NOT NULL AND am.secondary_position IS NOT NULL
+            THEN ARRAY[am.preferred_position, am.secondary_position]
+          WHEN am.preferred_position IS NOT NULL
+            THEN ARRAY[am.preferred_position]
+          WHEN am.secondary_position IS NOT NULL
+            THEN ARRAY[am.secondary_position]
+          ELSE ARRAY[]::TEXT[]
+        END as positions,
         am.is_active as "isActive",
         am.created_at as "createdAt",
         sm.id as "modality.id",

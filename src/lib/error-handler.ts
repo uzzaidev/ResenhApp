@@ -175,8 +175,8 @@ export function createErrorAction(
     case 'EVENT_FULL':
       if (context?.eventId && context?.router) {
         return {
-          label: 'Ver lista de espera',
-          onClick: () => context.router.push(`/treinos/${context.eventId}/waitlist`),
+          label: 'Abrir evento',
+          onClick: () => context.router.push(`/eventos/${context.eventId}`),
         };
       }
       break;
@@ -287,4 +287,3 @@ export function handleError(
 
   return categorized;
 }
-

@@ -64,3 +64,7 @@ COMMENT ON COLUMN events.price IS 'Price per athlete for this event (null if fre
 COMMENT ON COLUMN events.receiver_profile_id IS 'Who receives the payment (receiver profile)';
 COMMENT ON COLUMN events.auto_charge_on_rsvp IS 'Automatically create charge when athlete confirms RSVP';
 
+
+
+
+

@@ -479,3 +479,7 @@ src/app/globals.css              # Estilos globais
 **Próxima revisão:** Após cada sprint
 
 
+
+
+
+

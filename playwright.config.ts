@@ -7,6 +7,9 @@ import { defineConfig, devices } from '@playwright/test';
  * Sprint 7: Testes E2E + Observabilidade
  */
 
+const testPort = Number(process.env.PLAYWRIGHT_TEST_PORT || 3100);
+const baseURL = process.env.PLAYWRIGHT_TEST_BASE_URL || `http://localhost:${testPort}`;
+
 export default defineConfig({
   testDir: './tests/e2e',
   
@@ -28,7 +31,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3000',
+    baseURL,
     
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
@@ -57,10 +60,15 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'pnpm run dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
+    command: `pnpm exec next dev --webpack --port ${testPort}`,
+    url: baseURL,
+    reuseExistingServer: false,
     timeout: 120 * 1000,
+    env: {
+      ...process.env,
+      NEXTAUTH_URL: baseURL,
+      AUTH_URL: baseURL,
+    },
   },
 });
 

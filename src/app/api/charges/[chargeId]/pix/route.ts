@@ -5,11 +5,33 @@ import logger from "@/lib/logger";
 
 type Params = Promise<{ chargeId: string }>;
 
+function parseChargeId(chargeId: string): bigint | null {
+  try {
+    const parsed = BigInt(chargeId);
+    return parsed > BigInt(0) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function buildPixResponse(result: Awaited<ReturnType<typeof generatePixForCharge>>) {
+  return {
+    success: true,
+    pixKey: result.pixKey,
+    pixKeyRaw: result.pixKeyRaw,
+    pixType: result.pixType,
+    receiverName: result.receiverName,
+    bankName: result.bankName,
+    instructions: result.instructions,
+    // Legacy keys kept for compatibility.
+    payload: result.payload,
+    qrImage: result.qrImage,
+  };
+}
+
 /**
  * POST /api/charges/:chargeId/pix
- * Generate or regenerate Pix QR Code for a charge
- * 
- * Sprint 3: Pix QR Code + ReceiverProfiles
+ * Loads static Pix key details for a charge.
  */
 export async function POST(
   request: NextRequest,
@@ -18,43 +40,32 @@ export async function POST(
   try {
     const { chargeId } = await params;
     const user = await requireAuth();
+    const chargeIdNum = parseChargeId(chargeId);
 
-    // Validate chargeId is a valid number
-    const chargeIdNum = BigInt(chargeId);
-    if (!chargeIdNum || chargeIdNum <= 0) {
+    if (!chargeIdNum) {
       return NextResponse.json(
         { error: "ID de cobrança inválido" },
         { status: 400 }
       );
     }
 
-    // Generate Pix QR Code
     const result = await generatePixForCharge(chargeIdNum);
-
     if (!result.success) {
       return NextResponse.json(
-        { error: result.error || "Erro ao gerar Pix QR Code" },
+        { error: result.error || "Erro ao carregar dados Pix" },
         { status: 400 }
       );
     }
 
-    logger.info(
-      { chargeId, userId: user.id },
-      "Pix QR Code generated/regenerated"
-    );
-
-    return NextResponse.json({
-      success: true,
-      payload: result.payload,
-      qrImage: result.qrImage,
-    });
+    logger.info({ chargeId, userId: user.id }, "Pix static key loaded");
+    return NextResponse.json(buildPixResponse(result));
   } catch (error) {
     if (error instanceof Error && error.message === "Não autenticado") {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
-    logger.error(error, "Error generating Pix QR Code");
+    logger.error(error, "Error loading Pix data");
     return NextResponse.json(
-      { error: "Erro ao gerar Pix QR Code" },
+      { error: "Erro ao carregar dados Pix" },
       { status: 500 }
     );
   }
@@ -62,9 +73,7 @@ export async function POST(
 
 /**
  * GET /api/charges/:chargeId/pix
- * Get existing Pix QR Code for a charge
- * 
- * Sprint 3: Pix QR Code + ReceiverProfiles
+ * Gets static Pix key details for a charge.
  */
 export async function GET(
   request: NextRequest,
@@ -73,40 +82,35 @@ export async function GET(
   try {
     const { chargeId } = await params;
     await requireAuth();
+    const chargeIdNum = parseChargeId(chargeId);
 
-    // Validate chargeId
-    const chargeIdNum = BigInt(chargeId);
-    if (!chargeIdNum || chargeIdNum <= 0) {
+    if (!chargeIdNum) {
       return NextResponse.json(
         { error: "ID de cobrança inválido" },
         { status: 400 }
       );
     }
 
-    // Generate Pix (will return existing if already generated)
     const result = await generatePixForCharge(chargeIdNum);
-
     if (!result.success) {
       return NextResponse.json(
-        { error: result.error || "Pix QR Code não disponível" },
+        { error: result.error || "Dados Pix não disponíveis" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      payload: result.payload,
-      qrImage: result.qrImage,
-    });
+    return NextResponse.json(buildPixResponse(result));
   } catch (error) {
     if (error instanceof Error && error.message === "Não autenticado") {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
-    logger.error(error, "Error fetching Pix QR Code");
+    logger.error(error, "Error fetching Pix data");
     return NextResponse.json(
-      { error: "Erro ao buscar Pix QR Code" },
+      { error: "Erro ao buscar dados Pix" },
       { status: 500 }
     );
   }
 }
+
+
 

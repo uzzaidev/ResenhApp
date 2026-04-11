@@ -222,3 +222,7 @@ const pixResult = await generatePixForCharge(chargeId);
 
 **Sprint 3 concluído com sucesso! 🎉**
 
+
+
+
+

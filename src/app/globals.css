@@ -1,5 +1,4 @@
-/* Importar fontes do Google Fonts - DEVE VIR ANTES DOS @tailwind */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600&family=Exo+2:wght@400;600&family=Fira+Code:wght@400;500&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600&family=Exo+2:wght@400;600&family=Fira+Code:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,46 +6,39 @@
 
 @layer base {
   :root {
-    /* UzzAI Design System - Cores Base */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 11%; /* #1C1C1C */
+    --background: 210 20% 98%;
+    --foreground: 0 0% 11%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 11%;
-    
-    /* Primary = Mint Green (#1ABC9C) */
-    --primary: 168 76% 42%;
-    --primary-foreground: 0 0% 11%;
-    
-    /* Secondary = Blue (#2E86AB) */
-    --secondary: 199 58% 42%;
-    --secondary-foreground: 0 0% 98%;
-    
-    /* Muted = Silver (#B0B0B0) */
-    --muted: 0 0% 69%;
-    --muted-foreground: 0 0% 40%;
-    
-    /* Accent = Mint Green (mesma que primary) */
-    --accent: 168 76% 42%;
-    --accent-foreground: 0 0% 11%;
-    
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 168 76% 42%; /* Mint Green */
-    --radius: 0.75rem;
-    
-    /* Charts com cores UzzAI */
-    --chart-1: 168 76% 42%; /* Mint */
-    --chart-2: 199 58% 42%; /* Blue */
-    --chart-3: 51 100% 50%; /* Gold */
-    --chart-4: 0 0% 69%; /* Silver */
-    --chart-5: 0 0% 11%; /* Black */
 
-    /* Legacy colors (manter compatibilidade) */
+    --primary: 168 76% 42%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 199 58% 42%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 210 18% 92%;
+    --muted-foreground: 215 10% 40%;
+
+    --accent: 168 76% 42%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 16% 85%;
+    --input: 210 16% 85%;
+    --ring: 168 76% 42%;
+    --radius: 0.9rem;
+
+    --chart-1: 168 76% 42%;
+    --chart-2: 199 58% 42%;
+    --chart-3: 51 100% 50%;
+    --chart-4: 0 0% 69%;
+    --chart-5: 0 0% 11%;
+
     --navy: 215 60% 16%;
     --navy-light: 215 50% 25%;
     --green-dark: 152 70% 22%;
@@ -54,50 +46,101 @@
   }
 
   .dark {
-    /* UzzAI Dark Mode - Estética Retrofuturista */
-    --background: 0 0% 11%; /* #1C1C1C */
+    --background: 0 0% 11%;
     --foreground: 0 0% 98%;
-    --card: 0 0% 15%;
+    --card: 0 0% 14%;
     --card-foreground: 0 0% 98%;
     --popover: 0 0% 11%;
     --popover-foreground: 0 0% 98%;
-    
-    /* Primary = Mint Green (#1ABC9C) */
+
     --primary: 168 76% 42%;
-    --primary-foreground: 0 0% 11%;
-    
-    /* Secondary = Blue (#2E86AB) */
+    --primary-foreground: 0 0% 100%;
+
     --secondary: 199 58% 42%;
-    --secondary-foreground: 0 0% 98%;
-    
-    /* Muted = Silver (#B0B0B0) */
-    --muted: 0 0% 25%;
-    --muted-foreground: 0 0% 69%;
-    
-    /* Accent = Mint Green */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 22%;
+    --muted-foreground: 0 0% 74%;
+
     --accent: 168 76% 42%;
-    --accent-foreground: 0 0% 11%;
-    
-    --destructive: 0 62.8% 30.6%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 40%;
     --destructive-foreground: 0 0% 98%;
-    
-    --border: 0 0% 25%;
-    --input: 0 0% 25%;
-    --ring: 168 76% 42%; /* Mint Green */
-    
-    /* Charts Dark Mode */
-    --chart-1: 168 76% 42%; /* Mint */
-    --chart-2: 199 58% 42%; /* Blue */
-    --chart-3: 51 100% 50%; /* Gold */
-    --chart-4: 0 0% 69%; /* Silver */
-    --chart-5: 0 0% 98%; /* White */
+
+    --border: 0 0% 24%;
+    --input: 0 0% 24%;
+    --ring: 168 76% 42%;
+
+    --chart-1: 168 76% 42%;
+    --chart-2: 199 58% 42%;
+    --chart-3: 51 100% 50%;
+    --chart-4: 0 0% 69%;
+    --chart-5: 0 0% 98%;
   }
 
-  /* Modo Direto - Layout otimizado para agilidade */
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  body {
+    @apply bg-background text-foreground font-inter;
+    background-image:
+      radial-gradient(circle at 15% 15%, rgba(26, 188, 156, 0.13) 0%, transparent 36%),
+      radial-gradient(circle at 85% 5%, rgba(46, 134, 171, 0.16) 0%, transparent 34%),
+      radial-gradient(circle at 50% 110%, rgba(255, 215, 0, 0.08) 0%, transparent 42%);
+    background-attachment: fixed;
+  }
+
+  .dark body {
+    background-image:
+      radial-gradient(circle at 12% 12%, rgba(26, 188, 156, 0.2) 0%, transparent 34%),
+      radial-gradient(circle at 88% 5%, rgba(46, 134, 171, 0.22) 0%, transparent 32%),
+      linear-gradient(140deg, #1c1c1c 0%, #14212a 60%, #1c1c1c 100%);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Poppins", sans-serif;
+    letter-spacing: -0.01em;
+  }
+
+  *:focus-visible {
+    outline: 2px solid #1abc9c;
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+}
+
+@layer components {
+  .brand-panel {
+    @apply rounded-2xl border border-uzzai-silver/20 bg-card/85 backdrop-blur-md;
+    box-shadow: 0 12px 36px rgba(26, 188, 156, 0.2);
+  }
+
+  .brand-gradient-text {
+    @apply bg-gradient-to-r from-uzzai-mint via-uzzai-blue to-uzzai-gold bg-clip-text text-transparent;
+  }
+
+  .brand-surface {
+    @apply border border-uzzai-blue/20 bg-gradient-to-br from-uzzai-black/90 via-uzzai-black to-uzzai-blue/40;
+  }
+}
+
+@layer base {
   .direct-mode {
-    /* Scrollbar customizada para modo direto */
     scrollbar-width: thin;
-    scrollbar-color: #1ABC9C #0f242a;
+    scrollbar-color: #1abc9c #0f242a;
   }
 
   .direct-mode::-webkit-scrollbar {
@@ -109,7 +152,7 @@
   }
 
   .direct-mode::-webkit-scrollbar-thumb {
-    background: #1ABC9C;
+    background: #1abc9c;
     border-radius: 4px;
   }
 
@@ -118,24 +161,11 @@
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
-
-/* Responsividade Global - Zoom e Telas Grandes */
 @layer utilities {
-  /* Previne overflow horizontal em qualquer zoom */
-  html, body {
-    overflow-x: hidden;
-    max-width: 100vw;
+  .shadow-brand {
+    box-shadow: 0 12px 36px rgba(26, 188, 156, 0.2);
   }
 
-  /* Melhor responsividade para containers */
   .container-responsive {
     width: 100%;
     max-width: 100vw;
@@ -145,15 +175,13 @@
     margin-right: auto;
   }
 
-  /* Botões responsivos que ficam sempre visíveis */
   .btn-responsive {
-    min-height: 44px; /* Tamanho mínimo para toque */
+    min-height: 44px;
     padding: 0.75rem 1rem;
     font-size: clamp(0.875rem, 2.5vw, 1rem);
     white-space: nowrap;
   }
 
-  /* Textos que se adaptam ao zoom */
   .text-responsive {
     font-size: clamp(0.875rem, 2.5vw, 1.125rem);
     line-height: 1.5;
@@ -169,14 +197,12 @@
     line-height: 1.4;
   }
 
-  /* Containers com scroll interno quando necessário */
   .scroll-container {
     max-height: 70vh;
     overflow-y: auto;
     overflow-x: hidden;
   }
 
-  /* Modal overlay melhorado */
   .modal-overlay {
     position: fixed;
     inset: 0;
@@ -185,17 +211,19 @@
     backdrop-filter: blur(4px);
   }
 
-  /* Animações suaves para melhor UX */
   .animate-fade-in {
     animation: fadeIn 0.2s ease-in-out;
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
-  /* Shimmer animation para skeletons (Sprint 6) */
   .animate-shimmer {
     animation: shimmer 2s infinite;
     background: linear-gradient(
@@ -216,7 +244,6 @@
     }
   }
 
-  /* Dark mode shimmer */
   .dark .animate-shimmer {
     background: linear-gradient(
       90deg,

@@ -6,9 +6,9 @@ import { z } from "zod";
 
 /**
  * POST /api/recurring-trainings
- * Create recurring training (requires 5 credits)
- * 
- * EXEMPLO DE INTEGRAÇÃO COM SISTEMA DE CRÉDITOS
+ * Create recurring training (requires 5 quotas)
+ *
+ * Exemplo de integracao com sistema de quota.
  */
 
 const createRecurringSchema = z.object({
@@ -27,31 +27,24 @@ const createRecurringSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  // Parse body once before passing to middleware
   let body: any;
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json(
-      { error: "Body inválido" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Body invalido" }, { status: 400 });
   }
 
-  // Wrapper automático: verifica auth, membership, créditos e consome
+  // Wrapper automatico: verifica auth, membership, quota e consome.
   return withCreditsCheck(
     request,
-    "recurring_training", // Feature type (5 créditos)
+    "recurring_training", // Feature type (5 quotas)
     async (user, groupId) => {
-      // Créditos já foram consumidos automaticamente!
-      // Agora implementar a lógica da feature
-
-      // Body já foi parseado antes do middleware
+      // Quota ja foi consumida automaticamente.
       const validation = createRecurringSchema.safeParse(body);
 
       if (!validation.success) {
         return NextResponse.json(
-          { error: "Dados inválidos", details: validation.error.flatten() },
+          { error: "Dados invalidos", details: validation.error.flatten() },
           { status: 400 }
         );
       }
@@ -59,7 +52,6 @@ export async function POST(request: NextRequest) {
       const data = validation.data;
 
       try {
-        // Create recurring training template
         const result = await sql`
           INSERT INTO events (
             group_id,
@@ -89,7 +81,6 @@ export async function POST(request: NextRequest) {
 
         const recurringEvent = result[0];
 
-        // Generate occurrences using SQL function
         await sql`
           SELECT generate_recurring_events(
             ${recurringEvent.id}::UUID,
@@ -100,33 +91,30 @@ export async function POST(request: NextRequest) {
 
         logger.info(
           { groupId, userId: user.id, recurringEventId: recurringEvent.id },
-          "Recurring training created (5 credits consumed)"
+          "Recurring training created (5 quotas consumed)"
         );
 
         return NextResponse.json({
           success: true,
           recurringEvent,
-          message: "Treino recorrente criado com sucesso (5 créditos consumidos)",
+          message: "Treino recorrente criado com sucesso (5 quotas consumidas)",
         });
       } catch (error) {
         logger.error({ error, groupId }, "Error creating recurring training");
-        return NextResponse.json(
-          { error: "Erro ao criar treino recorrente" },
-          { status: 500 }
-        );
+        return NextResponse.json({ error: "Erro ao criar treino recorrente" }, { status: 500 });
       }
     },
     {
-      autoConsume: true, // Consumir créditos automaticamente
+      autoConsume: true, // Consumir quota automaticamente
       requireAdmin: true, // Apenas admins podem criar treinos recorrentes
-      description: "Criação de treino recorrente",
+      description: "Criacao de treino recorrente",
     }
   );
 }
 
 /**
  * GET /api/recurring-trainings?group_id=xxx
- * List recurring trainings (no credits required)
+ * List recurring trainings (no quota required)
  */
 export async function GET(request: NextRequest) {
   try {
@@ -137,26 +125,18 @@ export async function GET(request: NextRequest) {
     const groupId = searchParams.get("group_id");
 
     if (!groupId) {
-      return NextResponse.json(
-        { error: "group_id é obrigatório" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "group_id e obrigatorio" }, { status: 400 });
     }
 
-    // Check membership
     const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
 
     if (!membershipQuery || membershipQuery.length === 0) {
-      return NextResponse.json(
-        { error: "Você não é membro deste grupo" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Voce nao e membro deste grupo" }, { status: 403 });
     }
 
-    // Get recurring trainings
     const recurringTrainings = await sql`
       SELECT
         id,
@@ -177,10 +157,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ recurringTrainings });
   } catch (error) {
     logger.error({ error }, "Error fetching recurring trainings");
-    return NextResponse.json(
-      { error: "Erro ao buscar treinos recorrentes" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Erro ao buscar treinos recorrentes" }, { status: 500 });
   }
 }
-

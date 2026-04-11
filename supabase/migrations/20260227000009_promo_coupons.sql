@@ -307,3 +307,7 @@ INSERT INTO promo_coupons (code, description, discount_type, discount_value, max
 COMMENT ON TABLE promo_coupons IS 'Sample coupons created for testing';
 
 
+
+
+
+

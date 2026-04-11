@@ -111,3 +111,7 @@ O planner do PostgreSQL ainda usará o índice `idx_checkin_qrcodes_expires_at` 
 **Status:** ✅ Pronto para aplicação
 
 
+
+
+
+

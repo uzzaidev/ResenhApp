@@ -31,15 +31,17 @@ export async function GET(
 
     // Get filter parameters
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get("status"); // pending, paid, canceled
+    const status = searchParams.get("status");
     const userId = searchParams.get("userId"); // filter by user
+    const rawStatus = status === "canceled" ? "cancelled" : status;
+    const validStatuses = ["pending", "paid", "cancelled", "self_reported", "denied"];
 
     // Build query with filters
     let charges;
     
     if (userId) {
       // Filter by both status (if provided) and userId
-      if (status && ["pending", "paid", "canceled"].includes(status)) {
+      if (rawStatus && validStatuses.includes(rawStatus)) {
         charges = await sql`
           SELECT
             c.id,
@@ -60,7 +62,7 @@ export async function GET(
           INNER JOIN users u ON c.user_id = u.id
           LEFT JOIN events e ON c.event_id = e.id
           LEFT JOIN groups g ON e.group_id = g.id
-          WHERE c.group_id = ${groupId} AND c.status = ${status} AND c.user_id = ${userId}
+          WHERE c.group_id = ${groupId} AND c.status = ${rawStatus} AND c.user_id = ${userId}
           ORDER BY
             CASE WHEN c.due_date IS NULL THEN 1 ELSE 0 END,
             c.due_date DESC,
@@ -94,7 +96,7 @@ export async function GET(
             c.created_at DESC
         `;
       }
-    } else if (status && ["pending", "paid", "canceled"].includes(status)) {
+    } else if (rawStatus && validStatuses.includes(rawStatus)) {
       // Filter by status only
       charges = await sql`
         SELECT
@@ -116,7 +118,7 @@ export async function GET(
         INNER JOIN users u ON c.user_id = u.id
         LEFT JOIN events e ON c.event_id = e.id
         LEFT JOIN groups g ON e.group_id = g.id
-        WHERE c.group_id = ${groupId} AND c.status = ${status}
+        WHERE c.group_id = ${groupId} AND c.status = ${rawStatus}
         ORDER BY
           CASE WHEN c.due_date IS NULL THEN 1 ELSE 0 END,
           c.due_date DESC,

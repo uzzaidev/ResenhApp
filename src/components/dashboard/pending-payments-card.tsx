@@ -23,10 +23,11 @@ export function PendingPaymentsCard({ userId }: { userId: string }) {
   const [charges, setCharges] = useState<PendingCharge[]>([]);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchPendingCharges = async () => {
       try {
         // Buscar contagem com timeout
-        const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
 
         const countRes = await fetch("/api/users/me/pending-charges-count", {
@@ -77,6 +78,10 @@ export function PendingPaymentsCard({ userId }: { userId: string }) {
           setCharges(allCharges.slice(0, 5));
         }
       } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+
         console.error("Error fetching pending charges:", error);
         // Garantir que para de carregar mesmo com erro
         setCount(0);
@@ -87,6 +92,10 @@ export function PendingPaymentsCard({ userId }: { userId: string }) {
     };
 
     fetchPendingCharges();
+
+    return () => {
+      controller.abort();
+    };
   }, [userId]);
 
   if (loading) {
@@ -184,7 +193,7 @@ export function PendingPaymentsCard({ userId }: { userId: string }) {
               ))}
             </div>
             <Button asChild variant="outline" className="w-full" size="sm">
-              <Link href={`/groups/${charges[0].group_id}/payments`}>
+              <Link href="/financeiro">
                 Ver Todos os Pagamentos
               </Link>
             </Button>

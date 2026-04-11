@@ -138,3 +138,7 @@ Comparei o script `scripts/validar-migrations-aplicadas.sql` com todas as 8 migr
 **Status:** ✅ Script completo e condizente com migrations
 
 
+
+
+
+

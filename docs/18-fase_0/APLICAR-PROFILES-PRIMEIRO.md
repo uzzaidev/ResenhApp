@@ -87,3 +87,7 @@ Se você não usa Supabase Auth e tem apenas a tabela `users`, preciso corrigir 
 **Status:** ⏳ Aguardando aplicação da migration de profiles
 
 
+
+
+
+

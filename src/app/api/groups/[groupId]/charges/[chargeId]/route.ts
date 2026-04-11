@@ -3,6 +3,9 @@ import { requireAuth } from "@/lib/auth-helpers";
 import { sql } from "@/db/client";
 import logger from "@/lib/logger";
 import { updateChargeStatusSchema } from "@/lib/validations-charges";
+import { earnCredits } from "@/lib/credit-earning";
+import { createInAppNotification } from "@/lib/notifications";
+import { normalizeChargeStatus, validateDeniedStatusReason } from "@/lib/charge-status";
 
 type Params = Promise<{ groupId: string; chargeId: string }>;
 
@@ -54,26 +57,71 @@ export async function PATCH(
       );
     }
 
-    const { status } = validation.data;
+    const normalizedStatus = normalizeChargeStatus(validation.data.status);
+    const denialReason = validation.data.denialReason?.trim();
 
-    // Update charge status and paid_at based on status
-    // Se status for "paid", definir paid_at. Se for outro status, limpar paid_at
-    const updatedChargeQuery = await sql`
-      UPDATE charges
-      SET 
-        status = ${status}, 
-        paid_at = CASE 
-          WHEN ${status} = 'paid' THEN NOW()
-          ELSE NULL
-        END,
-        updated_at = NOW()
-      WHERE id = ${chargeId}
-      RETURNING *
-    `;
-    const updatedCharge = updatedChargeQuery[0];
+    const denialValidation = validateDeniedStatusReason(normalizedStatus, denialReason);
+    if (!denialValidation.valid) {
+      return NextResponse.json(
+        { error: denialValidation.message || "Dados inválidos" },
+        { status: 400 }
+      );
+    }
+
+    let updatedCharge: any;
+    try {
+      const updatedChargeQuery = await sql`
+        UPDATE charges
+        SET
+          status = ${normalizedStatus},
+          paid_at = CASE
+            WHEN ${normalizedStatus} = 'paid' THEN NOW()
+            ELSE NULL
+          END,
+          self_reported_at = CASE
+            WHEN ${normalizedStatus} = 'self_reported' THEN COALESCE(self_reported_at, NOW())
+            ELSE self_reported_at
+          END,
+          admin_confirmed_at = CASE
+            WHEN ${normalizedStatus} IN ('paid', 'denied') THEN NOW()
+            ELSE admin_confirmed_at
+          END,
+          admin_confirmed_by = CASE
+            WHEN ${normalizedStatus} IN ('paid', 'denied') THEN ${user.id}::UUID
+            ELSE admin_confirmed_by
+          END,
+          admin_denial_reason = CASE
+            WHEN ${normalizedStatus} = 'denied' THEN ${denialReason || null}
+            ELSE NULL
+          END,
+          updated_at = NOW()
+        WHERE id = ${chargeId}
+        RETURNING *
+      `;
+      updatedCharge = updatedChargeQuery[0];
+    } catch (migrationError) {
+      logger.warn(
+        { migrationError, chargeId, status: normalizedStatus },
+        "Falling back to legacy charge status update"
+      );
+
+      const updatedChargeQuery = await sql`
+        UPDATE charges
+        SET
+          status = ${normalizedStatus},
+          paid_at = CASE
+            WHEN ${normalizedStatus} = 'paid' THEN NOW()
+            ELSE NULL
+          END,
+          updated_at = NOW()
+        WHERE id = ${chargeId}
+        RETURNING *
+      `;
+      updatedCharge = updatedChargeQuery[0];
+    }
 
     logger.info(
-      { groupId, chargeId, status, updatedBy: user.id },
+      { groupId, chargeId, status: normalizedStatus, updatedBy: user.id },
       "Charge status updated"
     );
 
@@ -83,13 +131,57 @@ export async function PATCH(
     `;
     const userInfo = userInfoQuery[0];
 
+    if (normalizedStatus === "paid" && updatedCharge?.user_id) {
+      const earning = await earnCredits(
+        sql,
+        updatedCharge.user_id,
+        "attend_event",
+        String(updatedCharge.event_id || updatedCharge.id)
+      );
+      if (earning.deferred || !earning.awarded) {
+        logger.info(
+          {
+            userId: updatedCharge.user_id,
+            chargeId,
+            deferred: earning.deferred,
+            reason: earning.reason,
+          },
+          "Attend-event credit not awarded on charge confirmation"
+        );
+      }
+
+      await createInAppNotification(sql, {
+        userId: updatedCharge.user_id,
+        type: "payment_received",
+        title: "Pagamento confirmado",
+        body: "Seu pagamento foi confirmado pelo admin do grupo.",
+        actionUrl: `/financeiro/charges/${chargeId}`,
+        relatedType: "charge",
+        relatedId: chargeId,
+      });
+    }
+
+    if (normalizedStatus === "denied" && updatedCharge?.user_id) {
+      await createInAppNotification(sql, {
+        userId: updatedCharge.user_id,
+        type: "payment_request",
+        title: "Pagamento negado",
+        body: denialReason
+          ? `Seu pagamento foi negado: ${denialReason}`
+          : "Seu pagamento foi negado pelo admin. Verifique os detalhes da cobrança.",
+        actionUrl: `/financeiro/charges/${chargeId}`,
+        relatedType: "charge",
+        relatedId: chargeId,
+      });
+    }
+
     return NextResponse.json({
       message: "Status atualizado com sucesso",
       charge: {
         ...updatedCharge,
-        user_id: userInfo.id,
-        user_name: userInfo.name,
-        user_image: userInfo.image,
+        user_id: userInfo?.id ?? updatedCharge.user_id ?? null,
+        user_name: userInfo?.name ?? null,
+        user_image: userInfo?.image ?? null,
       },
     });
   } catch (error) {

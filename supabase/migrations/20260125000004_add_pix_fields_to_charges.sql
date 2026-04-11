@@ -24,3 +24,7 @@ COMMENT ON COLUMN charges.pix_payload IS 'Pix EMV QR Code payload (BR Code forma
 COMMENT ON COLUMN charges.qr_image_url IS 'QR Code image URL or base64 data';
 COMMENT ON COLUMN charges.pix_generated_at IS 'Timestamp when Pix QR Code was generated';
 
+
+
+
+

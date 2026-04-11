@@ -1,8 +1,8 @@
-import { Page } from '@playwright/test';
+﻿import { Page } from '@playwright/test';
 
 /**
- * Helper de Autenticação para Testes E2E
- * 
+ * Helper de Autenticacao para Testes E2E
+ *
  * Facilita login/logout em testes
  * Sprint 7: Testes E2E + Observabilidade
  */
@@ -14,41 +14,60 @@ interface LoginCredentials {
 
 /**
  * Faz login no sistema
- * 
- * @param page - Instância do Playwright Page
- * @param credentials - Credenciais de login (opcional, usa env vars se não fornecido)
+ *
+ * @param page - Instancia do Playwright Page
+ * @param credentials - Credenciais de login (opcional, usa env vars se nao fornecido)
  */
 export async function login(
   page: Page,
   credentials?: LoginCredentials
 ): Promise<void> {
-  const email = credentials?.email || process.env.TEST_USER_EMAIL || 'test@example.com';
-  const password = credentials?.password || process.env.TEST_USER_PASSWORD || 'password123';
+  const email = credentials?.email ?? process.env.TEST_USER_EMAIL;
+  const password = credentials?.password ?? process.env.TEST_USER_PASSWORD;
+  if (!email || !password) {
+    throw new Error(
+      "E2E login requer TEST_USER_EMAIL e TEST_USER_PASSWORD (ou credenciais explicitas no teste)."
+    );
+  }
 
   await page.goto('/auth/signin');
-  
-  // Preencher formulário
-  await page.fill('[name="email"]', email);
-  await page.fill('[name="password"]', password);
-  
+
+  // Preencher formulario (compativel com markup atual e legado)
+  const emailInput = page.locator('#email, [name="email"]').first();
+  const passwordInput = page.locator('#password, [name="password"]').first();
+  await emailInput.fill(email);
+  await passwordInput.fill(password);
+
   // Submeter
-  await page.click('button[type="submit"]');
-  
+  const submitButton = page.locator('button[type="submit"], button:has-text("Entrar")').first();
+  await submitButton.click();
+
   // Aguardar redirecionamento
-  await page.waitForURL(/\/dashboard|\/groups/, { timeout: 10000 });
+  try {
+    await page.waitForURL(/\/dashboard|\/grupos|\/onboarding\/step\/1/, { timeout: 15000 });
+  } catch {
+    const errorContainer = page.locator(".text-red-600").first();
+    if (await errorContainer.isVisible()) {
+      const errorText = (await errorContainer.innerText()).trim();
+      throw new Error(`Falha de login no E2E: ${errorText}`);
+    }
+    throw new Error(
+      "Falha de login no E2E: sem redirecionamento apos submit. Verifique TEST_USER_EMAIL/TEST_USER_PASSWORD."
+    );
+  }
 }
 
 /**
  * Faz logout do sistema
- * 
- * @param page - Instância do Playwright Page
+ *
+ * @param page - Instancia do Playwright Page
  */
 export async function logout(page: Page): Promise<void> {
-  // Clicar no menu do usuário (assumindo que existe)
+  // Clicar no menu do usuario (assumindo que existe)
   const userMenu = page.locator('[data-testid="user-menu"]');
   if (await userMenu.count() > 0) {
     await userMenu.click();
-    
+
     // Clicar em logout
     const logoutButton = page.locator('button:has-text("Sair"), a:has-text("Sair")');
     if (await logoutButton.count() > 0) {
@@ -59,10 +78,10 @@ export async function logout(page: Page): Promise<void> {
 }
 
 /**
- * Verifica se o usuário está autenticado
- * 
- * @param page - Instância do Playwright Page
- * @returns true se autenticado, false caso contrário
+ * Verifica se o usuario esta autenticado
+ *
+ * @param page - Instancia do Playwright Page
+ * @returns true se autenticado, false caso contrario
  */
 export async function isAuthenticated(page: Page): Promise<boolean> {
   const currentUrl = page.url();

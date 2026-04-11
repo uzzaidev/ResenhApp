@@ -12,27 +12,13 @@
 
 import { sql } from "@/db/client";
 import logger from "@/lib/logger";
+import { FEATURE_COSTS, type FeatureType } from "@/lib/credits-config";
+export { FEATURE_COSTS };
+export type { FeatureType };
 
 // =====================================================
 // TYPES
 // =====================================================
-
-export type FeatureType =
-  | "recurring_training"    // 5 créditos
-  | "qrcode_checkin"        // 2 créditos
-  | "convocation"           // 3 créditos
-  | "analytics"             // 10 créditos/mês
-  | "split_pix"             // 15 créditos/evento
-  | "tactical_board";       // 1 crédito/salvar
-
-export const FEATURE_COSTS: Record<FeatureType, number> = {
-  recurring_training: 5,
-  qrcode_checkin: 2,
-  convocation: 3,
-  analytics: 10,
-  split_pix: 15,
-  tactical_board: 1,
-};
 
 export interface CreditBalance {
   groupId: string;

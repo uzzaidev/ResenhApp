@@ -1,0 +1,464 @@
+RESENHAPP V2.0 — ÁRVORE DE REPOSITÓRIO
+Gerado em: 2026-02-17 | Branch: main | Commit: 7e6e15c
+Ignorados: node_modules/, .next/, dist/, build/, coverage/, .git/
+============================================================
+
+peladeiros-main/
+├── .claude/                              # Configurações de agentes Claude AI
+├── .env                                  # Variáveis de produção
+├── .env.local                            # Variáveis de desenvolvimento local
+├── .env.example                          # Template de variáveis de ambiente
+├── .github/
+│   └── copilot-instructions.md
+├── .vercel/
+│   ├── project.json
+│   └── README.txt
+├── backups/                              # Backups do banco de dados
+│   ├── schema.sql                        # Schema completo (791KB) ← FONTE PRIMÁRIA
+│   ├── data.sql                          # Export de dados (45KB)
+│   ├── roles.sql                         # Roles PostgreSQL (1.7KB)
+│   ├── peladeiros_data_20251030_182424.sql    # Backup legado dados (out/2025)
+│   ├── peladeiros_full_20251030_182424.sql    # Backup legado completo (out/2025)
+│   └── peladeiros_structure_20251030_182424.sql # Backup legado schema (out/2025)
+├── checkpoints/                          # ← ESTE CHECKPOINT
+│   └── 2026-02-17_resenhapp/
+│       ├── 00_MANIFEST.json
+│       ├── 01_REPO_TREE.txt (este arquivo)
+│       └── modules/
+├── docs/                                 # Documentação (pode estar desatualizada)
+│   ├── 00-project-overview/
+│   ├── 01-getting-started/
+│   ├── 02-architecture/
+│   ├── 03-api/
+│   ├── 04-database/
+│   ├── 05-authentication/
+│   ├── 06-features/
+│   ├── 07-deployment/
+│   ├── 08-guides/
+│   ├── 09-troubleshooting/
+│   ├── 10-improvements/
+│   ├── 11-app/
+│   ├── 12-rebranding/
+│   ├── 13-decisions/
+│   ├── 14-planning/
+│   ├── 15-reference/
+│   ├── 16-v2.0/
+│   ├── 17-fases_documentadas/
+│   ├── 18-fase_0/
+│   ├── 19-fase_1/
+│   ├── 20-fase_2/
+│   ├── 21-frontend-audit/
+│   ├── 22-fase_3-replano/
+│   ├── assets/
+│   ├── branding/
+│   ├── deprecated/
+│   ├── migrations/
+│   ├── FASES-TIMELINE.md
+│   ├── NAVIGATION_GUIDE.md
+│   ├── PROGRESSO-GERAL-V2.md
+│   └── README.md
+├── public/
+│   ├── favicon.ico
+│   ├── robots.txt
+│   ├── site.webmanifest
+│   └── .gitkeep
+├── scripts/                              # Scripts SQL avulsos (não são migrations oficiais)
+│   ├── adicionar-membro-grupo.sql
+│   ├── debug/
+│   ├── test-fase-1-executar.sql
+│   ├── test-fase-1-modalities.sql
+│   ├── test-fase-1-simples.sql
+│   ├── test-migrations-syntax.sql
+│   ├── validar-migrations-aplicadas.sql
+│   ├── validate-v2-migrations.js
+│   ├── verificar-e-corrigir-profiles.sql
+│   ├── verificar-migration-1.sql
+│   ├── verificar-tabelas-usuarios.sql
+│   └── verificar-tipos-reais.sql
+├── src/
+│   ├── app/                              # Next.js App Router
+│   │   ├── (dashboard)/                  # Route group — rotas protegidas com layout
+│   │   │   ├── atletas/
+│   │   │   │   ├── [id]/
+│   │   │   │   │   └── page.tsx          # /atletas/:id
+│   │   │   │   └── page.tsx              # /atletas (Client Component)
+│   │   │   ├── dashboard/
+│   │   │   │   └── page.tsx              # /dashboard (Server Component)
+│   │   │   ├── financeiro/
+│   │   │   │   ├── charges/
+│   │   │   │   │   └── [chargeId]/
+│   │   │   │   │       └── page.tsx      # /financeiro/charges/:chargeId
+│   │   │   │   └── page.tsx              # /financeiro
+│   │   │   ├── frequencia/
+│   │   │   │   └── page.tsx              # /frequencia
+│   │   │   ├── jogos/
+│   │   │   │   └── page.tsx              # /jogos
+│   │   │   ├── modalidades/
+│   │   │   │   ├── [id]/
+│   │   │   │   │   └── page.tsx          # /modalidades/:id
+│   │   │   │   └── page.tsx              # /modalidades (Client Component)
+│   │   │   ├── rankings/
+│   │   │   │   └── page.tsx              # /rankings
+│   │   │   ├── treinos/
+│   │   │   │   └── page.tsx              # /treinos
+│   │   │   └── layout.tsx                # Dashboard layout (Client Component)
+│   │   ├── api/                          # API Routes (54 endpoints)
+│   │   │   ├── athletes/
+│   │   │   │   └── [userId]/
+│   │   │   │       ├── modalities/
+│   │   │   │       │   ├── [modalityId]/
+│   │   │   │       │   │   └── route.ts  # PATCH, DELETE
+│   │   │   │       │   └── route.ts      # GET, POST
+│   │   │   ├── auth/
+│   │   │   │   ├── [...nextauth]/
+│   │   │   │   │   └── route.ts          # NextAuth handlers
+│   │   │   │   └── signup/
+│   │   │   │       └── route.ts          # POST /api/auth/signup
+│   │   │   ├── charges/
+│   │   │   │   └── [chargeId]/
+│   │   │   │       └── pix/
+│   │   │   │           └── route.ts      # GET, POST /api/charges/:id/pix
+│   │   │   ├── credits/
+│   │   │   │   ├── check/
+│   │   │   │   │   └── route.ts          # POST /api/credits/check
+│   │   │   │   ├── history/
+│   │   │   │   │   └── route.ts          # GET /api/credits/history
+│   │   │   │   ├── validate-coupon/
+│   │   │   │   │   └── route.ts          # POST /api/credits/validate-coupon
+│   │   │   │   └── route.ts              # GET, POST /api/credits
+│   │   │   ├── debug/
+│   │   │   │   └── route.ts              # GET /api/debug (público)
+│   │   │   ├── events/
+│   │   │   │   ├── [eventId]/
+│   │   │   │   │   ├── actions/
+│   │   │   │   │   │   └── route.ts      # GET, POST, DELETE
+│   │   │   │   │   ├── admin-rsvp/
+│   │   │   │   │   │   └── route.ts      # POST (admin)
+│   │   │   │   │   ├── draw/
+│   │   │   │   │   │   └── route.ts      # POST (sortear times)
+│   │   │   │   │   ├── ratings/
+│   │   │   │   │   │   ├── finalize/
+│   │   │   │   │   │   │   └── route.ts  # POST (finalizar MVP)
+│   │   │   │   │   │   ├── tiebreaker/
+│   │   │   │   │   │   │   ├── decide/
+│   │   │   │   │   │   │   │   └── route.ts  # POST (admin decide)
+│   │   │   │   │   │   │   ├── vote/
+│   │   │   │   │   │   │   │   └── route.ts  # POST (votar desempate)
+│   │   │   │   │   │   │   └── route.ts      # GET (tiebreaker info)
+│   │   │   │   │   │   └── route.ts          # GET, POST (votar MVP)
+│   │   │   │   │   ├── rsvp/
+│   │   │   │   │   │   └── route.ts          # POST (confirmar presença)
+│   │   │   │   │   ├── teams/
+│   │   │   │   │   │   ├── swap/
+│   │   │   │   │   │   │   └── route.ts      # POST (trocar jogadores)
+│   │   │   │   │   │   └── route.ts          # GET, POST
+│   │   │   │   │   └── route.ts              # GET, PATCH, DELETE
+│   │   │   │   └── route.ts                  # GET, POST /api/events
+│   │   │   ├── groups/
+│   │   │   │   ├── [groupId]/
+│   │   │   │   │   ├── charges/
+│   │   │   │   │   │   ├── [chargeId]/
+│   │   │   │   │   │   │   └── route.ts      # PATCH, DELETE
+│   │   │   │   │   │   └── route.ts          # GET, POST
+│   │   │   │   │   ├── draw-config/
+│   │   │   │   │   │   └── route.ts          # GET, POST
+│   │   │   │   │   ├── event-settings/
+│   │   │   │   │   │   └── route.ts          # GET, POST
+│   │   │   │   │   ├── invites/
+│   │   │   │   │   │   ├── [inviteId]/
+│   │   │   │   │   │   │   └── route.ts      # DELETE
+│   │   │   │   │   │   └── route.ts          # GET, POST
+│   │   │   │   │   ├── members/
+│   │   │   │   │   │   ├── [userId]/
+│   │   │   │   │   │   │   └── route.ts      # PATCH, DELETE
+│   │   │   │   │   │   ├── create-user/
+│   │   │   │   │   │   │   └── route.ts      # POST
+│   │   │   │   │   │   └── route.ts          # POST
+│   │   │   │   │   ├── my-stats/
+│   │   │   │   │   │   └── route.ts          # GET
+│   │   │   │   │   ├── rankings/
+│   │   │   │   │   │   └── route.ts          # GET
+│   │   │   │   │   ├── receiver-profiles/
+│   │   │   │   │   │   └── route.ts          # GET, POST
+│   │   │   │   │   ├── stats/
+│   │   │   │   │   │   └── route.ts          # GET
+│   │   │   │   │   └── route.ts              # GET, PATCH
+│   │   │   │   ├── join/
+│   │   │   │   │   └── route.ts              # POST
+│   │   │   │   ├── managed/
+│   │   │   │   │   └── route.ts              # GET
+│   │   │   │   ├── switch/
+│   │   │   │   │   └── route.ts              # POST
+│   │   │   │   └── route.ts                  # GET, POST
+│   │   │   ├── modalities/
+│   │   │   │   ├── [id]/
+│   │   │   │   │   ├── positions/
+│   │   │   │   │   │   └── route.ts          # GET, POST
+│   │   │   │   │   └── route.ts              # GET, PATCH, DELETE
+│   │   │   │   └── route.ts                  # GET, POST
+│   │   │   ├── notifications/
+│   │   │   │   ├── [id]/
+│   │   │   │   │   └── route.ts              # PATCH, DELETE
+│   │   │   │   └── route.ts                  # GET, POST
+│   │   │   ├── recurring-trainings/
+│   │   │   │   └── route.ts                  # GET, POST (com credits)
+│   │   │   ├── search/
+│   │   │   │   └── route.ts                  # GET
+│   │   │   └── users/
+│   │   │       ├── me/
+│   │   │       │   └── pending-charges-count/
+│   │   │       │       └── route.ts          # GET
+│   │   │       └── search/
+│   │   │           └── route.ts              # GET
+│   │   ├── auth/
+│   │   │   ├── error/
+│   │   │   │   └── page.tsx                  # /auth/error
+│   │   │   ├── signin/
+│   │   │   │   └── page.tsx                  # /auth/signin (Client Component)
+│   │   │   └── signup/
+│   │   │       └── page.tsx                  # /auth/signup (Client Component)
+│   │   ├── events/                           # (Evento público ou acesso direto)
+│   │   ├── groups/
+│   │   │   ├── [groupId]/
+│   │   │   │   ├── settings/
+│   │   │   │   │   └── page.tsx              # /groups/:groupId/settings (admin)
+│   │   │   │   └── page.tsx                  # /groups/:groupId
+│   │   │   ├── join/
+│   │   │   │   └── page.tsx                  # /groups/join
+│   │   │   └── new/
+│   │   │       └── page.tsx                  # /groups/new
+│   │   ├── simple-test/
+│   │   │   └── page.tsx                      # /simple-test (healthcheck)
+│   │   ├── globals.css
+│   │   ├── layout.tsx                        # Root layout
+│   │   ├── loading.tsx
+│   │   └── page.tsx                          # / (Home landing page)
+│   ├── components/
+│   │   ├── athletes/
+│   │   │   ├── add-modality-modal.tsx
+│   │   │   ├── athlete-filters.tsx
+│   │   │   ├── athletes-table.tsx
+│   │   │   ├── edit-rating-modal.tsx
+│   │   │   └── modality-badge.tsx
+│   │   ├── credits/
+│   │   │   ├── buy-credits-modal.tsx
+│   │   │   ├── credits-balance.tsx
+│   │   │   └── credits-page-client.tsx
+│   │   ├── dashboard/
+│   │   │   ├── dashboard-wrapper.tsx
+│   │   │   ├── direct-mode-dashboard.tsx
+│   │   │   ├── groups-card.tsx
+│   │   │   ├── hero-section.tsx
+│   │   │   ├── metrics-overview.tsx
+│   │   │   ├── modalities-grid.tsx
+│   │   │   ├── pending-payments-card.tsx
+│   │   │   ├── upcoming-events-card.tsx
+│   │   │   └── upcoming-trainings.tsx
+│   │   ├── events/
+│   │   │   ├── admin-player-manager.tsx
+│   │   │   ├── confirmation-tab.tsx
+│   │   │   ├── draw-config-modal.tsx
+│   │   │   ├── event-form.tsx
+│   │   │   ├── event-rsvp-form.tsx
+│   │   │   ├── event-tabs.tsx
+│   │   │   ├── live-match-tab.tsx
+│   │   │   ├── manual-team-manager.tsx
+│   │   │   ├── match-controls.tsx
+│   │   │   ├── match-scoreboard.tsx
+│   │   │   ├── match-timeline.tsx
+│   │   │   ├── mvp-tiebreaker-card.tsx
+│   │   │   ├── quick-action-panel.tsx
+│   │   │   ├── ratings-tab.tsx
+│   │   │   ├── stats-tab.tsx
+│   │   │   ├── team-draw-button.tsx
+│   │   │   ├── team-editor.tsx
+│   │   │   └── teams-tab.tsx
+│   │   ├── financial/
+│   │   │   └── pix-payment-card.tsx
+│   │   ├── group/
+│   │   │   ├── frequency-card.tsx
+│   │   │   ├── my-stats-card.tsx
+│   │   │   ├── rankings-card.tsx
+│   │   │   ├── recent-matches-card.tsx
+│   │   │   └── upcoming-events-card.tsx
+│   │   ├── groups/
+│   │   │   ├── create-group-form.tsx
+│   │   │   ├── event-settings-form.tsx
+│   │   │   ├── group-info-form.tsx
+│   │   │   ├── group-settings-tabs.tsx
+│   │   │   ├── invites-manager.tsx
+│   │   │   ├── join-group-form.tsx
+│   │   │   └── members-manager.tsx
+│   │   ├── layout/
+│   │   │   ├── breadcrumbs.tsx
+│   │   │   ├── dashboard-header.tsx
+│   │   │   ├── direct-mode-toggle.tsx
+│   │   │   ├── group-switcher.tsx
+│   │   │   ├── sidebar.tsx
+│   │   │   └── topbar.tsx
+│   │   ├── modalities/
+│   │   │   ├── modality-card.tsx
+│   │   │   ├── modality-form.tsx
+│   │   │   ├── modality-icon.tsx
+│   │   │   ├── modality-modal.tsx
+│   │   │   └── positions-config.tsx
+│   │   ├── notifications/
+│   │   │   └── notifications-dropdown.tsx
+│   │   ├── payments/
+│   │   │   ├── charges-data-table.tsx
+│   │   │   ├── create-charge-modal.tsx
+│   │   │   └── payments-content.tsx
+│   │   ├── providers/
+│   │   │   └── auth-provider.tsx
+│   │   ├── trainings/
+│   │   │   ├── confirmed-avatars.tsx
+│   │   │   ├── rsvp-progress.tsx
+│   │   │   └── training-card.tsx
+│   │   ├── ui/                               # shadcn/ui (32 componentes)
+│   │   │   ├── alert-dialog.tsx
+│   │   │   ├── alert.tsx
+│   │   │   ├── avatar.tsx
+│   │   │   ├── badge.tsx
+│   │   │   ├── button-with-loading.tsx
+│   │   │   ├── button.tsx
+│   │   │   ├── card.tsx
+│   │   │   ├── checkbox.tsx
+│   │   │   ├── collapsible.tsx
+│   │   │   ├── command.tsx
+│   │   │   ├── design-system-showcase.tsx
+│   │   │   ├── dialog.tsx
+│   │   │   ├── dropdown-menu.tsx
+│   │   │   ├── empty-state.tsx
+│   │   │   ├── form-field.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── label.tsx
+│   │   │   ├── metric-card.tsx
+│   │   │   ├── popover.tsx
+│   │   │   ├── progress.tsx
+│   │   │   ├── radio-group.tsx
+│   │   │   ├── scroll-area.tsx
+│   │   │   ├── select.tsx
+│   │   │   ├── separator.tsx
+│   │   │   ├── sheet.tsx
+│   │   │   ├── skeleton.tsx
+│   │   │   ├── slider.tsx
+│   │   │   ├── status-badge.tsx
+│   │   │   ├── table.tsx
+│   │   │   ├── tabs.tsx
+│   │   │   ├── textarea.tsx
+│   │   │   ├── toast.tsx
+│   │   │   ├── toaster.tsx
+│   │   │   └── tooltip.tsx
+│   │   └── error-boundary.tsx
+│   ├── contexts/
+│   │   ├── direct-mode-context.tsx          # DirectModeContext
+│   │   └── group-context.tsx                # GroupContext (ativo)
+│   ├── db/
+│   │   ├── client.ts                        # Supabase/Neon pg client (lazy init)
+│   │   ├── backups/
+│   │   └── migrations/
+│   ├── hooks/
+│   │   ├── use-debounce.ts
+│   │   ├── use-error-handler.ts
+│   │   └── use-notifications.ts
+│   ├── lib/
+│   │   ├── analytics.ts                     # Analytics (PostHog — TODO)
+│   │   ├── auth-helpers.ts                  # Auth helpers
+│   │   ├── auth.ts                          # NextAuth v5 config
+│   │   ├── credits-middleware.ts            # Middleware de créditos
+│   │   ├── credits.ts                       # Sistema de créditos
+│   │   ├── design-system.ts                 # Design tokens
+│   │   ├── error-handler.ts                 # Padronização de erros
+│   │   ├── group-helpers.ts                 # Helpers de grupo (server-side)
+│   │   ├── logger.ts                        # Pino logger
+│   │   ├── modalities.ts                    # Helpers de modalidades
+│   │   ├── permissions-middleware.ts        # Middleware de permissões
+│   │   ├── permissions.ts                   # RBAC e hierarquia
+│   │   ├── pix-helpers.ts                   # Helpers de PIX
+│   │   ├── pix.ts                           # Geração de QR Code PIX (BR Code)
+│   │   ├── rate-limit.ts                    # Rate limiting
+│   │   ├── undo.ts                          # Undo/redo com Sonner
+│   │   ├── utils.ts                         # Utilitários gerais
+│   │   ├── validations-charges.ts           # Schemas Zod para cobranças
+│   │   ├── validations-params.ts            # Schemas Zod para parâmetros
+│   │   ├── validations.ts                   # Schemas Zod principais
+│   │   └── stores/
+│   │       └── auth-store.ts                # Zustand auth store
+│   └── types/
+│       └── next-auth.d.ts                   # Tipos NextAuth estendidos
+├── supabase/
+│   ├── migrations/                          # 24 migrations SQL oficiais
+│   │   ├── 20260125000001_create_receiver_profiles.sql
+│   │   ├── 20260125000002_add_event_price_fields.sql
+│   │   ├── 20260125000003_add_receiver_profile_to_charges.sql
+│   │   ├── 20260125000004_add_pix_fields_to_charges.sql
+│   │   ├── 20260125000005_fix_notifications_users.sql
+│   │   ├── 20260127000000_legacy_users_table.sql
+│   │   ├── 20260127000001_initial_schema.sql
+│   │   ├── 20260127000002_auth_profiles.sql
+│   │   ├── 20260127000003_groups_and_events.sql
+│   │   ├── 20260127000004_rls_policies.sql
+│   │   ├── 20260204000001_financial_system.sql
+│   │   ├── 20260211000001_notifications.sql
+│   │   ├── 20260218000001_analytics.sql
+│   │   ├── 20260225000001_gamification.sql
+│   │   ├── 20260227000001_sport_modalities.sql
+│   │   ├── 20260227000002_athlete_modalities.sql
+│   │   ├── 20260227000003_recurring_trainings.sql
+│   │   ├── 20260227000004_game_convocations.sql
+│   │   ├── 20260227000005_checkin_qrcodes.sql
+│   │   ├── 20260227000006_saved_tactics.sql
+│   │   ├── 20260227000007_financial_by_training.sql
+│   │   ├── 20260227000008_hierarchy_and_credits.sql
+│   │   ├── 20260227000009_promo_coupons.sql
+│   │   └── README.md
+│   ├── .temp/
+│   ├── config.toml
+│   ├── debug_signup.sql
+│   ├── fix_users_policy_for_direct_connection.sql
+│   ├── seed.sql
+│   ├── setup_storage_and_realtime.sql
+│   └── verify_migrations*.sql
+├── tests/
+│   ├── unit/
+│   │   ├── api/
+│   │   │   └── rsvp-auto-charge.test.ts
+│   │   ├── contexts/
+│   │   │   └── group-context.test.tsx
+│   │   └── lib/
+│   │       ├── error-handler.test.ts
+│   │       ├── group-helpers.test.ts
+│   │       └── pix.test.ts
+│   ├── integration/
+│   │   └── api/
+│   │       └── groups-switch-logic.test.ts
+│   ├── e2e/
+│   │   ├── helpers/
+│   │   │   ├── auth.ts
+│   │   │   └── data.ts
+│   │   ├── payment-flow.spec.ts
+│   │   └── rsvp-flow.spec.ts
+│   ├── components/
+│   │   └── layout/
+│   │       └── group-switcher.test.tsx
+│   ├── setup.ts
+│   └── README.md
+├── .gitignore
+├── .vercelignore
+├── components.json                          # shadcn/ui config
+├── eslint.config.mjs
+├── FEATURES-UI-UX-FALTANTES.md             # (legado — pode estar desatualizado)
+├── next.config.ts
+├── next-env.d.ts
+├── package.json
+├── playwright.config.ts
+├── PLANO-ORGANIZACAO-DOCUMENTACAO.md
+├── pnpm-lock.yaml
+├── postcss.config.mjs
+├── README.md
+├── sentry.client.config.ts
+├── sentry.edge.config.ts
+├── sentry.server.config.ts
+├── tailwind.config.ts
+├── tsconfig.json
+└── vercel.json

@@ -4,6 +4,7 @@ declare module "next-auth" {
   interface Session {
     user: {
       id: string;
+      onboardingCompleted?: boolean;
     } & DefaultSession["user"];
   }
 
@@ -12,11 +13,13 @@ declare module "next-auth" {
     email: string;
     name: string;
     image?: string | null;
+    onboardingCompleted?: boolean;
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
     id: string;
+    onboardingCompleted?: boolean;
   }
 }

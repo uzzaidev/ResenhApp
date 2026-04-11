@@ -37,6 +37,7 @@ type GroupSettingsTabsProps = {
   invites: Invite[];
   members: Member[];
   currentUserId: string;
+  initialTab?: "info" | "events" | "invites" | "members";
 };
 
 export function GroupSettingsTabs({
@@ -44,9 +45,10 @@ export function GroupSettingsTabs({
   invites,
   members,
   currentUserId,
+  initialTab = "info",
 }: GroupSettingsTabsProps) {
   return (
-    <Tabs defaultValue="info" className="w-full">
+    <Tabs defaultValue={initialTab} className="w-full">
       <TabsList className="grid w-full grid-cols-4">
         <TabsTrigger value="info">Informações</TabsTrigger>
         <TabsTrigger value="events">Eventos</TabsTrigger>

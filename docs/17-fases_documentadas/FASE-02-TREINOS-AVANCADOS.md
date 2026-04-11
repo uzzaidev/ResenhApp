@@ -88,3 +88,7 @@ src/app/api/events/[id]/confirmed/route.ts
 **Status:** ⏸️ Planejado
 
 
+
+
+
+

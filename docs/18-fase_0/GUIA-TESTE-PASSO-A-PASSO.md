@@ -390,3 +390,7 @@ Após completar todos os passos, você deve ter:
 **Próximo passo após validação:** Documentar no `MIGRATIONS_STATUS.md`
 
 
+
+
+
+

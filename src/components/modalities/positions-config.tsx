@@ -37,7 +37,7 @@ export function PositionsConfig({
       if (!response.ok) throw new Error('Erro ao carregar posições');
 
       const data = await response.json();
-      setPositions(data.positions || []);
+      setPositions(Array.isArray(data.positions) ? data.positions : []);
     } catch (error) {
       toast.error('Erro ao carregar posições');
     } finally {
@@ -73,7 +73,7 @@ export function PositionsConfig({
       if (!response.ok) throw new Error('Erro ao carregar posições padrão');
 
       const data = await response.json();
-      if (data.positions && data.positions.length > 0) {
+      if (Array.isArray(data.positions) && data.positions.length > 0) {
         setPositions(data.positions);
         toast.success('Posições padrão carregadas!');
       } else {

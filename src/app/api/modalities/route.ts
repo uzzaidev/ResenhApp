@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (membership.role !== "admin") {
+    if (membership.role !== "admin" && membership.role !== "owner") {
       return NextResponse.json(
         { error: "Apenas administradores podem criar modalidades" },
         { status: 403 }

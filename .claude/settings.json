@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(__NEW_LINE_3233faec9ff4fc27__ for:*)",
+      "Bash(do)",
+      "Bash(echo \"=== $table ===\")",
+      "Bash($PSQL -c \"SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name = ''$table'' ORDER BY ordinal_position;\")",
+      "Bash(done)",
+      "Bash(PGPASSWORD='Uzzai2025@@' psql -h aws-0-us-west-2.pooler.supabase.com -p 6543 -U postgres.ebaypdptyhbyqduovvce -d postgres -c \"\\\\d user_achievements\")",
+      "Bash(PGPASSWORD='Uzzai2025@@' psql -h aws-0-us-west-2.pooler.supabase.com -p 6543 -U postgres.ebaypdptyhbyqduovvce -d postgres -c \"\\\\d social_posts\")",
+      "Bash(PGPASSWORD='Uzzai2025@@' psql -h aws-0-us-west-2.pooler.supabase.com -p 6543 -U postgres.ebaypdptyhbyqduovvce -d postgres -c \"SELECT id, email FROM auth.users LIMIT 5\")",
+      "Bash(PGPASSWORD='Uzzai2025@@' psql -h aws-0-us-west-2.pooler.supabase.com -p 6543 -U postgres.ebaypdptyhbyqduovvce -d postgres -c \"\\\\d auth.users\")",
+      "Bash(PGPASSWORD='Uzzai2025@@' psql -h aws-0-us-west-2.pooler.supabase.com -p 6543 -U postgres.ebaypdptyhbyqduovvce -d postgres -f \"c:/Projetos Uzz.Ai/peladeiros-main/supabase/seeds/demo/00_demo_cleanup.sql\")",
+      "Bash(PGPASSWORD='Uzzai2025@@' psql -h aws-0-us-west-2.pooler.supabase.com -p 6543 -U postgres.ebaypdptyhbyqduovvce -d postgres -f \"c:/Projetos Uzz.Ai/peladeiros-main/supabase/seeds/demo/01_demo_users.sql\")",
+      "Bash(PGPASSWORD='Uzzai2025@@' psql -h aws-0-us-west-2.pooler.supabase.com -p 6543 -U postgres.ebaypdptyhbyqduovvce -d postgres -f \"c:/Projetos Uzz.Ai/peladeiros-main/supabase/seeds/demo/02_demo_groups.sql\")",
+      "Bash(PGPASSWORD='Uzzai2025@@' psql -h aws-0-us-west-2.pooler.supabase.com -p 6543 -U postgres.ebaypdptyhbyqduovvce -d postgres -f \"c:/Projetos Uzz.Ai/peladeiros-main/supabase/seeds/demo/03_demo_events.sql\")",
+      "Bash(PGPASSWORD='Uzzai2025@@' psql -h aws-0-us-west-2.pooler.supabase.com -p 6543 -U postgres.ebaypdptyhbyqduovvce -d postgres -f \"c:/Projetos Uzz.Ai/peladeiros-main/supabase/seeds/demo/04_demo_partidas.sql\")",
+      "Bash(PGPASSWORD='Uzzai2025@@' psql -h aws-0-us-west-2.pooler.supabase.com -p 6543 -U postgres.ebaypdptyhbyqduovvce -d postgres -f \"c:/Projetos Uzz.Ai/peladeiros-main/supabase/seeds/demo/05_demo_financeiro.sql\")",
+      "Bash(PGPASSWORD='Uzzai2025@@' psql -h aws-0-us-west-2.pooler.supabase.com -p 6543 -U postgres.ebaypdptyhbyqduovvce -d postgres -f \"c:/Projetos Uzz.Ai/peladeiros-main/supabase/seeds/demo/06_demo_gamification.sql\")",
+      "Bash(PGPASSWORD='Uzzai2025@@' psql -h aws-0-us-west-2.pooler.supabase.com -p 6543 -U postgres.ebaypdptyhbyqduovvce -d postgres -f \"c:/Projetos Uzz.Ai/peladeiros-main/supabase/seeds/demo/07_demo_notifications.sql\")",
+      "Bash(PGPASSWORD='Uzzai2025@@' psql -h aws-0-us-west-2.pooler.supabase.com -p 6543 -U postgres.ebaypdptyhbyqduovvce -d postgres -f \"c:/Projetos Uzz.Ai/peladeiros-main/supabase/seeds/demo/08_demo_social.sql\")",
+      "Bash(PGPASSWORD='Uzzai2025@@' psql -h aws-0-us-west-2.pooler.supabase.com -p 6543 -U postgres.ebaypdptyhbyqduovvce -d postgres -c \":*)"
+    ]
+  }
+}

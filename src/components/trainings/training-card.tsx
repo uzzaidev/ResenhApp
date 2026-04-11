@@ -25,8 +25,8 @@ import {
   Calendar,
   AlertCircle,
 } from "lucide-react";
-import { RsvpProgress } from "./rsvp-progress";
-import { ConfirmedAvatars } from "./confirmed-avatars";
+import { RsvpProgress } from "@/components/eventos/rsvp-progress";
+import { ConfirmedAvatars } from "@/components/eventos/confirmed-avatars";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -179,15 +179,15 @@ export function TrainingCard({
           <div className="flex-shrink-0">
             {!training.userStatus ? (
               <Button className="w-full md:w-auto" size="lg" asChild>
-                <Link href={`/events/${training.id}`}>Confirmar Presença</Link>
+                <Link href={`/eventos/${training.id}?returnTo=/dashboard`}>Confirmar Presença</Link>
               </Button>
             ) : training.userStatus === "yes" ? (
               <Button variant="outline" className="w-full md:w-auto" asChild>
-                <Link href={`/events/${training.id}`}>Ver Detalhes</Link>
+                <Link href={`/eventos/${training.id}?returnTo=/dashboard`}>Ver Detalhes</Link>
               </Button>
             ) : (
               <Button variant="secondary" className="w-full md:w-auto" asChild>
-                <Link href={`/events/${training.id}`}>Responder</Link>
+                <Link href={`/eventos/${training.id}?returnTo=/dashboard`}>Responder</Link>
               </Button>
             )}
           </div>
@@ -196,5 +196,3 @@ export function TrainingCard({
     </Card>
   );
 }
-
-

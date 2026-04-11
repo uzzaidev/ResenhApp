@@ -51,7 +51,7 @@ export type Charge = {
   type: "monthly" | "daily" | "fine" | "other";
   amount_cents: number;
   due_date: string | null;
-  status: "pending" | "paid" | "canceled";
+  status: "pending" | "paid" | "cancelled" | "canceled" | "self_reported" | "denied";
   created_at: string;
   updated_at: string;
   event_id: string | null;
@@ -69,12 +69,18 @@ const chargeTypeLabels: Record<string, string> = {
 const statusLabels: Record<string, string> = {
   pending: "Pendente",
   paid: "Pago",
+  self_reported: "Aguardando confirmação",
+  denied: "Negado",
+  cancelled: "Cancelado",
   canceled: "Cancelado",
 };
 
 const statusVariants: Record<string, "default" | "secondary" | "destructive"> = {
   pending: "secondary",
   paid: "default",
+  self_reported: "secondary",
+  denied: "destructive",
+  cancelled: "destructive",
   canceled: "destructive",
 };
 
@@ -83,8 +89,9 @@ interface ChargesDataTableProps {
   isAdmin: boolean;
   onMarkAsPaid: (id: string) => void;
   onCancel: (id: string) => void;
+  onDeny: (id: string) => void;
   onDelete: (id: string) => void;
-  loadingCharges?: Record<string, 'marking' | 'canceling' | 'deleting'>;
+  loadingCharges?: Record<string, 'marking' | 'canceling' | 'denying' | 'deleting'>;
 }
 
 export function ChargesDataTable({
@@ -92,6 +99,7 @@ export function ChargesDataTable({
   isAdmin,
   onMarkAsPaid,
   onCancel,
+  onDeny,
   onDelete,
   loadingCharges = {},
 }: ChargesDataTableProps) {
@@ -241,7 +249,7 @@ export function ChargesDataTable({
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Ações</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              {charge.status === "pending" && (
+              {(charge.status === "pending" || charge.status === "self_reported") && (
                 <>
                   <DropdownMenuItem 
                     data-testid="mark-as-paid-action"
@@ -255,17 +263,31 @@ export function ChargesDataTable({
                     )}
                     Marcar como Pago
                   </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => onCancel(charge.id)}
-                    disabled={loadingCharges[charge.id] !== undefined}
-                  >
-                    {loadingCharges[charge.id] === 'canceling' ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <X className="mr-2 h-4 w-4" />
-                    )}
-                    Cancelar
-                  </DropdownMenuItem>
+                  {charge.status === "pending" ? (
+                    <DropdownMenuItem 
+                      onClick={() => onCancel(charge.id)}
+                      disabled={loadingCharges[charge.id] !== undefined}
+                    >
+                      {loadingCharges[charge.id] === 'canceling' ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <X className="mr-2 h-4 w-4" />
+                      )}
+                      Cancelar
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem 
+                      onClick={() => onDeny(charge.id)}
+                      disabled={loadingCharges[charge.id] !== undefined}
+                    >
+                      {loadingCharges[charge.id] === 'denying' ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <X className="mr-2 h-4 w-4" />
+                      )}
+                      Negar Pagamento
+                    </DropdownMenuItem>
+                  )}
                 </>
               )}
               <DropdownMenuItem
@@ -331,8 +353,10 @@ export function ChargesDataTable({
           <SelectContent>
             <SelectItem value="all">Todos os status</SelectItem>
             <SelectItem value="pending">Pendente</SelectItem>
+            <SelectItem value="self_reported">Aguardando confirmação</SelectItem>
             <SelectItem value="paid">Pago</SelectItem>
-            <SelectItem value="canceled">Cancelado</SelectItem>
+            <SelectItem value="denied">Negado</SelectItem>
+            <SelectItem value="cancelled">Cancelado</SelectItem>
           </SelectContent>
         </Select>
         <Select

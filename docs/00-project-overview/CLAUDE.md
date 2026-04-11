@@ -26,6 +26,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Code**: English (variable names, function names, comments)
 - **Database**: English (table names, column names)
 
+## Canonical Product Terms
+
+- **Quota de plataforma != cobranca financeira**:
+  - `quota` (antigo "creditos") e consumo interno da plataforma.
+  - `cobranca`/`pagamento`/`PIX` sao dinheiro real do fluxo financeiro do grupo.
+  - Nunca misturar os dois conceitos no mesmo texto sem qualificador explicito.
+- **Evento** e a entidade principal:
+  - Valores canonicos de `event_type`: `training` e `match`.
+  - "Treino" e "Jogo" sao apresentacoes de UI do mesmo dominio de eventos.
+
 ## Commands
 
 ### Development

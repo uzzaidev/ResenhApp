@@ -1,20 +1,19 @@
-"use client";
+﻿"use client";
 
 /**
- * Upcoming Trainings - Lista de Próximos Treinos
- * 
- * Lista expandida de treinos próximos com cards visuais
- * e confirmação de presença inline.
+ * Upcoming Trainings - Lista de PrÃ³ximos Treinos
+ *
+ * Lista expandida de treinos prÃ³ximos com cards visuais
+ * e confirmaÃ§Ã£o de presenÃ§a inline.
  */
 
 import { TrainingCard } from "@/components/trainings/training-card";
 import { useGroup } from "@/contexts/group-context";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Calendar } from "lucide-react";
 import Link from "next/link";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Calendar } from "lucide-react";
 
 interface Training {
   id: string;
@@ -56,36 +55,35 @@ export function UpcomingTrainings() {
       }
 
       try {
-        // TODO: Conectar com API real no Sprint 2
-        // Por enquanto, mock data
-        const mockTrainings: Training[] = [
-          {
-            id: "1",
-            name: "Treino Tático - Preparação Interatléticas",
-            date: new Date(Date.now() + 24 * 60 * 60 * 1000),
-            time: "20:00",
-            venue: { id: "1", name: "Ginásio UFRGS" },
-            modality: {
-              id: "1",
-              name: "FUTSAL",
-              icon: "⚽",
-              color: "blue",
-            },
-            price: 10,
+        const response = await fetch(`/api/groups/${currentGroup.id}/upcoming-trainings`);
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Erro ao carregar treinos (${response.status}): ${errorText}`);
+        }
+
+        const data = await response.json();
+        const mappedTrainings: Training[] = (data.trainings || []).map((training: any) => {
+          const startsAt = new Date(training.startsAt);
+          return {
+            id: training.id,
+            name: training.name,
+            date: startsAt,
+            time: startsAt.toLocaleTimeString("pt-BR", {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            venue: training.venueName ? { id: "", name: training.venueName } : null,
+            modality: null,
+            price: typeof training.price === "number" ? training.price : undefined,
             isRecurring: false,
-            confirmedCount: 23,
-            maxPlayers: 30,
-            userStatus: "yes",
-            confirmedAttendees: [
-              { id: "1", name: "Pedro Vitor" },
-              { id: "2", name: "Lucas Silva" },
-              { id: "3", name: "Maria Oliveira" },
-              { id: "4", name: "Rafael Costa" },
-              { id: "5", name: "Ana Santos" },
-            ],
-          },
-        ];
-        setTrainings(mockTrainings);
+            confirmedCount: Number(training.confirmedCount || 0),
+            maxPlayers: Number(training.maxPlayers || 0),
+            userStatus: training.userStatus || null,
+            confirmedAttendees: training.confirmedAttendees || [],
+          };
+        });
+
+        setTrainings(mappedTrainings);
       } catch (error) {
         console.error("Error loading trainings:", error);
       } finally {
@@ -101,7 +99,7 @@ export function UpcomingTrainings() {
       <section className="mb-12">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold font-heading">Próximos Treinos</h2>
+            <h2 className="text-2xl font-bold font-heading">PrÃ³ximos Treinos</h2>
             <p className="text-gray-600 text-sm mt-1">Carregando...</p>
           </div>
         </div>
@@ -119,11 +117,11 @@ export function UpcomingTrainings() {
       <section className="mb-12">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold font-heading">Próximos Treinos</h2>
-            <p className="text-gray-600 text-sm mt-1">Confirme sua presença nos treinos</p>
+            <h2 className="text-2xl font-bold font-heading">PrÃ³ximos Treinos</h2>
+            <p className="text-gray-600 text-sm mt-1">Confirme sua presenÃ§a nos treinos</p>
           </div>
           <Button asChild>
-            <Link href="/treinos">
+            <Link href="/eventos?tipo=treino">
               Ver todos <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
@@ -131,10 +129,12 @@ export function UpcomingTrainings() {
         <EmptyState
           icon={Calendar}
           title="Nenhum treino agendado"
-          description="Não há treinos próximos no momento."
+          description="NÃ£o hÃ¡ treinos prÃ³ximos no momento."
           action={{
             label: "Ver todos os treinos",
-            onClick: () => window.location.href = "/treinos",
+            onClick: () => {
+              window.location.href = "/eventos?tipo=treino";
+            },
           }}
         />
       </section>
@@ -145,11 +145,11 @@ export function UpcomingTrainings() {
     <section className="mb-12">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-bold font-heading">Próximos Treinos</h2>
-          <p className="text-gray-600 text-sm mt-1">Confirme sua presença nos treinos</p>
+          <h2 className="text-2xl font-bold font-heading">PrÃ³ximos Treinos</h2>
+          <p className="text-gray-600 text-sm mt-1">Confirme sua presenÃ§a nos treinos</p>
         </div>
         <Button asChild>
-          <Link href="/treinos">
+          <Link href="/eventos?tipo=treino">
             Ver todos <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </Button>

@@ -59,3 +59,7 @@ SELECT
   (SELECT COUNT(*) FROM pg_trigger WHERE tgname = 'trigger_update_sport_modalities_updated_at') AS triggers;
 
 
+
+
+
+

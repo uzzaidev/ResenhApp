@@ -26,3 +26,7 @@ WHERE tablename = 'users' AND schemaname = 'public'
 AND cmd = 'INSERT';
 
 
+
+
+
+

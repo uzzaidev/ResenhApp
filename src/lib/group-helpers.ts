@@ -10,12 +10,13 @@
 
 import { cookies } from "next/headers";
 import { sql } from "@/db/client";
+import { fromDbGroupType } from "@/lib/group-type";
 
 export interface UserGroup {
   id: string;
   name: string;
   description?: string | null;
-  groupType?: "athletic" | "pelada";
+  groupType?: "atletica" | "modality_group" | "standalone";
   parentGroupId?: string | null;
   role?: "admin" | "member";
   memberCount?: number;
@@ -97,7 +98,7 @@ export async function getUserCurrentGroup(userId: string): Promise<UserGroup | n
       id: g.id,
       name: g.name,
       description: g.description,
-      groupType: g.group_type,
+      groupType: fromDbGroupType(g.group_type, g.parent_group_id),
       parentGroupId: g.parent_group_id,
       role: g.role,
       memberCount: Number(g.member_count) || 0,
@@ -132,7 +133,7 @@ export async function getUserGroups(userId: string): Promise<UserGroup[]> {
       id: g.id,
       name: g.name,
       description: g.description,
-      groupType: g.group_type,
+      groupType: fromDbGroupType(g.group_type, g.parent_group_id),
       parentGroupId: g.parent_group_id,
       role: g.role,
       memberCount: Number(g.member_count) || 0,
@@ -142,5 +143,9 @@ export async function getUserGroups(userId: string): Promise<UserGroup[]> {
     return [];
   }
 }
+
+
+
+
 
 

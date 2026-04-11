@@ -44,8 +44,21 @@ export async function GET(
 
     return NextResponse.json({
       modality: {
-        ...modality,
-        athletes,
+        id: modality.id,
+        groupId: modality.groupId,
+        name: modality.name,
+        icon: modality.icon,
+        color: modality.color,
+        description: modality.description,
+        trainingsPerWeek: modality.trainingsPerWeek,
+        athleteCount: modality.athletesCount,
+        athletes: athletes.map((athlete) => ({
+          userId: athlete.userId,
+          userName: athlete.athlete?.name || "Atleta",
+          userAvatar: athlete.athlete?.avatarUrl,
+          rating: athlete.rating,
+          positions: athlete.positions || [],
+        })),
       },
     });
   } catch (error) {
@@ -101,7 +114,7 @@ export async function PATCH(
 
     const membership = membershipQuery[0];
 
-    if (!membership || membership.role !== "admin") {
+    if (!membership || (membership.role !== "admin" && membership.role !== "owner")) {
       return NextResponse.json(
         { error: "Apenas administradores podem editar modalidades" },
         { status: 403 }
@@ -213,7 +226,7 @@ export async function DELETE(
 
     const membership = membershipQuery[0];
 
-    if (!membership || membership.role !== "admin") {
+    if (!membership || (membership.role !== "admin" && membership.role !== "owner")) {
       return NextResponse.json(
         { error: "Apenas administradores podem excluir modalidades" },
         { status: 403 }

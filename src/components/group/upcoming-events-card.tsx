@@ -93,7 +93,7 @@ export function UpcomingEventsCard({ events, groupId, userRole }: UpcomingEvents
           {events.map((event) => (
             <div key={event.id} className="p-4 rounded-lg border bg-card hover:bg-accent transition-colors">
               <div className="flex items-start justify-between gap-4">
-                <Link href={`/events/${event.id}`} className="flex-1 space-y-2">
+                <Link href={`/eventos/${event.id}`} className="flex-1 space-y-2">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Calendar className="h-4 w-4" />
                     {formatDate(event.starts_at)}
@@ -119,8 +119,8 @@ export function UpcomingEventsCard({ events, groupId, userRole }: UpcomingEvents
                     {event.status === "live" ? "Ao vivo" : "Agendado"}
                   </Badge>
                   <div className="flex gap-2">
-                    <Button asChild variant="ghost" size="sm" className="gap-1">
-                      <Link href={`/events/${event.id}`}>
+                      <Button asChild variant="ghost" size="sm" className="gap-1">
+                      <Link href={`/eventos/${event.id}`}>
                         Ver detalhes
                         <ArrowRight className="h-4 w-4" />
                       </Link>

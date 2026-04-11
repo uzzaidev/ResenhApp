@@ -76,3 +76,7 @@ Implementar sistema completo de frequência com QR Code check-in e rankings.
 **Status:** ⏸️ Planejado
 
 
+
+
+
+

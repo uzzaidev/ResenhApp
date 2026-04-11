@@ -19,7 +19,7 @@ export function PaymentsContent({ groupId, isAdmin }: PaymentsContentProps) {
   const [charges, setCharges] = useState<Charge[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [loadingCharges, setLoadingCharges] = useState<Record<string, 'marking' | 'canceling' | 'deleting'>>({});
+  const [loadingCharges, setLoadingCharges] = useState<Record<string, 'marking' | 'canceling' | 'denying' | 'deleting'>>({});
   const { handleError } = useErrorHandler();
 
   const fetchCharges = async () => {
@@ -125,6 +125,42 @@ export function PaymentsContent({ groupId, isAdmin }: PaymentsContentProps) {
     }
   };
 
+  const handleDenyCharge = async (chargeId: string) => {
+    const denialReason = window.prompt("Motivo da negativa do pagamento:");
+    if (!denialReason || denialReason.trim().length < 3) {
+      toast.error("Informe um motivo com pelo menos 3 caracteres.");
+      return;
+    }
+
+    setLoadingCharges(prev => ({ ...prev, [chargeId]: 'denying' }));
+
+    try {
+      const response = await fetch(`/api/groups/${groupId}/charges/${chargeId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "denied", denialReason: denialReason.trim() }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Erro ao negar pagamento");
+      }
+
+      toast.success("Pagamento negado", {
+        description: "A cobrança foi marcada como negada.",
+      });
+      fetchCharges();
+    } catch (error) {
+      handleError(error, { chargeId, onRetry: () => handleDenyCharge(chargeId) });
+    } finally {
+      setLoadingCharges(prev => {
+        const next = { ...prev };
+        delete next[chargeId];
+        return next;
+      });
+    }
+  };
+
   const formatCurrency = (cents: number) => {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -133,7 +169,7 @@ export function PaymentsContent({ groupId, isAdmin }: PaymentsContentProps) {
   };
 
   const totalPending = charges
-    .filter((c) => c.status === "pending")
+    .filter((c) => c.status === "pending" || c.status === "self_reported")
     .reduce((sum, c) => sum + c.amount_cents, 0);
 
   const totalPaid = charges
@@ -152,7 +188,7 @@ export function PaymentsContent({ groupId, isAdmin }: PaymentsContentProps) {
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(totalPending)}</div>
             <p className="text-xs text-muted-foreground">
-              {charges.filter((c) => c.status === "pending").length} cobrança(s)
+              {charges.filter((c) => c.status === "pending" || c.status === "self_reported").length} cobrança(s)
             </p>
           </CardContent>
         </Card>
@@ -193,6 +229,7 @@ export function PaymentsContent({ groupId, isAdmin }: PaymentsContentProps) {
               isAdmin={isAdmin}
               onMarkAsPaid={handleMarkAsPaid}
               onCancel={handleCancelCharge}
+              onDeny={handleDenyCharge}
               onDelete={handleDeleteCharge}
               loadingCharges={loadingCharges}
             />

@@ -260,3 +260,7 @@ COMMENT ON FUNCTION create_notification IS 'Helper function to create notificati
 COMMENT ON FUNCTION notify_charge_created IS 'Trigger function: Notify user when charge is created';
 COMMENT ON FUNCTION notify_payment_received IS 'Trigger function: Notify user when payment is received';
 
+
+
+
+

@@ -611,3 +611,7 @@ Funções retornam:
 **Status:** ✅ Todas as funções implementadas e testadas
 
 
+
+
+
+

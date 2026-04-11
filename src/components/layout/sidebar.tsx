@@ -2,10 +2,11 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
+import { useGroup } from "@/contexts/group-context";
 import {
-  Home,
   Users,
   Calendar,
   DollarSign,
@@ -13,25 +14,16 @@ import {
   Settings,
   Trophy,
   Target,
-  Zap,
+  FolderOpen,
   ChevronDown,
   ChevronRight,
-  Plus,
-  Sparkles,
   Medal,
   CheckCircle,
   Dumbbell,
   type LucideIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-
-/**
- * Sidebar Navigation V2 - Design System UzzAI
- *
- * Navegação hierárquica inspirada em ATLETICAS-SISTEMA-COMPLETO-V1.html
- * Seções: Principal, Gestão, Análise, Ferramentas
- */
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface NavItem {
   title: string;
@@ -56,49 +48,52 @@ export interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function Sidebar({
   className,
-  groupId = 'temp-group-id', // Temporário até ter context
-  pendingPayments = 3,
+  groupId,
+  pendingPayments = 0,
   ...props
 }: SidebarProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const { currentGroup } = useGroup();
+  const { data: session } = useSession();
+  const currentTipo = searchParams.get("tipo")?.toLowerCase() || null;
+  const resolvedGroupId = groupId ?? currentGroup?.id;
+  const groupHref = resolvedGroupId ? `/grupos/${resolvedGroupId}` : "/grupos/new";
+  const profileHref = session?.user?.id ? `/atletas/${session.user.id}` : "/configuracoes";
+  const athleteName = session?.user?.name || session?.user?.email || "Atleta";
+  const athleteRole = "Atleta";
 
-  // Seções fixas baseadas na referência HTML
+  const athleteInitials = React.useMemo(() => {
+    const value = athleteName.trim();
+    if (!value) return "AT";
+    return value
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? "")
+      .join("");
+  }, [athleteName]);
+
   const sections: NavSection[] = [
     {
       title: "Principal",
       items: [
-        {
-          title: "Dashboard",
-          href: "/dashboard",
-          icon: BarChart3,
-        },
-        {
-          title: "Modalidades",
-          href: "/modalidades",
-          icon: Dumbbell,
-          badge: "5",
-          badgeVariant: "new",
-        },
-        {
-          title: "Atletas",
-          href: "/atletas",
-          icon: Users,
-        },
+        { title: "Dashboard", href: "/dashboard", icon: BarChart3 },
+        { title: "Grupos", href: groupHref, icon: FolderOpen },
       ],
     },
     {
-      title: "Gestão",
+      title: "Eventos",
+      collapsible: true,
+      defaultOpen: true,
       items: [
-        {
-          title: "Treinos",
-          href: "/treinos",
-          icon: Calendar,
-        },
-        {
-          title: "Jogos Oficiais",
-          href: "/jogos",
-          icon: Trophy,
-        },
+        { title: "Todos", href: "/eventos", icon: Calendar },
+        { title: "Treinos", href: "/eventos?tipo=treino", icon: Calendar },
+        { title: "Jogos", href: "/eventos?tipo=jogo", icon: Trophy },
+      ],
+    },
+    {
+      title: "Operacional",
+      items: [
         {
           title: "Financeiro",
           href: "/financeiro",
@@ -106,21 +101,14 @@ export function Sidebar({
           badge: pendingPayments > 0 ? pendingPayments : undefined,
           badgeVariant: "destructive",
         },
+        { title: "Atletas", href: "/atletas", icon: Users },
       ],
     },
     {
-      title: "Análise",
+      title: "Analise",
       items: [
-        {
-          title: "Frequência",
-          href: "/frequencia",
-          icon: CheckCircle,
-        },
-        {
-          title: "Rankings",
-          href: "/rankings",
-          icon: Medal,
-        },
+        { title: "Rankings", href: "/rankings", icon: Medal },
+        { title: "Frequencia", href: "/frequencia", icon: CheckCircle },
       ],
     },
     {
@@ -128,18 +116,9 @@ export function Sidebar({
       collapsible: true,
       defaultOpen: false,
       items: [
-        {
-          title: "Tabelinha Tática",
-          href: "/tabelinha",
-          icon: Target,
-          badge: "NOVO",
-          badgeVariant: "new",
-        },
-        {
-          title: "Configurações",
-          href: "/settings",
-          icon: Settings,
-        },
+        { title: "Tabelinha Tatica", href: "/tabelinha", icon: Target, badge: "NOVO", badgeVariant: "new" },
+        { title: "Modalidades", href: "/modalidades", icon: Dumbbell },
+        { title: "Configuracoes", href: "/configuracoes", icon: Settings },
       ],
     },
   ];
@@ -147,81 +126,65 @@ export function Sidebar({
   return (
     <div
       className={cn(
-        "flex h-full w-64 flex-col gap-2 border-r bg-background p-4",
+        "flex h-full w-72 flex-col gap-3 border-r border-uzzai-silver/20 bg-gradient-to-b from-uzzai-black via-[#132a35] to-uzzai-black p-4 text-white",
         className
       )}
       {...props}
     >
-      {/* Logo */}
-      <div className="mb-4 flex items-center gap-2 px-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-uzzai-mint to-uzzai-blue">
-          <span className="text-lg font-bold text-white">P</span>
-        </div>
-        <div className="flex flex-col">
+      <div className="mb-2 rounded-xl border border-uzzai-mint/25 bg-uzzai-mint/8 px-3 py-2.5">
+        <div className="mb-1 flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-uzzai-mint to-uzzai-blue shadow-brand">
+            <span className="text-sm font-bold text-white">P</span>
+          </div>
           <span className="text-sm font-bold font-poppins">
             <span className="text-uzzai-mint">Uzz</span>
-            <span className="text-uzzai-blue font-exo2">Ai</span>
+            <span className="font-exo2 text-uzzai-blue">Ai</span>
           </span>
-          <span className="text-xs text-muted-foreground">Peladeiros</span>
         </div>
+        {currentGroup ? (
+          <Link href={`/grupos/${currentGroup.id}`} className="truncate text-xs text-white/70 hover:text-white transition-colors">
+            {currentGroup.name}
+          </Link>
+        ) : (
+          <p className="truncate text-xs text-white/70">Nenhum grupo selecionado</p>
+        )}
       </div>
 
-      {/* Quick Actions */}
-      {groupId && (
-        <div className="mb-4 space-y-2">
-          <Button
-            asChild
-            size="sm"
-            className="w-full bg-uzzai-mint hover:bg-uzzai-mint/90 text-uzzai-black"
-          >
-            <Link href={`/groups/${groupId}/events/new`}>
-              <Plus className="mr-2 h-4 w-4" />
-              Novo Evento
-            </Link>
-          </Button>
-        </div>
-      )}
-
-      {/* Navigation Sections */}
-      <nav className="flex-1 space-y-4 overflow-y-auto">
+      <nav className="flex-1 space-y-4 overflow-y-auto pr-1">
         {sections.map((section) => (
-          <NavSection
-            key={section.title}
-            section={section}
-            pathname={pathname}
-          />
+          <NavSection key={section.title} section={section} pathname={pathname} currentTipo={currentTipo} />
         ))}
       </nav>
 
-      {/* Footer - Credits Balance (se tiver groupId) */}
-      {groupId && (
-        <div className="mt-auto border-t pt-4">
-          <Link
-            href={`/groups/${groupId}/credits`}
-            className="flex items-center justify-between rounded-lg border border-uzzai-gold/30 bg-gradient-to-r from-uzzai-gold/10 to-uzzai-mint/10 p-3 transition-colors hover:border-uzzai-gold/50"
-          >
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-uzzai-gold" />
-              <div>
-                <p className="text-xs font-medium">Créditos</p>
-                <p className="text-xs text-muted-foreground">Ver saldo</p>
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </Link>
-        </div>
-      )}
+      <div className="mt-auto border-t border-uzzai-silver/20 pt-4">
+        <Link
+          href={profileHref}
+          className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 transition-colors hover:border-white/20 hover:bg-white/10"
+        >
+          <Avatar className="h-9 w-9 border border-white/20">
+            <AvatarImage src={session?.user?.image ?? ""} alt={athleteName} />
+            <AvatarFallback className="bg-gradient-to-br from-uzzai-mint to-uzzai-blue text-xs font-semibold text-white">
+              {athleteInitials}
+            </AvatarFallback>
+          </Avatar>
+          <div className="min-w-0">
+            <p className="text-xs text-white/60">{athleteRole}</p>
+            <p className="truncate text-sm font-medium text-white">{athleteName}</p>
+          </div>
+        </Link>
+      </div>
     </div>
   );
 }
 
-// Componente interno para renderizar seção
 function NavSection({
   section,
   pathname,
+  currentTipo,
 }: {
   section: NavSection;
   pathname: string;
+  currentTipo: string | null;
 }) {
   const [isOpen, setIsOpen] = React.useState(section.defaultOpen ?? true);
 
@@ -230,19 +193,15 @@ function NavSection({
       <div>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex w-full items-center justify-between px-2 py-1 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
+          className="flex w-full items-center justify-between px-2 py-1 text-sm font-semibold text-white/70 transition-colors hover:text-white"
         >
           {section.title}
-          {isOpen ? (
-            <ChevronDown className="h-4 w-4" />
-          ) : (
-            <ChevronRight className="h-4 w-4" />
-          )}
+          {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </button>
         {isOpen && (
           <div className="space-y-1 pt-1">
             {section.items.map((item) => (
-              <NavItem key={item.href} item={item} pathname={pathname} />
+              <NavItem key={item.href} item={item} pathname={pathname} currentTipo={currentTipo} />
             ))}
           </div>
         )}
@@ -252,41 +211,47 @@ function NavSection({
 
   return (
     <div>
-      <p className="mb-2 px-2 text-sm font-semibold text-muted-foreground">
-        {section.title}
-      </p>
+      <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wide text-white/60">{section.title}</p>
       <div className="space-y-1">
         {section.items.map((item) => (
-          <NavItem key={item.href} item={item} pathname={pathname} />
+          <NavItem key={item.href} item={item} pathname={pathname} currentTipo={currentTipo} />
         ))}
       </div>
     </div>
   );
 }
 
-// Componente interno para renderizar item de navegação
-function NavItem({ item, pathname }: { item: NavItem; pathname: string }) {
-  const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+function NavItem({
+  item,
+  pathname,
+  currentTipo,
+}: {
+  item: NavItem;
+  pathname: string;
+  currentTipo: string | null;
+}) {
+  const hrefPath = item.href.split("?")[0];
+  const hrefQuery = item.href.split("?")[1] || "";
+  const hrefTipo = new URLSearchParams(hrefQuery).get("tipo")?.toLowerCase() || null;
+
+  const isEventosPath = hrefPath === "/eventos";
+  const isActive = isEventosPath
+    ? pathname === "/eventos" && ((hrefTipo === null && (currentTipo === null || currentTipo === "todos")) || hrefTipo === currentTipo)
+    : pathname === hrefPath || pathname.startsWith(hrefPath + "/");
 
   return (
     <Link
       href={item.href}
       className={cn(
-        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all",
         isActive
-          ? "bg-uzzai-mint/10 text-uzzai-mint font-medium"
-          : "text-muted-foreground hover:text-foreground"
+          ? "bg-uzzai-mint/20 font-medium text-uzzai-mint"
+          : "text-white/75 hover:bg-white/6 hover:text-white"
       )}
     >
       <item.icon className="h-4 w-4 flex-shrink-0" />
       <span className="flex-1 truncate">{item.title}</span>
-      
-      {/* Premium Badge */}
-      {item.isPremium && (
-        <Sparkles className="h-3 w-3 text-uzzai-gold flex-shrink-0" />
-      )}
-      
-      {/* Badge/Counter */}
+
       {item.badge && (
         <Badge
           variant={item.badgeVariant || "default"}
@@ -301,4 +266,3 @@ function NavItem({ item, pathname }: { item: NavItem; pathname: string }) {
     </Link>
   );
 }
-

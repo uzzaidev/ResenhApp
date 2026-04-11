@@ -143,7 +143,7 @@ export function InvitesManager({ groupId, groupName, initialInvites }: InvitesMa
   };
 
   const copyInviteUrl = (code: string) => {
-    const inviteUrl = `${window.location.origin}/groups/join?code=${code}`;
+    const inviteUrl = `${window.location.origin}/grupos/join?code=${code}`;
     navigator.clipboard.writeText(inviteUrl);
     toast({
       title: "Link copiado!",
@@ -152,8 +152,8 @@ export function InvitesManager({ groupId, groupName, initialInvites }: InvitesMa
   };
 
   const shareViaWhatsApp = (code: string) => {
-    const inviteUrl = `${window.location.origin}/groups/join?code=${code}`;
-    const message = `Você foi convidado para o grupo "${groupName}" no Peladeiros! Acesse: ${inviteUrl}`;
+    const inviteUrl = `${window.location.origin}/grupos/join?code=${code}`;
+    const message = `Você foi convidado para o grupo "${groupName}" no RESENHAFC! Acesse: ${inviteUrl}`;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, "_blank");
   };

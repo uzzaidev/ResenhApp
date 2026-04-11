@@ -25,3 +25,7 @@ WHERE receiver_profile_id IS NOT NULL;
 -- Add comment
 COMMENT ON COLUMN charges.receiver_profile_id IS 'Who receives the payment (receiver profile for Pix)';
 
+
+
+
+

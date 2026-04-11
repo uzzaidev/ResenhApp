@@ -41,3 +41,7 @@ SELECT
   (SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'auth' AND table_name = 'users') AS auth_users_existe;
 
 
+
+
+
+

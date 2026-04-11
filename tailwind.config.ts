@@ -75,10 +75,15 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
+        sans: ["Inter", "sans-serif"],
+        heading: ["Poppins", "sans-serif"],
         poppins: ["Poppins", "sans-serif"],
         inter: ["Inter", "sans-serif"],
         exo2: ["Exo 2", "sans-serif"],
         "fira-code": ["Fira Code", "monospace"],
+      },
+      boxShadow: {
+        brand: "0 12px 36px rgba(26, 188, 156, 0.2)",
       },
     },
   },

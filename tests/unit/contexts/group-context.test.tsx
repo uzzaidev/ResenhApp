@@ -340,7 +340,7 @@ describe('useGroup Hook - Testes Críticos', () => {
         await result.current.switchGroup('2');
       });
 
-      // Deve chamar refresh (pathname é /dashboard, não /groups/)
+      // Deve chamar refresh (pathname é /dashboard, não /grupos/)
       expect(mockRefresh).toHaveBeenCalled();
     });
   });
@@ -419,4 +419,5 @@ describe('useGroup Hook - Testes Críticos', () => {
     });
   });
 });
+
 

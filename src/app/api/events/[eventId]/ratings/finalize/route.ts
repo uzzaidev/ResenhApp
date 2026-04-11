@@ -2,6 +2,7 @@ import { requireAuth } from "@/lib/auth-helpers";
 import { sql } from "@/db/client";
 import logger from "@/lib/logger";
 import { NextRequest, NextResponse } from "next/server";
+import { earnCredits } from "@/lib/credit-earning";
 
 type RouteContext = {
   params: Promise<{ eventId: string }>;
@@ -57,11 +58,25 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     // Se apenas 1 jogador tem o máximo, não há empate
     if (Array.isArray(tiedPlayers) && tiedPlayers.length === 1) {
+      const winnerUserId = tiedPlayers[0].voted_user_id;
+      const earning = await earnCredits(sql, winnerUserId, "receive_mvp", String(eventId));
+      if (earning.deferred || !earning.awarded) {
+        logger.info(
+          {
+            userId: winnerUserId,
+            eventId,
+            deferred: earning.deferred,
+            reason: earning.reason,
+          },
+          "MVP credit not awarded"
+        );
+      }
+
       return NextResponse.json({
         success: true,
         hasTie: false,
         winner: {
-          userId: tiedPlayers[0].voted_user_id,
+          userId: winnerUserId,
           userName: tiedPlayers[0].user_name,
           voteCount: maxVotes,
         },

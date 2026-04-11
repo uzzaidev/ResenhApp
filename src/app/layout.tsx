@@ -1,15 +1,15 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/components/providers/auth-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
 import { GroupProvider } from "@/contexts/group-context";
-import { DirectModeProvider } from "@/contexts/direct-mode-context";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
 
 export const metadata: Metadata = {
-  title: "Peladeiros - Gestão de Peladas",
-  description: "Organize suas peladas, sorteie times, registre estatísticas e acompanhe rankings",
+  title: "RESENHAFC - Gestão de Treinos",
+  description: "Organize seus treinos, sorteie times, registre estatísticas e acompanhe rankings",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Peladeiros",
+    title: "RESENHAFC",
   },
   formatDetection: {
     telephone: false,
@@ -45,16 +45,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <body className="font-sans min-h-screen overflow-x-hidden" suppressHydrationWarning>
-        <ErrorBoundary>
-          <AuthProvider>
-            <GroupProvider>
-              <DirectModeProvider>
+      <body className="font-inter antialiased min-h-screen overflow-x-hidden" suppressHydrationWarning>
+        <ThemeProvider>
+          <ErrorBoundary>
+            <AuthProvider>
+              <GroupProvider>
                 {children}
-              </DirectModeProvider>
-            </GroupProvider>
-          </AuthProvider>
-        </ErrorBoundary>
+              </GroupProvider>
+            </AuthProvider>
+          </ErrorBoundary>
+        </ThemeProvider>
         <Toaster />
         <SonnerToaster />
       </body>

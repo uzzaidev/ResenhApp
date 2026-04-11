@@ -3,6 +3,33 @@ import { requireAuth } from "@/lib/auth-helpers";
 import { sql } from "@/db/client";
 import { createEventSchema } from "@/lib/validations";
 import logger from "@/lib/logger";
+import { earnCredits } from "@/lib/credit-earning";
+
+type EventTypeFilter = "training" | "match" | null;
+
+function normalizeEventTypeFilter(raw: string | null): EventTypeFilter {
+  if (!raw) return null;
+
+  const normalized = raw.trim().toLowerCase();
+  if (!normalized) return null;
+
+  if (normalized === "treino" || normalized === "training") {
+    return "training";
+  }
+
+  if (normalized === "jogo" || normalized === "match" || normalized === "game") {
+    return "match";
+  }
+
+  return null;
+}
+
+function parseLimit(raw: string | null, fallback = 10): number {
+  if (!raw) return fallback;
+  const parsed = Number.parseInt(raw, 10);
+  if (Number.isNaN(parsed) || parsed <= 0) return fallback;
+  return Math.min(parsed, 100);
+}
 
 // GET /api/events - List events (with filters)
 export async function GET(request: NextRequest) {
@@ -11,8 +38,12 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     
     const groupId = searchParams.get("groupId");
-    const status = searchParams.get("status");
-    const limit = searchParams.get("limit") ? parseInt(searchParams.get("limit")!) : 10;
+    const requestedStatus = searchParams.get("status");
+    const status = requestedStatus === "canceled" ? "cancelled" : requestedStatus;
+    const eventTypeFilter = normalizeEventTypeFilter(
+      searchParams.get("event_type") ?? searchParams.get("tipo")
+    );
+    const limit = parseLimit(searchParams.get("limit"));
 
     if (!groupId) {
       return NextResponse.json(
@@ -35,38 +66,109 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Build query with filters
-    let events;
-    
-    if (status) {
-      events = await sql`
-        SELECT
-          e.id,
-          e.starts_at,
-          e.status,
-          e.max_players,
-          v.name as venue_name
-        FROM events e
-        LEFT JOIN venues v ON e.venue_id = v.id
-        WHERE e.group_id = ${groupId} AND e.status = ${status}
-        ORDER BY e.starts_at DESC
-        LIMIT ${limit}
-      `;
-    } else {
-      events = await sql`
-        SELECT
-          e.id,
-          e.starts_at,
-          e.status,
-          e.max_players,
-          v.name as venue_name
-        FROM events e
-        LEFT JOIN venues v ON e.venue_id = v.id
-        WHERE e.group_id = ${groupId}
-        ORDER BY e.starts_at DESC
-        LIMIT ${limit}
-      `;
-    }
+    const eventColumnsResult = await sql<
+      {
+        has_event_type: boolean;
+        has_price: boolean;
+        has_opponent: boolean;
+        has_our_score: boolean;
+        has_opponent_score: boolean;
+      }[]
+    >`
+      SELECT
+        EXISTS (
+          SELECT 1
+          FROM information_schema.columns
+          WHERE table_schema = 'public' AND table_name = 'events' AND column_name = 'event_type'
+        ) as has_event_type,
+        EXISTS (
+          SELECT 1
+          FROM information_schema.columns
+          WHERE table_schema = 'public' AND table_name = 'events' AND column_name = 'price'
+        ) as has_price,
+        EXISTS (
+          SELECT 1
+          FROM information_schema.columns
+          WHERE table_schema = 'public' AND table_name = 'events' AND column_name = 'opponent'
+        ) as has_opponent,
+        EXISTS (
+          SELECT 1
+          FROM information_schema.columns
+          WHERE table_schema = 'public' AND table_name = 'events' AND column_name = 'our_score'
+        ) as has_our_score,
+        EXISTS (
+          SELECT 1
+          FROM information_schema.columns
+          WHERE table_schema = 'public' AND table_name = 'events' AND column_name = 'opponent_score'
+        ) as has_opponent_score
+    `;
+
+    const eventColumns = eventColumnsResult[0] || {
+      has_event_type: false,
+      has_price: false,
+      has_opponent: false,
+      has_our_score: false,
+      has_opponent_score: false,
+    };
+
+    const eventTypeSelectSql = eventColumns.has_event_type
+      ? sql`e.event_type as event_type,`
+      : sql`NULL::TEXT as event_type,`;
+    const priceSelectSql = eventColumns.has_price
+      ? sql`e.price as price,`
+      : sql`NULL::NUMERIC as price,`;
+    const opponentSelectSql = eventColumns.has_opponent
+      ? sql`e.opponent as opponent,`
+      : sql`NULL::TEXT as opponent,`;
+    const ourScoreSelectSql = eventColumns.has_our_score
+      ? sql`e.our_score as our_score,`
+      : sql`NULL::INTEGER as our_score,`;
+    const opponentScoreSelectSql = eventColumns.has_opponent_score
+      ? sql`e.opponent_score as opponent_score,`
+      : sql`NULL::INTEGER as opponent_score,`;
+
+    const statusFilterSql = status ? sql`AND e.status = ${status}` : sql``;
+    const eventTypeFilterSql =
+      !eventColumns.has_event_type || !eventTypeFilter
+        ? sql``
+        : eventTypeFilter === "training"
+        ? sql`AND (e.event_type = 'training' OR e.event_type IS NULL)`
+        : sql`AND (e.event_type = 'game' OR e.event_type = 'match')`;
+
+    const events = await sql`
+      SELECT
+        e.id,
+        e.group_id,
+        e.starts_at,
+        e.status,
+        e.max_players,
+        v.name as venue_name,
+        ${eventTypeSelectSql}
+        ${priceSelectSql}
+        ${opponentSelectSql}
+        ${ourScoreSelectSql}
+        ${opponentScoreSelectSql}
+        (
+          SELECT COUNT(*)::INTEGER
+          FROM event_attendance ea
+          WHERE ea.event_id = e.id
+            AND ea.status = 'yes'
+        ) as confirmed_count,
+        (
+          SELECT ea.status::TEXT
+          FROM event_attendance ea
+          WHERE ea.event_id = e.id
+            AND ea.user_id = ${user.id}
+          LIMIT 1
+        ) as user_rsvp_status
+      FROM events e
+      LEFT JOIN venues v ON e.venue_id = v.id
+      WHERE e.group_id = ${groupId}
+      ${statusFilterSql}
+      ${eventTypeFilterSql}
+      ORDER BY e.starts_at DESC
+      LIMIT ${limit}
+    `;
 
     return NextResponse.json({ events });
   } catch (error) {
@@ -108,6 +210,13 @@ export async function POST(request: NextRequest) {
       receiverProfileId,
       autoChargeOnRsvp,
     } = validation.data;
+
+    const existingEventsByUser = await sql<{ total: number }[]>`
+      SELECT COUNT(*)::INTEGER AS total
+      FROM events
+      WHERE created_by = ${user.id}
+    `;
+    const isFirstEventByUser = Number(existingEventsByUser[0]?.total || 0) === 0;
 
     // Check if user is admin of the group
     const membershipResult = await sql`
@@ -168,6 +277,26 @@ export async function POST(request: NextRequest) {
       RETURNING *
     `;
     const event = eventResult[0];
+
+    if (isFirstEventByUser) {
+      const earning = await earnCredits(
+        sql,
+        user.id,
+        "first_event_created",
+        String(event.id)
+      );
+      if (earning.deferred || !earning.awarded) {
+        logger.info(
+          {
+            userId: user.id,
+            eventId: event.id,
+            deferred: earning.deferred,
+            reason: earning.reason,
+          },
+          "First event credit not awarded"
+        );
+      }
+    }
 
     logger.info({ eventId: event.id, groupId, userId: user.id }, "Event created");
 

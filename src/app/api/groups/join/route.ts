@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth } from "@/lib/auth-helpers";
+import { isUnauthorizedError, requireAuth } from "@/lib/auth-helpers";
 import { sql } from "@/db/client";
 import logger from "@/lib/logger";
 
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    if (error instanceof Error && error.message === "Não autenticado") {
+    if (isUnauthorizedError(error)) {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
     logger.error(error, "Error joining group");
@@ -117,3 +117,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

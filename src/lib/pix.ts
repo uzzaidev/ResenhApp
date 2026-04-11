@@ -75,6 +75,7 @@ export function formatPixKey(key: string, type: string): string {
 /**
  * Creates EMV QR Code payload for Pix
  * Format: BR Code (Brazilian standard)
+ * @deprecated Phase 3 uses static Pix key display instead of EMV payload generation.
  */
 export function generatePixPayload(data: PixData): string {
   // Validate Pix key
@@ -200,6 +201,7 @@ function calculateCRC16(data: string): string {
 /**
  * Generates QR Code image from Pix payload
  * Returns base64 data URL
+ * @deprecated Phase 3 uses static Pix key display instead of QR generation.
  */
 export async function generatePixQRImage(
   payload: string,
@@ -233,6 +235,7 @@ export async function generatePixQRImage(
 
 /**
  * Generates complete Pix QR Code (payload + image)
+ * @deprecated Phase 3 uses static Pix key display instead of QR generation.
  */
 export async function generatePixQRCode(
   data: PixData,
@@ -252,4 +255,8 @@ export async function generatePixQRCode(
     qrImage,
   };
 }
+
+
+
+
 

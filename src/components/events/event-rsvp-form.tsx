@@ -1,14 +1,14 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ButtonWithLoading, ButtonStatus } from "@/components/ui/button-with-loading";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { useErrorHandler } from "@/hooks/use-error-handler";
-import { Check, X, Goal, Shield, Zap, TrendingUp } from "lucide-react";
+import { Goal, Shield, Zap, TrendingUp } from "lucide-react";
+import { RsvpAction, RsvpButton, RsvpButtonStatus } from "@/components/eventos/rsvp-button";
 
 type Position = "gk" | "defender" | "midfielder" | "forward";
 
@@ -33,7 +33,8 @@ export function EventRsvpForm({ eventId, currentAttendance, eventStatus }: Event
   const router = useRouter();
   const { toast } = useToast();
   const { handleError } = useErrorHandler();
-  const [rsvpStatus, setRsvpStatus] = useState<ButtonStatus>('idle');
+  const [rsvpStatus, setRsvpStatus] = useState<RsvpButtonStatus>("idle");
+  const [activeAction, setActiveAction] = useState<RsvpAction | null>(null);
   const [preferredPosition, setPreferredPosition] = useState<Position | null>(
     (currentAttendance?.preferred_position as Position) || null
   );
@@ -53,11 +54,11 @@ export function EventRsvpForm({ eventId, currentAttendance, eventStatus }: Event
     }
   };
 
-  const handleRsvp = async (status: "yes" | "no") => {
+  const handleRsvp = async (status: RsvpAction) => {
     if (status === "yes" && !preferredPosition) {
       toast({
-        title: "Posição obrigatória",
-        description: "Selecione pelo menos sua posição preferencial",
+        title: "PosiÃ§Ã£o obrigatÃ³ria",
+        description: "Selecione pelo menos sua posiÃ§Ã£o preferencial",
         variant: "destructive",
       });
       return;
@@ -65,14 +66,15 @@ export function EventRsvpForm({ eventId, currentAttendance, eventStatus }: Event
 
     if (preferredPosition === secondaryPosition && secondaryPosition !== null) {
       toast({
-        title: "Posições duplicadas",
-        description: "Selecione posições diferentes para 1ª e 2ª opção",
+        title: "PosiÃ§Ãµes duplicadas",
+        description: "Selecione posiÃ§Ãµes diferentes para 1Âª e 2Âª opÃ§Ã£o",
         variant: "destructive",
       });
       return;
     }
 
-    setRsvpStatus('loading');
+    setActiveAction(status);
+    setRsvpStatus("loading");
 
     try {
       const response = await fetch(`/api/events/${eventId}/rsvp`, {
@@ -90,7 +92,7 @@ export function EventRsvpForm({ eventId, currentAttendance, eventStatus }: Event
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || "Erro ao confirmar presença");
+        throw new Error(error.error || "Erro ao confirmar presenÃ§a");
       }
 
       const data = await response.json();
@@ -104,36 +106,37 @@ export function EventRsvpForm({ eventId, currentAttendance, eventStatus }: Event
         }).format(amount);
 
         toast({
-          title: "Presença confirmada!",
-          description: `Cobrança de ${formattedAmount} gerada automaticamente.`,
+          title: "PresenÃ§a confirmada!",
+          description: `CobranÃ§a de ${formattedAmount} gerada automaticamente.`,
           action: data.charge.id ? (
             <ToastAction
-              altText="Ver cobrança"
+              altText="Ver cobranÃ§a"
               onClick={() => router.push(`/financeiro/charges/${data.charge.id}`)}
             >
-              Ver cobrança
+              Ver cobranÃ§a
             </ToastAction>
           ) : undefined,
         });
       } else {
         toast({
-          title: status === "yes" ? "Presença confirmada!" : "Presença cancelada",
+          title: status === "yes" ? "PresenÃ§a confirmada!" : "PresenÃ§a cancelada",
           description:
             status === "yes"
-              ? "Sua confirmação foi registrada com sucesso"
-              : "Sua confirmação foi removida",
+              ? "Sua confirmaÃ§Ã£o foi registrada com sucesso"
+              : "Sua confirmaÃ§Ã£o foi removida",
         });
       }
 
-      setRsvpStatus('success');
+      setRsvpStatus(status === "yes" ? "confirmed" : "declined");
       router.refresh();
 
-      // Reset status após 2 segundos
+      // Reset status apÃ³s 2 segundos
       setTimeout(() => {
-        setRsvpStatus('idle');
+        setRsvpStatus("idle");
+        setActiveAction(null);
       }, 2000);
     } catch (error) {
-      setRsvpStatus('error');
+      setRsvpStatus("error");
       
       // Usar error handler com retry
       handleError(error, {
@@ -141,9 +144,10 @@ export function EventRsvpForm({ eventId, currentAttendance, eventStatus }: Event
         onRetry: () => handleRsvp(status),
       });
 
-      // Reset status após 3 segundos
+      // Reset status apÃ³s 3 segundos
       setTimeout(() => {
-        setRsvpStatus('idle');
+        setRsvpStatus("idle");
+        setActiveAction(null);
       }, 3000);
     }
   };
@@ -152,9 +156,9 @@ export function EventRsvpForm({ eventId, currentAttendance, eventStatus }: Event
 
   return (
     <div className="space-y-6">
-      {/* Step 1: Seleção de posição preferencial */}
+      {/* Step 1: SeleÃ§Ã£o de posiÃ§Ã£o preferencial */}
       <div className="space-y-3">
-        <Label className="text-base">1ª Posição Preferencial *</Label>
+        <Label className="text-base">1Âª PosiÃ§Ã£o Preferencial *</Label>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {POSITIONS.map((pos) => {
             const IconComponent = pos.Icon;
@@ -162,7 +166,7 @@ export function EventRsvpForm({ eventId, currentAttendance, eventStatus }: Event
               <button
                 key={pos.value}
                 type="button"
-                disabled={isEventFinished || rsvpStatus === 'loading'}
+                disabled={isEventFinished || rsvpStatus === "loading"}
                 onClick={() => handlePrimaryPositionSelect(pos.value)}
                 className={`p-4 rounded-lg border-2 transition-all text-center ${
                   preferredPosition === pos.value
@@ -180,13 +184,13 @@ export function EventRsvpForm({ eventId, currentAttendance, eventStatus }: Event
         </div>
       </div>
 
-      {/* Step 2: Seleção de posição secundária (conditional) */}
+      {/* Step 2: SeleÃ§Ã£o de posiÃ§Ã£o secundÃ¡ria (conditional) */}
       {showSecondaryPosition && preferredPosition && (
         <div className="space-y-3 animate-in fade-in slide-in-from-top-4 duration-300">
-          <Label className="text-base">2ª Posição (Opcional)</Label>
+          <Label className="text-base">2Âª PosiÃ§Ã£o (Opcional)</Label>
           <p className="text-sm text-muted-foreground">
-            Você escolheu {POSITIONS.find(p => p.value === preferredPosition)?.label}.
-            Quer adicionar uma segunda opção?
+            VocÃª escolheu {POSITIONS.find(p => p.value === preferredPosition)?.label}.
+            Quer adicionar uma segunda opÃ§Ã£o?
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {POSITIONS.filter(pos => pos.value !== preferredPosition).map((pos) => {
@@ -195,7 +199,7 @@ export function EventRsvpForm({ eventId, currentAttendance, eventStatus }: Event
                 <button
                   key={pos.value}
                   type="button"
-                  disabled={isEventFinished || rsvpStatus === 'loading'}
+                  disabled={isEventFinished || rsvpStatus === "loading"}
                   onClick={() =>
                     setSecondaryPosition(secondaryPosition === pos.value ? null : pos.value)
                   }
@@ -215,7 +219,7 @@ export function EventRsvpForm({ eventId, currentAttendance, eventStatus }: Event
           </div>
           {secondaryPosition ? (
             <p className="text-xs text-muted-foreground">
-              Clique novamente para remover a 2ª posição
+              Clique novamente para remover a 2Âª posiÃ§Ã£o
             </p>
           ) : (
             <Button
@@ -225,49 +229,37 @@ export function EventRsvpForm({ eventId, currentAttendance, eventStatus }: Event
               onClick={() => setSecondaryPosition(null)}
               className="w-full sm:w-auto"
             >
-              Pular (sem 2ª posição)
+              Pular (sem 2Âª posiÃ§Ã£o)
             </Button>
           )}
         </div>
       )}
 
-      {/* Botões de ação */}
+      {/* BotÃµes de aÃ§Ã£o */}
       <div className="flex flex-col sm:flex-row gap-3 pt-4">
-        <ButtonWithLoading
-          data-testid="confirm-presence-button"
+        <RsvpButton
+          action="yes"
           onClick={() => handleRsvp("yes")}
           disabled={isEventFinished || !preferredPosition}
-          status={rsvpStatus}
-          idleText="Confirmar Presença"
-          loadingText="Confirmando..."
-          successText="Confirmado!"
-          errorText="Tentar Novamente"
+          status={activeAction === "yes" ? rsvpStatus : "idle"}
+          dataTestId="confirm-presence-button"
           className="flex-1"
-          size="lg"
-        >
-          <Check className="h-4 w-4 mr-2" />
-        </ButtonWithLoading>
-        <ButtonWithLoading
+        />
+        <RsvpButton
+          action="no"
           onClick={() => handleRsvp("no")}
           disabled={isEventFinished}
-          status={rsvpStatus}
-          idleText="Não Vou"
-          loadingText="Cancelando..."
-          successText="Cancelado"
-          errorText="Tentar Novamente"
-          variant="outline"
+          status={activeAction === "no" ? rsvpStatus : "idle"}
           className="flex-1 sm:flex-none"
-          size="lg"
-        >
-          <X className="h-4 w-4 mr-2" />
-        </ButtonWithLoading>
+        />
       </div>
 
       {isEventFinished && (
         <p className="text-sm text-muted-foreground text-center">
-          Este evento já foi finalizado
+          Este evento jÃ¡ foi finalizado
         </p>
       )}
     </div>
   );
 }
+

@@ -1,75 +1,48 @@
 /**
  * Credits Middleware
- * 
- * Helper para integrar verificação de créditos em features premium.
- * 
- * Usage:
- * ```typescript
- * import { withCreditsCheck } from "@/lib/credits-middleware";
- * 
- * export async function POST(request: NextRequest) {
- *   return withCreditsCheck(
- *     request,
- *     "recurring_training",
- *     async (user, groupId) => {
- *       // Your feature logic here
- *       return NextResponse.json({ success: true });
- *     }
- *   );
- * }
- * ```
+ *
+ * Helper para integrar verificacao de quota em features premium.
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth-helpers";
 import { sql } from "@/db/client";
-import { checkAndConsumeCredits, type FeatureType } from "@/lib/credits";
+import {
+  checkAndConsumeCredits,
+  hasEnoughCredits,
+  type FeatureType,
+} from "@/lib/credits";
 import logger from "@/lib/logger";
 
 export interface CreditsCheckOptions {
-  /** Se deve consumir créditos automaticamente (default: true) */
+  /** Se deve consumir quota automaticamente (default: true) */
   autoConsume?: boolean;
   /** ID do evento relacionado (opcional) */
   eventId?: string;
-  /** Descrição customizada da transação */
+  /** Descricao customizada da transacao */
   description?: string;
-  /** Verificar se usuário é admin do grupo (default: false) */
+  /** Verificar se usuario e admin do grupo (default: false) */
   requireAdmin?: boolean;
 }
 
 /**
- * Wrapper para rotas que requerem créditos
- * 
- * Verifica automaticamente:
- * 1. Autenticação do usuário
- * 2. Membership no grupo
- * 3. Créditos suficientes
- * 4. Consome créditos (se autoConsume = true)
- * 
- * @param request - NextRequest
- * @param feature - Feature type (recurring_training, qrcode_checkin, etc.)
- * @param handler - Handler function que recebe (user, groupId, eventId?)
- * @param options - Opções adicionais
+ * Wrapper para rotas que requerem quota.
  */
 export async function withCreditsCheck<T = any>(
   request: NextRequest,
   feature: FeatureType,
-  handler: (user: any, groupId: string, eventId?: string) => Promise<NextResponse<T> | NextResponse<{ error: string }>>,
+  handler: (
+    user: any,
+    groupId: string,
+    eventId?: string
+  ) => Promise<NextResponse<T> | NextResponse<{ error: string }>>,
   options: CreditsCheckOptions = {}
 ): Promise<NextResponse> {
-  const {
-    autoConsume = true,
-    eventId,
-    description,
-    requireAdmin = false,
-  } = options;
+  const { autoConsume = true, eventId, description, requireAdmin = false } = options;
 
   try {
-    // 1. Authenticate user
     const user = await requireAuth();
 
-    // 2. Get groupId from request (body or query)
-    // IMPORTANTE: Não consumir body aqui, deixar handler fazer isso
     let groupId: string | null = null;
     let requestEventId: string | undefined = eventId;
 
@@ -78,15 +51,12 @@ export async function withCreditsCheck<T = any>(
       groupId = searchParams.get("group_id");
       requestEventId = requestEventId || searchParams.get("event_id") || undefined;
     } else {
-      // Para POST/PATCH, tentar pegar groupId do body sem consumir completamente
-      // Se não conseguir, o handler precisará parsear
       try {
         const clonedRequest = request.clone();
         const body = await clonedRequest.json();
         groupId = body.groupId || body.group_id;
         requestEventId = requestEventId || body.eventId || body.event_id;
       } catch {
-        // Se falhar, tentar pegar de query params como fallback
         const { searchParams } = new URL(request.url);
         groupId = searchParams.get("group_id");
         requestEventId = requestEventId || searchParams.get("event_id") || undefined;
@@ -94,13 +64,9 @@ export async function withCreditsCheck<T = any>(
     }
 
     if (!groupId) {
-      return NextResponse.json(
-        { error: "group_id é obrigatório" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "group_id e obrigatorio" }, { status: 400 });
     }
 
-    // 3. Check membership
     const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
@@ -109,13 +75,9 @@ export async function withCreditsCheck<T = any>(
     const membership = membershipQuery[0];
 
     if (!membership) {
-      return NextResponse.json(
-        { error: "Você não é membro deste grupo" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Voce nao e membro deste grupo" }, { status: 403 });
     }
 
-    // 4. Check if admin is required
     if (requireAdmin && membership.role !== "admin") {
       return NextResponse.json(
         { error: "Apenas administradores podem usar esta feature" },
@@ -123,7 +85,6 @@ export async function withCreditsCheck<T = any>(
       );
     }
 
-    // 5. Check and consume credits
     if (autoConsume) {
       const result = await checkAndConsumeCredits(
         groupId,
@@ -134,6 +95,25 @@ export async function withCreditsCheck<T = any>(
       );
 
       if (!result.success) {
+        let requiredCredits: number | undefined;
+        let currentBalance: number | undefined;
+
+        try {
+          const snapshot = await hasEnoughCredits(groupId, feature);
+          requiredCredits = snapshot.required;
+          currentBalance = snapshot.current;
+        } catch (snapshotError) {
+          logger.warn(
+            { groupId, feature, userId: user.id, snapshotError },
+            "Failed to fetch quota snapshot for insufficient credits response"
+          );
+        }
+
+        const normalizedError = String(result.error || "Quota insuficiente").replace(
+          /cr[eé]ditos?/gi,
+          "quota"
+        );
+
         logger.warn(
           { groupId, feature, userId: user.id, error: result.error },
           "Insufficient credits for feature"
@@ -141,12 +121,13 @@ export async function withCreditsCheck<T = any>(
 
         return NextResponse.json(
           {
-            error: result.error || "Créditos insuficientes",
+            error: normalizedError,
             code: "INSUFFICIENT_CREDITS",
             feature,
-            required: result.newBalance, // Actually contains error info
+            requiredCredits,
+            currentBalance,
           },
-          { status: 402 } // 402 Payment Required
+          { status: 402 }
         );
       }
 
@@ -161,31 +142,23 @@ export async function withCreditsCheck<T = any>(
       );
     }
 
-    // 6. Execute handler
     return await handler(user, groupId, requestEventId);
   } catch (error) {
-    if (error instanceof Error && error.message === "Não autenticado") {
-      return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+    if (
+      error instanceof Error &&
+      /nao autenticado|não autenticado/i.test(error.message)
+    ) {
+      return NextResponse.json({ error: "Nao autenticado" }, { status: 401 });
     }
 
     logger.error({ error, feature }, "Error in credits middleware");
-    return NextResponse.json(
-      { error: "Erro ao processar requisição" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Erro ao processar requisicao" }, { status: 500 });
   }
 }
 
-/**
- * Verificar créditos sem consumir
- * 
- * Útil para pré-validação antes de ações complexas
- */
 export async function checkCreditsOnly(
   groupId: string,
   feature: FeatureType
 ): Promise<{ hasCredits: boolean; required: number; current: number }> {
-  const { hasEnoughCredits } = await import("@/lib/credits");
   return hasEnoughCredits(groupId, feature);
 }
-

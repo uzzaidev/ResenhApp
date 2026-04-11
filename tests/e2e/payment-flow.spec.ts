@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { login } from './helpers/auth';
+import { createAuthUserFixture, cleanupAuthUserFixture, type AuthUserFixture } from './helpers/db';
 
 /**
  * Teste E2E: Fluxo de Pagamento (Pix)
@@ -16,13 +17,22 @@ import { login } from './helpers/auth';
  */
 
 test.describe('Payment Flow', () => {
+  let fixture: AuthUserFixture;
+
   test.beforeEach(async ({ page }) => {
-    // Fazer login antes de cada teste
-    await login(page);
+    fixture = await createAuthUserFixture('payment', { withPendingCharge: true });
+    await login(page, { email: fixture.email, password: fixture.password });
   });
+
+  test.afterEach(async () => {
+    if (fixture) {
+      await cleanupAuthUserFixture(fixture);
+    }
+  });
+
   test('deve visualizar QR Code Pix de uma cobrança', async ({ page }) => {
     // 1. Ir para financeiro
-    await page.goto('/financeiro');
+    await page.goto('/financeiro', { waitUntil: 'domcontentloaded', timeout: 45000 });
     await expect(page.locator('h1')).toContainText('Financeiro');
 
     // 2. Verificar se há cobranças
@@ -57,7 +67,7 @@ test.describe('Payment Flow', () => {
   });
 
   test('deve marcar cobrança como paga e permitir undo', async ({ page }) => {
-    await page.goto('/financeiro');
+    await page.goto('/financeiro', { waitUntil: 'domcontentloaded', timeout: 45000 });
     
     const charges = page.locator('[data-testid="charge-item"]');
     const chargeCount = await charges.count();
@@ -100,4 +110,3 @@ test.describe('Payment Flow', () => {
     // É melhor testar isso em um teste separado com mock de tempo
   });
 });
-

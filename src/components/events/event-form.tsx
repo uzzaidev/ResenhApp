@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,11 +14,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/components/ui/use-toast";
 import { ButtonWithLoading, ButtonStatus } from "@/components/ui/button-with-loading";
 import { FormField } from "@/components/ui/form-field";
 import { useErrorHandler } from "@/hooks/use-error-handler";
-import { DollarSign, ChevronDown, ChevronUp } from "lucide-react";
+import { DollarSign, ChevronDown, ChevronUp, AlertTriangle } from "lucide-react";
 import { z } from "zod";
 import {
   Collapsible,
@@ -66,6 +68,11 @@ export function EventForm({ groupId, mode, eventId, initialData }: EventFormProp
   const { handleError } = useErrorHandler();
   const [submitStatus, setSubmitStatus] = useState<ButtonStatus>('idle');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [quotaIssue, setQuotaIssue] = useState<{
+    message: string;
+    requiredCredits?: number;
+    currentBalance?: number;
+  } | null>(null);
 
   // Format datetime for input (needs to be in local time for datetime-local input)
   const formatDateTimeLocal = (isoString?: string) => {
@@ -126,6 +133,7 @@ export function EventForm({ groupId, mode, eventId, initialData }: EventFormProp
     e.preventDefault();
     setErrors({});
     setSubmitStatus('loading');
+    setQuotaIssue(null);
 
     try {
       // Validação com Zod
@@ -199,6 +207,26 @@ export function EventForm({ groupId, mode, eventId, initialData }: EventFormProp
       const data = await response.json();
 
       if (!response.ok) {
+        if (response.status === 402) {
+          const normalizedMessage = String(
+            data.error || "Quota insuficiente para concluir esta acao."
+          ).replace(/cr[eé]ditos?/gi, "quota");
+          setQuotaIssue({
+            message: normalizedMessage,
+            requiredCredits:
+              typeof data.requiredCredits === "number" ? data.requiredCredits : undefined,
+            currentBalance:
+              typeof data.currentBalance === "number" ? data.currentBalance : undefined,
+          });
+          setSubmitStatus("error");
+          toast({
+            title: "Quota insuficiente",
+            description: "Recarregue sua quota antes de criar ou editar o evento.",
+            variant: "destructive",
+          });
+          setTimeout(() => setSubmitStatus("idle"), 2000);
+          return;
+        }
         throw new Error(data.error || `Erro ao ${mode === "create" ? "criar" : "atualizar"} evento`);
       }
 
@@ -212,9 +240,9 @@ export function EventForm({ groupId, mode, eventId, initialData }: EventFormProp
       // Redirect to the event or group page após 1 segundo
       setTimeout(() => {
         if (mode === "create") {
-          router.push(`/groups/${groupId}/events/${data.event.id}`);
+          router.push(`/eventos/${data.event.id}`);
         } else {
-          router.push(`/groups/${groupId}/events/${eventId}`);
+          router.push(`/eventos/${eventId}`);
         }
       }, 1000);
     } catch (error) {
@@ -244,6 +272,31 @@ export function EventForm({ groupId, mode, eventId, initialData }: EventFormProp
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {quotaIssue && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Quota insuficiente</AlertTitle>
+              <AlertDescription className="space-y-3">
+                <p>{quotaIssue.message}</p>
+                {typeof quotaIssue.requiredCredits === "number" &&
+                  typeof quotaIssue.currentBalance === "number" && (
+                    <p>
+                      Necessario: {quotaIssue.requiredCredits} quota(s) | Disponivel:{" "}
+                      {quotaIssue.currentBalance} quota(s)
+                    </p>
+                  )}
+                <div className="flex flex-wrap gap-2">
+                  <Button asChild size="sm" variant="outline">
+                    <Link href="/configuracoes?tab=quota">Gerenciar quota</Link>
+                  </Button>
+                  <Button asChild size="sm" variant="outline">
+                    <Link href="/credits/buy">Solicitar compra</Link>
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
           <FormField
             label="Data e Hora"
             required

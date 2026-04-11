@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { login } from './helpers/auth';
-import { createTestTraining, cleanupTestData } from './helpers/data';
+import { createAuthUserFixture, cleanupAuthUserFixture, type AuthUserFixture } from './helpers/db';
 
 /**
  * Teste E2E: Fluxo RSVP Completo
@@ -16,18 +16,29 @@ import { createTestTraining, cleanupTestData } from './helpers/data';
  */
 
 test.describe('RSVP Flow', () => {
+  let fixture: AuthUserFixture;
+
   test.beforeEach(async ({ page }) => {
-    // Fazer login antes de cada teste
-    await login(page);
+    fixture = await createAuthUserFixture('rsvp', { withUpcomingEvent: true });
+    await login(page, { email: fixture.email, password: fixture.password });
+  });
+
+  test.afterEach(async () => {
+    if (fixture) {
+      await cleanupAuthUserFixture(fixture);
+    }
   });
 
   test('deve confirmar presença e gerar charge automaticamente', async ({ page }) => {
     // 2. Ir para treinos
-    await page.goto('/treinos');
-    await expect(page.locator('h1')).toContainText('Treinos');
+    await page.goto('/eventos?tipo=treino', { waitUntil: 'domcontentloaded', timeout: 45000 });
+    await expect(
+      page.getByRole('main').getByRole('heading', { name: 'Eventos', exact: true })
+    ).toBeVisible();
 
     // 3. Verificar se há treinos disponíveis
-    const hasTrainings = await page.locator('[data-testid="training-card"]').count() > 0;
+    const eventLinks = page.locator('a[href*="/eventos/"][href*="returnTo="]');
+    const hasTrainings = await eventLinks.count() > 0;
     
     if (!hasTrainings) {
       test.skip('Nenhum treino disponível para teste');
@@ -35,7 +46,7 @@ test.describe('RSVP Flow', () => {
     }
 
     // 4. Clicar no primeiro treino com preço
-    const trainingCard = page.locator('[data-testid="training-card"]').first();
+    const trainingCard = eventLinks.first();
     await trainingCard.click();
 
     // 5. Verificar se há botão de confirmar presença
@@ -73,10 +84,10 @@ test.describe('RSVP Flow', () => {
     // Este teste verifica que o toast de sucesso do RSVP
     // contém um link para a página da charge criada
     
-    await page.goto('/treinos');
+    await page.goto('/eventos?tipo=treino', { waitUntil: 'domcontentloaded', timeout: 45000 });
     
     // Assumindo que há um treino com preço
-    const trainingCard = page.locator('[data-testid="training-card"]').first();
+    const trainingCard = page.locator('a[href*="/eventos/"][href*="returnTo="]').first();
     
     if ((await trainingCard.count()) === 0) {
       test.skip('Nenhum treino disponível');
@@ -98,4 +109,3 @@ test.describe('RSVP Flow', () => {
     await expect(toastLink).toBeVisible({ timeout: 5000 });
   });
 });
-

@@ -20,44 +20,37 @@ export async function POST(request: NextRequest) {
     const user = await requireAuth();
     const body = await request.json();
 
-    // Validate request body
     const validation = validateSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json(
-        { error: "Dados inválidos", details: validation.error.flatten() },
+        { error: "Dados invalidos", details: validation.error.flatten() },
         { status: 400 }
       );
     }
 
     const { groupId, code, packagePriceCents } = validation.data;
 
-    // Check if user is member of the group
     const membershipQuery = await sql`
       SELECT role FROM group_members
       WHERE group_id = ${groupId} AND user_id = ${user.id}
     `;
 
     if (!membershipQuery || membershipQuery.length === 0) {
-      return NextResponse.json(
-        { error: "Você não é membro deste grupo" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Voce nao e membro deste grupo" }, { status: 403 });
     }
 
-    // Validate coupon
     const result = await validateCoupon(code, groupId, packagePriceCents);
-
     return NextResponse.json(result);
   } catch (error) {
-    if (error instanceof Error && error.message === "Não autenticado") {
-      return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+    if (
+      error instanceof Error &&
+      /nao autenticado|n�o autenticado/i.test(error.message)
+    ) {
+      return NextResponse.json({ error: "Nao autenticado" }, { status: 401 });
     }
+
     logger.error(error, "Error validating coupon");
-    return NextResponse.json(
-      { error: "Erro ao validar cupom" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Erro ao validar cupom" }, { status: 500 });
   }
 }
-
 

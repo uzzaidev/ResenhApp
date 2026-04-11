@@ -125,3 +125,7 @@ CREATE TABLE events (
 **Status:** ✅ Pronto para aplicação
 
 
+
+
+
+

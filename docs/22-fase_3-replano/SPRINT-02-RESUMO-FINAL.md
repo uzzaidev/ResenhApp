@@ -210,3 +210,7 @@ Implementar criação automática de cobrança quando um atleta confirma presen�
 
 **Sprint 2 concluído com sucesso! 🎉**
 
+
+
+
+

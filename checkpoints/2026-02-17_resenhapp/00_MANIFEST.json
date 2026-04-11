@@ -1,0 +1,130 @@
+{
+  "checkpoint": {
+    "date": "2026-02-17",
+    "timezone": "America/Sao_Paulo",
+    "generated_at": "2026-02-17T00:00:00-03:00",
+    "completed_at": "2026-02-17T03:00:00-03:00",
+    "documentation_updated_at": "2026-02-17T12:00:00-03:00",
+    "status": "COMPLETE",
+    "total_files": 36,
+    "general_files": 23,
+    "module_files": 13
+  },
+  "project": {
+    "name": "ResenhApp V2.0",
+    "codename": "peladeiros",
+    "version": "0.2.0",
+    "domain": "resenhapp.uzzai.com.br",
+    "status": "Em desenvolvimento — Fases 0-4 implementadas em código, migrations PENDENTES de aplicação",
+    "branch": "main",
+    "last_commit": "7e6e15c",
+    "last_commit_message": "backup: include roles dump",
+    "implementation_phase": "Fase 4 completa (código) | Fases 5-7 parciais | Próximo: aplicar migrations e testar"
+  },
+  "stack": {
+    "framework": "Next.js 16.1.1 (App Router)",
+    "language": "TypeScript 5",
+    "runtime": "React 19.2.0",
+    "database": "Supabase / PostgreSQL (via postgres@3.4.8)",
+    "auth": "NextAuth.js v5.0.0-beta.25 + @auth/pg-adapter",
+    "state": "Zustand 5.0.8 + React Context",
+    "styling": "Tailwind CSS 3.4.1 + shadcn/ui",
+    "payments": "PIX (implementação customizada)",
+    "monitoring": "@sentry/nextjs 10.36.0",
+    "testing": "Vitest 4.0.18 + Playwright 1.58.0",
+    "deploy": "Vercel + Cloudflare",
+    "package_manager": "pnpm 10.18.1"
+  },
+  "sources_used": {
+    "migrations": "supabase/migrations/ (24 arquivos SQL)",
+    "backups": [
+      "backups/schema.sql (791KB - fonte principal)",
+      "backups/data.sql (45KB)",
+      "backups/roles.sql (1.7KB)",
+      "backups/peladeiros_full_20251030_182424.sql (legado)",
+      "backups/peladeiros_structure_20251030_182424.sql (legado)",
+      "backups/peladeiros_data_20251030_182424.sql (legado)"
+    ],
+    "source_code": "src/ (220 arquivos TS/TSX, ~35.545 LOC)",
+    "config_files": "package.json, tsconfig.json, next.config.ts, vercel.json, etc."
+  },
+  "stats": {
+    "total_ts_tsx_files": 320,
+    "total_loc_approx": 50000,
+    "api_endpoints": 80,
+    "react_components": 125,
+    "database_tables": 47,
+    "database_tables_pending_migration": 8,
+    "database_functions": 70,
+    "database_triggers": 22,
+    "database_views": 4,
+    "migrations_applied": 24,
+    "migrations_pending": 8,
+    "test_files": 21,
+    "storage_buckets": 4,
+    "storage_buckets_pending": 1,
+    "cron_jobs": 3,
+    "cron_jobs_implemented": 3,
+    "new_lib_files": 11,
+    "new_api_routes": 23,
+    "new_components": 12,
+    "new_pages": 5,
+    "note": "Migrations _pending nao foram aplicadas ao banco ainda — código funciona em deferred mode"
+  },
+  "deferred_mode": {
+    "description": "O código detecta quando as migrations não estão aplicadas e funciona em modo degradado (sem crash). Funcionalidades marcadas como 'deferred: true' na API ficam com badge PENDENTE na sidebar.",
+    "pending_migrations": [
+      "20260301000010_phase1_group_lifecycle.sql",
+      "20260301000011_phase2_user_wallets.sql",
+      "20260301000012_phase2_credit_earning_rules.sql",
+      "20260301000013_phase3_pix_simplified.sql",
+      "20260301000014_phase4_social_core.sql",
+      "20260301000015_phase5_onboarding_referrals.sql",
+      "20260301000016_phase4_social_storage.sql",
+      "20260301000017_phase7_credit_purchase_requests.sql"
+    ],
+    "next_action": "Aplicar migrations em ordem crescente via supabase db push ou psql manual"
+  },
+  "generated_files": {
+    "general": [
+      "00_MANIFEST.json",
+      "01_REPO_TREE.txt",
+      "02_BUILD_RUNBOOK.md",
+      "03_DEPENDENCIES.md",
+      "04_ARCHITECTURE_FROM_CODE.md",
+      "05_ROUTES_FROM_CODE.md",
+      "06_UI_COMPONENTS_CATALOG.md",
+      "07_DATA_ACCESS_MAP.md",
+      "08_DATABASE_SCHEMA_COMPLETE.md",
+      "09_RLS_POLICIES.md",
+      "10_AUTH_AND_SESSION.md",
+      "11_GROUP_CONTEXT_FLOW.md",
+      "12_FINANCIAL_AND_PIX.md",
+      "13_PERMISSIONS_RBAC.md",
+      "14_NOTIFICATIONS.md",
+      "15_GAMIFICATION.md",
+      "16_WEBHOOKS_JOBS.md",
+      "17_TESTS_COVERAGE_MAP.md",
+      "18_TECH_DEBT_FINDINGS.md",
+      "19_ERRORS_EDGE_CASES.md",
+      "90_MODULE_DEPENDENCY_MAP.md",
+      "91_MAIN_FLOWS.md",
+      "99_AI_CONTEXT_PACK.md"
+    ],
+    "modules": [
+      "modules/AUTH.md",
+      "modules/GROUPS.md",
+      "modules/EVENTS.md",
+      "modules/ATHLETES.md",
+      "modules/FINANCIAL.md",
+      "modules/CREDITS.md",
+      "modules/MODALITIES.md",
+      "modules/RANKINGS.md",
+      "modules/TRAININGS.md",
+      "modules/ATTENDANCE.md",
+      "modules/NOTIFICATIONS.md",
+      "modules/GAMIFICATION.md",
+      "modules/DASHBOARD.md"
+    ]
+  }
+}

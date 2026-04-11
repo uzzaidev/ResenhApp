@@ -104,8 +104,7 @@ describe('Error Handler', () => {
     it('deve criar ação de ver lista de espera para treino lotado', () => {
       const mockRouter = {
         push: (path: string) => {
-          expect(path).toContain('/treinos/');
-          expect(path).toContain('/waitlist');
+          expect(path).toContain('/eventos/');
         },
       };
       
@@ -114,8 +113,7 @@ describe('Error Handler', () => {
         router: mockRouter,
       });
       expect(action).toBeDefined();
-      expect(action?.label).toContain('espera');
+      expect(action?.label).toContain('evento');
     });
   });
 });
-

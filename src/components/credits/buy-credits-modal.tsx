@@ -18,17 +18,17 @@ import { cn } from "@/lib/utils";
 import { toast } from "@/components/ui/use-toast";
 
 /**
- * Buy Credits Modal
+ * Buy Quota Modal
  * 
- * Modal para compra de créditos com suporte a cupons promocionais.
+ * Modal para compra de quota com suporte a cupons promocionais.
  * 
  * Features:
- * - Seleção de pacotes
- * - Validação de cupons
+ * - Selecao de pacotes
+ * - Validacao de cupons
  * - Desconto percentual
  * - Desconto fixo em reais
- * - Bônus de créditos
- * - Cálculo de preço final
+ * - Bonus de quota
+ * - Calculo de preco final
  * 
  * @example
  * <BuyCreditsModal
@@ -121,8 +121,8 @@ export function BuyCreditsModal({
 
       if (!data.isValid) {
         toast({
-          title: "Cupom inválido",
-          description: data.errorMessage || "Este cupom não pode ser utilizado",
+          title: "Cupom invalido",
+          description: data.errorMessage || "Este cupom nao pode ser utilizado",
           variant: "destructive",
         });
       } else {
@@ -150,7 +150,7 @@ export function BuyCreditsModal({
     setCouponValidation(null);
   };
 
-  // Purchase credits
+  // Purchase quota
   const handlePurchase = async () => {
     if (!selectedPackageId) {
       toast({
@@ -179,7 +179,7 @@ export function BuyCreditsModal({
       if (!response.ok) {
         toast({
           title: "Erro",
-          description: data.error || "Erro ao comprar créditos",
+          description: data.error || "Erro ao comprar quota",
           variant: "destructive",
         });
         return;
@@ -187,18 +187,18 @@ export function BuyCreditsModal({
 
       toast({
         title: "Compra realizada!",
-        description: `${data.creditsAdded} créditos adicionados${
-          data.bonusCredits > 0 ? ` + ${data.bonusCredits} bônus` : ""
+        description: `${data.creditsAdded} quotas adicionadas${
+          data.bonusCredits > 0 ? ` + ${data.bonusCredits} bonus` : ""
         }`,
       });
 
       onOpenChange(false);
       onPurchaseSuccess?.();
     } catch (error) {
-      console.error("Error purchasing credits:", error);
+      console.error("Error purchasing quota:", error);
       toast({
         title: "Erro",
-        description: "Erro ao comprar créditos",
+        description: "Erro ao comprar quota",
         variant: "destructive",
       });
     } finally {
@@ -216,7 +216,7 @@ export function BuyCreditsModal({
       const discount = (validation.discountApplied || 0) / 100;
       return `R$ ${discount.toFixed(2)} de desconto aplicado`;
     } else if (validation.discountType === "fixed_credits") {
-      return `+${validation.bonusCredits} créditos bônus`;
+      return `+${validation.bonusCredits} quotas bonus`;
     }
 
     return "Desconto aplicado";
@@ -237,7 +237,7 @@ export function BuyCreditsModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-uzzai-gold" />
-            Comprar Créditos
+            Comprar Quota
           </DialogTitle>
           <DialogDescription>
             Escolha um pacote e adicione um cupom promocional (opcional)
@@ -273,7 +273,7 @@ export function BuyCreditsModal({
                     <div className="mb-2 flex items-center justify-between">
                       <h4 className="font-semibold font-poppins">{pkg.name}</h4>
                       <Badge variant="secondary" className="bg-uzzai-gold/20 text-uzzai-gold">
-                        {pkg.creditsAmount} créditos
+                        {pkg.creditsAmount} quotas
                       </Badge>
                     </div>
 
@@ -282,7 +282,7 @@ export function BuyCreditsModal({
                         R$ {(pkg.priceCents / 100).toFixed(2)}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        R$ {pricePerCredit.toFixed(2)} por crédito
+                        R$ {pricePerCredit.toFixed(2)} por quota
                       </p>
                     </div>
                   </button>
@@ -302,7 +302,7 @@ export function BuyCreditsModal({
                   <Tag className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     id="coupon"
-                    placeholder="Digite o código do cupom"
+                    placeholder="Digite o codigo do cupom"
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                     disabled={isValidatingCoupon || couponValidation?.isValid}
@@ -351,26 +351,26 @@ export function BuyCreditsModal({
               <h4 className="font-semibold mb-3">Resumo da Compra</h4>
 
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Créditos do pacote</span>
+                <span className="text-muted-foreground">Quota do pacote</span>
                 <span className="font-medium">{selectedPackage.creditsAmount}</span>
               </div>
 
               {couponValidation?.bonusCredits && couponValidation.bonusCredits > 0 && (
                 <div className="flex justify-between text-sm text-uzzai-gold">
-                  <span>Bônus do cupom</span>
+                  <span>Bonus do cupom</span>
                   <span className="font-medium">+{couponValidation.bonusCredits}</span>
                 </div>
               )}
 
               <div className="flex justify-between text-sm font-semibold border-t pt-2">
-                <span>Total de créditos</span>
+                <span>Total de quota</span>
                 <span className="text-uzzai-mint">{totalCredits}</span>
               </div>
 
               <div className="border-t pt-2 mt-2">
                 {couponValidation?.isValid && originalPrice !== finalPrice && (
                   <div className="flex justify-between text-sm text-muted-foreground line-through">
-                    <span>Preço original</span>
+                    <span>Preco original</span>
                     <span>R$ {originalPrice.toFixed(2)}</span>
                   </div>
                 )}

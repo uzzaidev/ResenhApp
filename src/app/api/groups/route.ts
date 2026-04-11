@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth } from "@/lib/auth-helpers";
+import { isUnauthorizedError, requireAuth } from "@/lib/auth-helpers";
 import { sql } from "@/db/client";
 import { createGroupSchema } from "@/lib/validations";
 import logger from "@/lib/logger";
 import { generateInviteCode } from "@/lib/utils";
+import {
+  fromDbGroupType,
+  normalizeRequestedGroupType,
+  toDbGroupType,
+} from "@/lib/group-type";
+import {
+  consumeCreditsForGroupCreation,
+  ensureCreditsForGroupCreation,
+} from "@/lib/group-creation-credits";
 
 // GET /api/groups - List all groups for current user
 export async function GET() {
@@ -28,12 +37,12 @@ export async function GET() {
       ORDER BY g.created_at DESC
     `;
 
-    // Mapear para formato esperado pelo frontend
     const mappedGroups = groups.map((g: any) => ({
       id: g.id,
       name: g.name,
       description: g.description,
-      groupType: g.group_type,
+      groupType: fromDbGroupType(g.group_type, g.parent_group_id),
+      rawGroupType: g.group_type,
       parentGroupId: g.parent_group_id,
       role: g.user_role,
       memberCount: Number(g.member_count) || 0,
@@ -41,14 +50,11 @@ export async function GET() {
 
     return NextResponse.json({ groups: mappedGroups });
   } catch (error) {
-    if (error instanceof Error && error.message === "Não autenticado") {
-      return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+    if (isUnauthorizedError(error)) {
+      return NextResponse.json({ error: "NÃƒÂ£o autenticado" }, { status: 401 });
     }
     logger.error(error, "Error fetching groups");
-    return NextResponse.json(
-      { error: "Erro ao buscar grupos" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Erro ao buscar grupos" }, { status: 500 });
   }
 }
 
@@ -62,95 +68,150 @@ export async function POST(request: NextRequest) {
 
     if (!validation.success) {
       return NextResponse.json(
-        { error: "Dados inválidos", details: validation.error.flatten() },
+        { error: "Dados invÃƒÂ¡lidos", details: validation.error.flatten() },
         { status: 400 }
       );
     }
 
     const { name, description, privacy, groupType, parentGroupId } = validation.data;
+    const normalizedGroupType = normalizeRequestedGroupType(groupType, parentGroupId);
 
-    // Validate hierarchy if parentGroupId is provided
     if (parentGroupId) {
       const { validateHierarchy, canCreateGroup } = await import("@/lib/permissions");
-      
-      // Check if user can create child group
+
       const createCheck = await canCreateGroup(user.id, parentGroupId);
       if (!createCheck.canCreate) {
         return NextResponse.json(
-          { error: createCheck.reason || "Não é possível criar grupo filho" },
+          { error: createCheck.reason || "NÃƒÂ£o ÃƒÂ© possÃƒÂ­vel criar grupo filho" },
           { status: 403 }
         );
       }
 
-      // Validate hierarchy rules
-      const hierarchyCheck = await validateHierarchy(groupType, parentGroupId);
+      const hierarchyCheck = await validateHierarchy(normalizedGroupType, parentGroupId);
       if (!hierarchyCheck.valid) {
         return NextResponse.json(
-          { error: hierarchyCheck.error || "Hierarquia inválida" },
+          { error: hierarchyCheck.error || "Hierarquia invÃƒÂ¡lida" },
           { status: 400 }
         );
       }
     }
 
-    // Create group
-    const groupQuery = await sql`
-      INSERT INTO groups (
-        name, 
-        description, 
-        privacy, 
-        group_type,
-        parent_group_id,
-        created_by
-      )
-      VALUES (
-        ${name}, 
-        ${description || null}, 
-        ${privacy},
-        ${groupType},
-        ${parentGroupId || null},
-        ${user.id}
-      )
-      RETURNING *
-    `;
-    const group = groupQuery[0];
+    if (normalizedGroupType === "modality_group" && !parentGroupId) {
+      return NextResponse.json(
+        { error: "Grupo de modalidade exige uma atlÃƒÂ©tica pai" },
+        { status: 400 }
+      );
+    }
 
-    // Add creator as admin
-    await sql`
-      INSERT INTO group_members (user_id, group_id, role)
-      VALUES (${user.id}, ${group.id}, 'admin')
-    `;
+    const dbGroupType = toDbGroupType(normalizedGroupType);
+    const effectiveParentId =
+      normalizedGroupType === "atletica" || normalizedGroupType === "standalone"
+        ? null
+        : parentGroupId || null;
 
-    // Create group wallet
-    await sql`
-      INSERT INTO wallets (owner_type, owner_id, balance_cents)
-      VALUES ('group', ${group.id}, 0)
-    `;
+    const creditCheck = await ensureCreditsForGroupCreation(
+      sql,
+      user.id,
+      normalizedGroupType
+    );
+    if (!creditCheck.allowed) {
+      const quotaReason = "Quota insuficiente para criacao";
+      return NextResponse.json(
+        {
+          error: quotaReason,
+          requiredCredits: creditCheck.required,
+          currentBalance: creditCheck.balance ?? 0,
+        },
+        { status: 402 }
+      );
+    }
 
-    // Create default invite code
     const inviteCode = generateInviteCode();
-    await sql`
-      INSERT INTO invites (group_id, code, created_by)
-      VALUES (${group.id}, ${inviteCode}, ${user.id})
-    `;
+    const result = await sql.begin(async (tx: any) => {
+      const groupQuery = await tx`
+        INSERT INTO groups (
+          name,
+          description,
+          privacy,
+          group_type,
+          parent_group_id,
+          created_by
+        )
+        VALUES (
+          ${name},
+          ${description || null},
+          ${privacy},
+          ${dbGroupType},
+          ${effectiveParentId},
+          ${user.id}
+        )
+        RETURNING *
+      `;
+      const group = groupQuery[0];
 
-    logger.info({ 
-      groupId: group.id, 
-      userId: user.id, 
-      groupType,
-      parentGroupId 
-    }, "Group created");
+      await tx`
+        INSERT INTO group_members (user_id, group_id, role)
+        VALUES (${user.id}, ${group.id}, 'admin')
+      `;
 
-    return NextResponse.json({
-      group: { ...group, inviteCode },
-    }, { status: 201 });
+      await tx`
+        INSERT INTO wallets (owner_type, owner_id, balance_cents)
+        VALUES ('group', ${group.id}, 0)
+      `;
+
+      await tx`
+        INSERT INTO invites (group_id, code, created_by)
+        VALUES (${group.id}, ${inviteCode}, ${user.id})
+      `;
+
+      const creditConsumption = await consumeCreditsForGroupCreation(
+        tx,
+        user.id,
+        normalizedGroupType
+      );
+
+      return { group, creditConsumption };
+    });
+
+    const group = result.group;
+
+    logger.info(
+      {
+        groupId: group.id,
+        userId: user.id,
+        groupType: normalizedGroupType,
+        dbGroupType,
+        parentGroupId: effectiveParentId,
+        requiredCredits: creditCheck.required,
+        creditsDeferred: creditCheck.deferred,
+      },
+      "Group created"
+    );
+
+    return NextResponse.json(
+      {
+        group: {
+          ...group,
+          groupType: normalizedGroupType,
+          rawGroupType: dbGroupType,
+          parent_group_id: effectiveParentId,
+          inviteCode,
+        },
+        credits: {
+          required: creditCheck.required,
+          deferred: creditCheck.deferred,
+          charged: result.creditConsumption.charged,
+          amount: result.creditConsumption.amount,
+        },
+      },
+      { status: 201 }
+    );
   } catch (error) {
-    if (error instanceof Error && error.message === "Não autenticado") {
-      return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+    if (isUnauthorizedError(error)) {
+      return NextResponse.json({ error: "NÃƒÂ£o autenticado" }, { status: 401 });
     }
     logger.error(error, "Error creating group");
-    return NextResponse.json(
-      { error: "Erro ao criar grupo" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Erro ao criar grupo" }, { status: 500 });
   }
 }
+

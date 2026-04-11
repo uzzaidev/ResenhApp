@@ -70,7 +70,7 @@ describe('GroupSwitcher Component', () => {
       
       // Verificar que é um link
       const link = createButton.closest('a');
-      expect(link).toHaveAttribute('href', '/groups/new');
+      expect(link).toHaveAttribute('href', '/grupos/new');
     });
   });
 
@@ -194,7 +194,7 @@ describe('GroupSwitcher Component', () => {
       await waitFor(() => {
         const createLink = screen.getByText('Criar Novo Grupo');
         expect(createLink).toBeInTheDocument();
-        expect(createLink.closest('a')).toHaveAttribute('href', '/groups/new');
+        expect(createLink.closest('a')).toHaveAttribute('href', '/grupos/new');
       });
     });
   });
@@ -288,4 +288,3 @@ describe('GroupSwitcher Component', () => {
     });
   });
 });
-

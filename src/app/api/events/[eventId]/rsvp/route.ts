@@ -5,6 +5,7 @@ import { rsvpSchema } from "@/lib/validations";
 import logger from "@/lib/logger";
 import { analytics } from "@/lib/analytics";
 import { generatePixForCharge } from "@/lib/pix-helpers";
+import { earnCredits } from "@/lib/credit-earning";
 
 type Params = Promise<{ eventId: string }>;
 
@@ -83,6 +84,7 @@ export async function POST(
       WHERE event_id = ${eventId} AND user_id = ${user.id}
     `;
     const currentAttendance = currentAttendanceQuery[0];
+    const wasPreviouslyConfirmed = currentAttendance?.status === "yes";
 
     // Determine if this is a self-removal (yes → no) or re-confirmation (no → yes)
     const isSelfRemoval = currentAttendance?.status === 'yes' && status === 'no';
@@ -312,6 +314,21 @@ export async function POST(
       { eventId, userId: user.id, status: finalStatus, chargeCreated: !!charge },
       "RSVP updated"
     );
+
+    if (finalStatus === "yes" && !wasPreviouslyConfirmed) {
+      const earning = await earnCredits(sql, user.id, "rsvp_yes", String(eventId));
+      if (earning.deferred || !earning.awarded) {
+        logger.info(
+          {
+            userId: user.id,
+            eventId,
+            deferred: earning.deferred,
+            reason: earning.reason,
+          },
+          "RSVP credit not awarded"
+        );
+      }
+    }
 
     // Analytics: Rastrear RSVP confirmado
     if (finalStatus === 'yes') {

@@ -38,14 +38,18 @@ export function MetricsOverview() {
       }
 
       try {
-        // TODO: Conectar com API real no Sprint 2
-        // Por enquanto, mock data
+        const response = await fetch(`/api/groups/${currentGroup.id}/dashboard-metrics`);
+        if (!response.ok) {
+          throw new Error("Erro ao carregar mÃ©tricas");
+        }
+
+        const data = await response.json();
         setMetrics({
-          activeAthletes: 127,
-          trainingsThisWeek: 8,
-          averageAttendance: 72,
-          cashBalance: 3450,
-          pendingPayments: 850,
+          activeAthletes: Number(data.activeAthletes || 0),
+          trainingsThisWeek: Number(data.trainingsThisWeek || 0),
+          averageAttendance: Number(data.averageAttendance || 0),
+          cashBalance: Number(data.cashBalance || 0),
+          pendingPayments: Number(data.pendingPayments || 0),
         });
       } catch (error) {
         console.error("Error loading metrics:", error);
@@ -115,5 +119,9 @@ export function MetricsOverview() {
     </div>
   );
 }
+
+
+
+
 
 

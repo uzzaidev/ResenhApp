@@ -134,7 +134,7 @@ export async function cancelChargeWithUndo(
       const response = await fetch(`/api/groups/${groupId}/charges/${chargeId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "canceled" }),
+        body: JSON.stringify({ status: "cancelled" }),
       });
 
       if (!response.ok) {
@@ -182,4 +182,8 @@ export async function deleteWithUndo<T = any>(
     duration: 8000,
   });
 }
+
+
+
+
 

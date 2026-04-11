@@ -46,3 +46,7 @@ SELECT
   (SELECT data_type FROM information_schema.columns WHERE table_name = 'profiles' AND column_name = 'id') AS profiles_id_tipo;
 
 
+
+
+
+

@@ -1,10 +1,33 @@
 // Script para fazer backup completo do schema atual do Supabase
 const postgres = require('postgres');
 const fs = require('fs');
+const path = require('path');
 
-const url = 'postgresql://postgres.ujrvfkkkssfdhwizjucq:Uzzai2025%40%40@aws-1-us-east-2.pooler.supabase.com:6543/postgres';
+function loadEnv() {
+  const envPaths = [
+    path.join(__dirname, '..', '..', '.env.local'),
+    path.join(__dirname, '..', '..', '.env'),
+  ];
 
-const sql = postgres(url, {
+  for (const envPath of envPaths) {
+    if (!fs.existsSync(envPath)) continue;
+    const content = fs.readFileSync(envPath, 'utf8');
+    for (const line of content.split(/\r?\n/)) {
+      const match = line.match(/^([A-Z0-9_]+)=(.*)$/);
+      if (!match) continue;
+      if (process.env[match[1]]) continue;
+      process.env[match[1]] = match[2];
+    }
+  }
+}
+
+loadEnv();
+const dbUrl = process.env.SUPABASE_DB_URL || process.env.DATABASE_URL;
+if (!dbUrl) {
+  throw new Error('SUPABASE_DB_URL ou DATABASE_URL não configurado.');
+}
+
+const sql = postgres(dbUrl, {
   max: 1,
   idle_timeout: 10,
   connect_timeout: 10,

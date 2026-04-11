@@ -16,14 +16,35 @@ export function Breadcrumbs() {
   const segments = pathname.split('/').filter(Boolean);
 
   // Build breadcrumb items
+  const routeLabels: Record<string, string> = {
+    dashboard: 'Dashboard',
+    modalidades: 'Modalidades',
+    atletas: 'Atletas',
+    treinos: 'Treinos',
+    financeiro: 'Financeiro',
+    frequencia: 'Frequência',
+    rankings: 'Rankings',
+    jogos: 'Jogos',
+    eventos: 'Eventos',
+    novo: 'Novo Evento',
+    groups: 'Grupos',
+    grupos: 'Grupos',
+    credits: 'Quota',
+    settings: 'Configurações',
+    configuracoes: 'Configurações',
+    pagamentos: 'Pagamentos',
+    events: 'Eventos',
+  };
+
   const breadcrumbs = segments.map((segment, index) => {
     const href = '/' + segments.slice(0, index + 1).join('/');
     const isLast = index === segments.length - 1;
+    const looksLikeId = /^[a-f0-9-]{8,}$/i.test(segment);
 
-    // Humanize segment name
-    const label = segment
-      .replace(/-/g, ' ')
-      .replace(/\b\w/g, (l) => l.toUpperCase());
+    const label = looksLikeId
+      ? 'Detalhes'
+      : (routeLabels[segment] ??
+        segment.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()));
 
     return {
       label,
@@ -33,10 +54,10 @@ export function Breadcrumbs() {
   });
 
   return (
-    <nav className="flex items-center space-x-2 text-sm text-gray-400 mb-4">
+    <nav className="mb-4 flex items-center space-x-2 text-sm text-muted-foreground">
       <Link
         href="/dashboard"
-        className="flex items-center hover:text-teal-500 transition-colors"
+        className="flex items-center rounded-md p-1 transition-colors hover:text-uzzai-mint"
       >
         <Home className="h-4 w-4" />
       </Link>
@@ -45,13 +66,13 @@ export function Breadcrumbs() {
         <Fragment key={breadcrumb.href}>
           <ChevronRight className="h-4 w-4 flex-shrink-0" />
           {breadcrumb.isLast ? (
-            <span className="font-medium text-white truncate">
+            <span className="truncate font-medium text-foreground">
               {breadcrumb.label}
             </span>
           ) : (
             <Link
               href={breadcrumb.href}
-              className="hover:text-teal-500 transition-colors truncate"
+              className="truncate transition-colors hover:text-uzzai-mint"
             >
               {breadcrumb.label}
             </Link>

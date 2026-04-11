@@ -4,34 +4,16 @@ import { sql } from "@/db/client";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 
-// Validar configuração do AUTH_SECRET
 if (!process.env.AUTH_SECRET && !process.env.NEXTAUTH_SECRET) {
-  console.error(`
-╔═══════════════════════════════════════════════════════════════════╗
-║                     ERRO DE CONFIGURAÇÃO                          ║
-╟───────────────────────────────────────────────────────────────────╢
-║  AUTH_SECRET não está configurado!                                ║
-║                                                                    ║
-║  A autenticação não funcionará sem esta variável de ambiente.     ║
-║                                                                    ║
-║  Para corrigir:                                                    ║
-║  1. Gere um secret: openssl rand -base64 32                       ║
-║  2. Adicione ao .env.local:                                       ║
-║     AUTH_SECRET="valor_gerado"                                    ║
-║  3. No Vercel, adicione em: Project Settings > Environment Vars   ║
-║                                                                    ║
-║  Documentação: /NEON_AUTH_GUIDE.md                                ║
-╚═══════════════════════════════════════════════════════════════════╝
-  `);
-  
-  // Em produção, isso é crítico
+  console.error("AUTH_SECRET is not configured.");
+
   if (process.env.NODE_ENV === "production") {
     throw new Error(
-      "AUTH_SECRET não está configurado. A aplicação não pode iniciar sem esta variável de ambiente."
+      "AUTH_SECRET is not configured. The application cannot start without this environment variable.",
     );
   }
-  
-  console.warn("Usando modo de desenvolvimento sem AUTH_SECRET - NÃO USE EM PRODUÇÃO!");
+
+  console.warn("Running in development without AUTH_SECRET. Do not use this in production.");
 }
 
 const credentialsSchema = z.object({
@@ -48,86 +30,73 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       async authorize(credentials) {
         try {
-          // Validar credenciais
           const { email, password } = credentialsSchema.parse(credentials);
+          const normalizedEmail = email.toLowerCase();
 
-          // Buscar usuário no banco
-          // Tenta primeiro 'users', depois 'profiles' se users não existir
           let result;
           try {
             result = await sql`
-              SELECT id, name, email, password_hash
+              SELECT id, name, email, password_hash, onboarding_completed
               FROM users
-              WHERE email = ${email.toLowerCase()}
+              WHERE email = ${normalizedEmail}
             `;
-          } catch (tableError: any) {
-            // Se tabela users não existe, tenta profiles
-            if (tableError?.code === '42P01' || tableError?.message?.includes('does not exist')) {
-              try {
-                result = await sql`
-                  SELECT p.id, p.full_name as name, u.email, u.encrypted_password as password_hash
-                  FROM profiles p
-                  INNER JOIN auth.users u ON p.id = u.id
-                  WHERE u.email = ${email.toLowerCase()}
-                `;
-              } catch (profilesError) {
-                console.error('[AUTH] Error querying profiles table:', profilesError);
-                throw tableError; // Re-throw original error
-              }
+          } catch (usersError: any) {
+            if (usersError?.code === "42703") {
+              result = await sql`
+                SELECT id, name, email, password_hash, TRUE as onboarding_completed
+                FROM users
+                WHERE email = ${normalizedEmail}
+              `;
             } else {
-              throw tableError;
+              if (
+                usersError?.code === "42P01" ||
+                usersError?.message?.includes("does not exist")
+              ) {
+                console.error(
+                  "[AUTH] Users table is missing. Legacy profiles fallback was removed in Fase 5. Apply users migrations.",
+                );
+              }
+              throw usersError;
             }
           }
 
           if (!Array.isArray(result) || result.length === 0) {
-            // Log apenas em desenvolvimento para não expor informações
-            if (process.env.NODE_ENV === 'development') {
-              console.log('[AUTH] User not found for email:', email.toLowerCase());
+            if (process.env.NODE_ENV === "development") {
+              console.log("[AUTH] User not found for email:", normalizedEmail);
             }
             return null;
           }
 
           const user = result[0] as any;
 
-          // Verificar senha
           if (!user.password_hash) {
-            if (process.env.NODE_ENV === 'development') {
-              console.log('[AUTH] User found but no password_hash');
+            if (process.env.NODE_ENV === "development") {
+              console.log("[AUTH] User found but no password_hash");
             }
             return null;
           }
 
-          const isValidPassword = await bcrypt.compare(
-            password,
-            user.password_hash
-          );
-
+          const isValidPassword = await bcrypt.compare(password, user.password_hash);
           if (!isValidPassword) {
-            if (process.env.NODE_ENV === 'development') {
-              console.log('[AUTH] Invalid password for user');
+            if (process.env.NODE_ENV === "development") {
+              console.log("[AUTH] Invalid password for user");
             }
             return null;
           }
 
-          // Retornar dados do usuário (sem senha)
           return {
             id: user.id,
             name: user.name,
             email: user.email,
             image: null,
+            onboardingCompleted: user.onboarding_completed !== false,
           };
         } catch (error) {
-          // Log error with more context (sem expor PII)
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          const errorStack = error instanceof Error ? error.stack : undefined;
-          
-          // Log sempre em produção para debugging (sem dados sensíveis)
-          console.error('[AUTH] Authentication error:', {
+          const errorMessage = error instanceof Error ? error.message : "Unknown error";
+          console.error("[AUTH] Authentication error:", {
             message: errorMessage,
             code: (error as any)?.code,
-            // Não logar email ou senha
           });
-          
           return null;
         }
       },
@@ -138,13 +107,32 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     error: "/auth/error",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
         token.picture = user.image;
+        token.onboardingCompleted =
+          typeof user.onboardingCompleted === "boolean" ? user.onboardingCompleted : true;
       }
+
+      if (
+        trigger === "update" &&
+        session &&
+        Object.prototype.hasOwnProperty.call(session, "onboardingCompleted")
+      ) {
+        const onboardingCompleted = (session as { onboardingCompleted?: unknown }).onboardingCompleted;
+        if (typeof onboardingCompleted === "boolean") {
+          token.onboardingCompleted = onboardingCompleted;
+        }
+      }
+
+      if (typeof token.onboardingCompleted !== "boolean") {
+        // Backward compatibility for legacy tokens issued before onboarding flag existed.
+        token.onboardingCompleted = true;
+      }
+
       return token;
     },
     async session({ session, token }) {
@@ -153,46 +141,50 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.name = token.name as string;
         session.user.email = token.email as string;
         session.user.image = token.picture as string;
+        session.user.onboardingCompleted = token.onboardingCompleted === false ? false : true;
       }
       return session;
     },
   },
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 dias
+    maxAge: 30 * 24 * 60 * 60,
   },
   cookies: {
     sessionToken: {
-      name: process.env.NODE_ENV === 'production'
-        ? `__Secure-next-auth.session-token`
-        : `next-auth.session-token`,
+      name:
+        process.env.NODE_ENV === "production"
+          ? "__Secure-next-auth.session-token"
+          : "next-auth.session-token",
       options: {
         httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: process.env.NODE_ENV === 'production',
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
       },
     },
     callbackUrl: {
-      name: process.env.NODE_ENV === 'production'
-        ? `__Secure-next-auth.callback-url`
-        : `next-auth.callback-url`,
+      name:
+        process.env.NODE_ENV === "production"
+          ? "__Secure-next-auth.callback-url"
+          : "next-auth.callback-url",
       options: {
         httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: process.env.NODE_ENV === 'production',
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
       },
     },
     csrfToken: {
-      name: process.env.NODE_ENV === 'production'
-        ? `__Host-next-auth.csrf-token`
-        : `next-auth.csrf-token`,
+      name:
+        process.env.NODE_ENV === "production"
+          ? "__Host-next-auth.csrf-token"
+          : "next-auth.csrf-token",
       options: {
         httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: process.env.NODE_ENV === 'production',
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
       },
     },
   },

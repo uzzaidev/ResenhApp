@@ -123,3 +123,7 @@ CREATE TABLE charges (
 **Status:** ✅ Pronto para aplicação no schema antigo
 
 
+
+
+
+

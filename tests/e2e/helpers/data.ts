@@ -18,7 +18,7 @@ export async function createTestTraining(
   page: Page,
   groupId: string
 ): Promise<string> {
-  await page.goto(`/groups/${groupId}/events/new`);
+  await page.goto(`/eventos/novo?groupId=${groupId}`);
   
   // Preencher formulário básico
   await page.fill('[name="title"]', 'Treino de Teste E2E');
@@ -33,9 +33,9 @@ export async function createTestTraining(
   await page.click('button[type="submit"]');
   
   // Aguardar criação e extrair ID da URL
-  await page.waitForURL(/\/events\/[^/]+/, { timeout: 10000 });
+  await page.waitForURL(/\/eventos\/[^/?]+/, { timeout: 10000 });
   const url = page.url();
-  const eventId = url.match(/\/events\/([^/]+)/)?.[1];
+  const eventId = url.match(/\/eventos\/([^/?]+)/)?.[1];
   
   if (!eventId) {
     throw new Error('Não foi possível obter ID do treino criado');
@@ -58,4 +58,8 @@ export async function cleanupTestData(
   // Por enquanto, apenas log
   console.log(`[TEST] Limpar dados de teste para evento ${eventId}`);
 }
+
+
+
+
 

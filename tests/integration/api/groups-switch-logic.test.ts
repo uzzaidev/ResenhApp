@@ -192,3 +192,7 @@ describe('API /api/groups/switch - Lógica de Integração', () => {
   });
 });
 
+
+
+
+

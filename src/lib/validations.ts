@@ -4,8 +4,10 @@ export const createGroupSchema = z.object({
   name: z.string().min(3, "Nome deve ter no mínimo 3 caracteres"),
   description: z.string().optional(),
   privacy: z.enum(["private", "public"]).default("private"),
-  groupType: z.enum(["athletic", "pelada"]).default("pelada"),
-  parentGroupId: z.string().uuid().optional(),
+  groupType: z
+    .enum(["atletica", "modality_group", "standalone", "athletic", "pelada"])
+    .default("standalone"),
+  parentGroupId: z.string().min(1).optional(),
 });
 
 export const createEventSchema = z.object({

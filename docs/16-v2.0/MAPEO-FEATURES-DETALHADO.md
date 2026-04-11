@@ -527,3 +527,7 @@ DELETE /api/tactics/[id]
 **Status:** ✅ Mapeamento Completo
 
 
+
+
+
+

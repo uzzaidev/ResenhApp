@@ -15,7 +15,7 @@ interface Group {
   id: string;
   name: string;
   description?: string | null;
-  groupType?: "athletic" | "pelada";
+  groupType?: "atletica" | "modality_group" | "standalone";
   parentGroupId?: string | null;
   role?: "admin" | "member";
   memberCount?: number;
@@ -129,7 +129,7 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
         toast.success(`Grupo alterado para: ${group.name}`);
         
         // Se estiver em uma página específica de grupo, redireciona para dashboard
-        if (pathname?.includes("/groups/")) {
+        if (pathname?.includes("/groups/") || pathname?.includes("/grupos/")) {
           router.push("/dashboard");
         } else {
           // Refresh para atualizar Server Components
@@ -179,4 +179,3 @@ export function useGroup() {
   }
   return context;
 }
-

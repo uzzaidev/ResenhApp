@@ -157,3 +157,7 @@ SELECT * FROM create_event_qrcode(
 **Status:** ✅ Pronto para aplicação
 
 
+
+
+
+

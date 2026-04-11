@@ -3,6 +3,7 @@ import { sql } from "@/db/client";
 import logger from "@/lib/logger";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { earnCredits } from "@/lib/credit-earning";
 
 type RouteContext = {
   params: Promise<{ eventId: string }>;
@@ -85,6 +86,19 @@ export async function POST(request: NextRequest, context: RouteContext) {
         completed_at = NOW()
       WHERE id = ${tiebreakerId}
     `;
+
+    const earning = await earnCredits(sql, winnerUserId, "receive_mvp", String(eventId));
+    if (earning.deferred || !earning.awarded) {
+      logger.info(
+        {
+          userId: winnerUserId,
+          eventId,
+          deferred: earning.deferred,
+          reason: earning.reason,
+        },
+        "MVP credit not awarded after admin decision"
+      );
+    }
 
     logger.info(
       {
