@@ -9,8 +9,6 @@ const schema = z.object({
   email: z.string().email(),
 });
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 function hashToken(token: string): string {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
@@ -45,6 +43,7 @@ export async function POST(request: NextRequest) {
         { status: 503 }
       );
     }
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
     const userId = users[0].id;
     const token = crypto.randomBytes(32).toString("hex");
