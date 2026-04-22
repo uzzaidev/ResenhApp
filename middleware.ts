@@ -1,7 +1,13 @@
 import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
-const AUTH_PATHS = new Set(["/auth/signin", "/auth/signup", "/auth/error"]);
+const AUTH_PATHS = new Set([
+  "/auth/signin",
+  "/auth/signup",
+  "/auth/error",
+  "/auth/forgot-password",
+  "/auth/reset-password",
+]);
 
 function isOnboardingPath(pathname: string) {
   return pathname === "/onboarding" || pathname.startsWith("/onboarding/");
